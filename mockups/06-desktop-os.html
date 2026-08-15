@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jimson Yang — Desktop OS mockup</title>
+<style>
+  :root {
+    --menubar: rgba(30,30, 34, 0.55);
+    --dock-bg: rgba(255,255,255,0.12);
+    --win-bg: #f4f4f6;
+    --win-header: #e4e4e8;
+    --line: #d3d3d9;
+    --ink: #1c1c1e;
+    --ink-soft: #6b6b70;
+    --accent: #4c8bf5;
+  }
+  * { box-sizing: border-box; user-select: none; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(1200px 800px at 80% 10%, #6a5acd33, transparent 60%),
+      radial-gradient(1000px 700px at 10% 90%, #ff6b9733, transparent 60%),
+      linear-gradient(160deg, #2b2350 0%, #1a1330 45%, #0d0a1a 100%);
+    overflow: hidden;
+    height: 100vh;
+    position: relative;
+    color: var(--ink);
+  }
+  a { color: inherit; }
+
+  /* menu bar */
+  .menubar {
+    position: fixed; top: 0; left: 0; right: 0; height: 28px; z-index: 100;
+    background: var(--menubar); backdrop-filter: blur(14px);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 14px; font-size: 13px; color: #fff;
+  }
+  .menubar-left { display: flex; align-items: center; gap: 18px; }
+  .menubar-logo { font-weight: 700; }
+  .menubar-item { opacity: 0.85; }
+  .menubar-right { display: flex; align-items: center; gap: 14px; opacity: 0.9; font-variant-numeric: tabular-nums; }
+
+  /* desktop icons */
+  .desktop-icons {
+    position: fixed; top: 44px; right: 24px; z-index: 5;
+    display: flex; flex-direction: column; gap: 22px; align-items: center;
+  }
+  .icon {
+    width: 84px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    cursor: pointer; padding: 6px; border-radius: 8px;
+  }
+  .icon:hover, .icon.selected { background: rgba(255,255,255,0.12); }
+  .icon-glyph {
+    width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: white; box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  }
+  .icon-label { font-size: 12px; color: white; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+
+  .g-about { background: linear-gradient(135deg, #5ac8fa, #007aff); }
+  .g-aventos { background: linear-gradient(135deg, #ff6b9d, #b83280); }
+  .g-projects { background: linear-gradient(135deg, #ffd166, #f77f00); }
+  .g-experience { background: linear-gradient(135deg, #7ee787, #1f9d55); }
+  .g-education { background: linear-gradient(135deg, #c792ea, #6a3fbf); }
+  .g-contact { background: linear-gradient(135deg, #ff8a65, #d84315); }
+
+  /* windows */
+  .window {
+    position: absolute; width: 460px; background: var(--win-bg); border-radius: 10px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,0,0,0.08);
+    display: none; overflow: hidden;
+  }
+  .window.open { display: block; }
+  .win-header {
+    height: 38px; background: var(--win-header); display: flex; align-items: center; gap: 8px; padding: 0 12px;
+    cursor: grab; border-bottom: 1px solid var(--line);
+  }
+  .win-header:active { cursor: grabbing; }
+  .traffic { width: 12px; height: 12px; border-radius: 50%; }
+  .t-red { background: #ff5f57; }
+  .t-yellow { background: #febc2e; }
+  .t-green { background: #28c840; }
+  .win-title {
+    flex: 1; text-align: center; font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    margin-right: 54px;
+  }
+  .win-body { padding: 20px; font-size: 14px; line-height: 1.6; max-height: 60vh; overflow-y: auto; }
+  .win-body h2 { font-size: 17px; margin: 0 0 10px; }
+  .win-body p { color: #3a3a3c; margin: 0 0 12px; }
+  .win-body .soft { color: var(--ink-soft); font-size: 12.5px; }
+
+  /* about window: text-editor style */
+  #win-about .win-body { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: white; }
+
+  /* aventos window: media player style */
+  #win-aventos .win-body { background: #17171b; color: #eee; }
+  #win-aventos .win-body p { color: #b8b8bc; }
+  .video-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .video-thumb { aspect-ratio: 16/9; background: #0d0d10; border: 1px solid #2b2b30; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ff6b9d; font-size: 12px; }
+
+  /* projects window: finder list */
+  .file-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .file-row:last-child { border-bottom: none; }
+  .file-icon { width: 34px; height: 34px; border-radius: 7px; background: linear-gradient(135deg, #ffd166, #f77f00); flex: none; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:700; }
+  .file-icon.fun { background: linear-gradient(135deg, #7ee787, #1f9d55); }
+  .file-name { font-size: 13.5px; font-weight: 600; }
+  .file-desc { font-size: 12px; color: var(--ink-soft); }
+  .group-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); margin: 14px 0 4px; }
+  .group-label:first-child { margin-top: 0; }
+
+  /* experience window: pdf-preview style */
+  #win-experience .win-body { background: #3a3a3c; padding: 24px; }
+  .pdf-page { background: white; padding: 22px; border-radius: 2px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
+  .pdf-page:last-child { margin-bottom: 0; }
+  .pdf-role { font-weight: 700; font-size: 14px; }
+  .pdf-meta { color: var(--ink-soft); font-size: 11.5px; margin: 2px 0 8px; }
+  .pdf-summary { font-size: 12.5px; color: #3a3a3c; }
+
+  /* contact window: mail compose style */
+  .mail-field { display: flex; border-bottom: 1px solid var(--line); padding: 8px 0; font-size: 13px; }
+  .mail-field .label { width: 60px; color: var(--ink-soft); }
+  .mail-send {
+    margin-top: 16px; background: var(--accent); color: white; border: none; padding: 9px 18px; border-radius: 6px;
+    font-size: 13px; font-weight: 600; cursor: pointer; display: inline-block; text-decoration: none;
+  }
+
+  /* dock */
+  .dock {
+    position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 100;
+    display: flex; gap: 10px; padding: 8px 12px; border-radius: 18px;
+    background: var(--dock-bg); backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  .dock-item {
+    width: 46px; height: 46px; border-radius: 11px; display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 700; cursor: pointer; transition: transform .12s; position: relative;
+  }
+  .dock-item:hover { transform: translateY(-6px) scale(1.06); }
+  .dock-item.running::after {
+    content: ""; position: absolute; bottom: -8px; width: 4px; height: 4px; border-radius: 50%; background: white;
+  }
+
+  .welcome-hint {
+    position: fixed; left: 24px; bottom: 90px; z-index: 4; color: rgba(255,255,255,0.75); font-size: 13px; max-width: 240px;
+  }
+</style>
+</head>
+<body>
+
+<div class="menubar">
+  <div class="menubar-left">
+    <span class="menubar-logo">◆ JimsonOS</span>
+    <span class="menubar-item">File</span>
+    <span class="menubar-item">Edit</span>
+    <span class="menubar-item">View</span>
+    <span class="menubar-item">Window</span>
+    <span class="menubar-item">Help</span>
+  </div>
+  <div class="menubar-right">
+    <span>San Francisco, CA</span>
+    <span id="clock">--:--</span>
+  </div>
+</div>
+
+<div class="desktop-icons">
+  <div class="icon" onclick="openWindow('about')">
+    <div class="icon-glyph g-about">TXT</div>
+    <div class="icon-label">About_Me.txt</div>
+  </div>
+  <div class="icon" onclick="openWindow('aventos')">
+    <div class="icon-glyph g-aventos">▶</div>
+    <div class="icon-label">Aventos.app</div>
+  </div>
+  <div class="icon" onclick="openWindow('projects')">
+    <div class="icon-glyph g-projects">▤</div>
+    <div class="icon-label">Projects</div>
+  </div>
+  <div class="icon" onclick="openWindow('experience')">
+    <div class="icon-glyph g-experience">PDF</div>
+    <div class="icon-label">Experience.pdf</div>
+  </div>
+  <div class="icon" onclick="openWindow('education')">
+    <div class="icon-glyph g-education">UM</div>
+    <div class="icon-label">Education.txt</div>
+  </div>
+  <div class="icon" onclick="openWindow('contact')">
+    <div class="icon-glyph g-contact">@</div>
+    <div class="icon-label">Contact.app</div>
+  </div>
+</div>
+
+<p class="welcome-hint">Click an icon to open it. Drag windows by their title bar.</p>
+
+<!-- WINDOWS -->
+<div class="window" id="win-about" style="top:80px; left:120px; z-index:10;">
+  <div class="win-header" onmousedown="startDrag(event,'win-about')">
+    <span class="traffic t-red" onclick="closeWindow('win-about')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">About_Me.txt</span>
+  </div>
+  <div class="win-body">
+    <p class="soft">Jimson Yang — San Francisco, CA</p>
+    <p>I co-founded Aventos, an AI anime studio, after a few years doing a little bit of everything at startups — sales, GTM, frontend engineering, and a stint on the VC side doing due diligence. I build my own backend for fun, ship frontend for work, and I'm currently trying to figure out how to make an AI-generated anime that's actually emotionally powerful and not just fast-paced slop.</p>
+  </div>
+</div>
+
+<div class="window" id="win-aventos" style="top:120px; left:400px; z-index:9;">
+  <div class="win-header" onmousedown="startDrag(event,'win-aventos')">
+    <span class="traffic t-red" onclick="closeWindow('win-aventos')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">Aventos.app</span>
+  </div>
+  <div class="win-body">
+    <h2 style="color:white;">Aventos</h2>
+    <p>Aventos is an AI anime studio — short-form, AI-generated anime built end to end, from concept and screenwriting to voice, animation, and post. The bet: anime-style storytelling doesn't just work as entertainment, it works as a marketing channel for B2B SaaS companies who all sound and look the same.</p>
+    <div class="video-row">
+      <div class="video-thumb">▶ Trailer</div>
+      <div class="video-thumb">▶ Bill split</div>
+    </div>
+  </div>
+</div>
+
+<div class="window" id="win-projects" style="top:160px; left:200px; z-index:8; width:500px;">
+  <div class="win-header" onmousedown="startDrag(event,'win-projects')">
+    <span class="traffic t-red" onclick="closeWindow('win-projects')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">Projects</span>
+  </div>
+  <div class="win-body">
+    <p class="group-label">For work</p>
+    <a class="file-row" href="https://github.com/umich2021/InternalToolsSeedance" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+      <div class="file-icon">FA</div>
+      <div><div class="file-name">Seedance Internal Tool</div><div class="file-desc">Internal FastAPI + React tool for generating and archiving AI video via BytePlus Seedance.</div></div>
+    </a>
+    <a class="file-row" href="https://github.com/umich2021/manhwa-reader" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+      <div class="file-icon">MR</div>
+      <div><div class="file-name">Manhwa Reader</div><div class="file-desc">A reader built to make sense of messy manhwa file collections.</div></div>
+    </a>
+    <a class="file-row" href="https://github.com/umich2021/tracking_LLMs_bots" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+      <div class="file-icon">LC</div>
+      <div><div class="file-name">LLM Citation Tracker</div><div class="file-desc">Tracks when ChatGPT or Google crawl and cite a site when answering user questions.</div></div>
+    </a>
+    <a class="file-row" href="https://github.com/umich2021/tableau_website" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+      <div class="file-icon">TB</div>
+      <div><div class="file-name">Tableau Client Site</div><div class="file-desc">A client website build.</div></div>
+    </a>
+    <p class="group-label">For fun</p>
+    <a class="file-row" href="https://github.com/umich2021/jetlag_SF" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+      <div class="file-icon fun">JL</div>
+      <div><div class="file-name">Jet Lag: SF</div><div class="file-desc">A mobile app for playing Jet Lag: The Game across SF neighborhoods.</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="window" id="win-experience" style="top:100px; left:520px; z-index:7;">
+  <div class="win-header" onmousedown="startDrag(event,'win-experience')">
+    <span class="traffic t-red" onclick="closeWindow('win-experience')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">Experience.pdf</span>
+  </div>
+  <div class="win-body">
+    <div class="pdf-page">
+      <div class="pdf-role">Co-Founder — Aventos</div>
+      <div class="pdf-meta">May 2025 – Present · San Francisco, CA</div>
+      <div class="pdf-summary">AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS.</div>
+    </div>
+    <div class="pdf-page">
+      <div class="pdf-role">Intern — CitySide Ventures</div>
+      <div class="pdf-meta">Mar 2023 – Jul 2024</div>
+      <div class="pdf-summary">Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors.</div>
+    </div>
+    <div class="pdf-page">
+      <div class="pdf-role">Summer Intern — Arboretum Ventures</div>
+      <div class="pdf-meta">Apr 2023 – Jul 2023</div>
+      <div class="pdf-summary">Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand.</div>
+    </div>
+  </div>
+</div>
+
+<div class="window" id="win-education" style="top:220px; left:340px; z-index:6; width:380px;">
+  <div class="win-header" onmousedown="startDrag(event,'win-education')">
+    <span class="traffic t-red" onclick="closeWindow('win-education')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">Education.txt</span>
+  </div>
+  <div class="win-body">
+    <h2>University of Michigan</h2>
+    <p class="soft">Stephen M. Ross School of Business</p>
+    <p>BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
+  </div>
+</div>
+
+<div class="window" id="win-contact" style="top:150px; left:260px; z-index:5; width:420px;">
+  <div class="win-header" onmousedown="startDrag(event,'win-contact')">
+    <span class="traffic t-red" onclick="closeWindow('win-contact')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">New Message</span>
+  </div>
+  <div class="win-body">
+    <div class="mail-field"><span class="label">To:</span><span>jimsonyangbusiness@gmail.com</span></div>
+    <div class="mail-field"><span class="label">Subject:</span><span>Let's talk</span></div>
+    <p class="soft" style="margin-top:14px;">Hi Jimson — I came across your site and wanted to reach out about...</p>
+    <a class="mail-send" href="mailto:jimsonyangbusiness@gmail.com?subject=Let%27s%20talk">Send</a>
+  </div>
+</div>
+
+<div class="dock" id="dock">
+  <div class="dock-item g-about" onclick="openWindow('about')">TXT</div>
+  <div class="dock-item g-aventos" onclick="openWindow('aventos')">▶</div>
+  <div class="dock-item g-projects" onclick="openWindow('projects')">▤</div>
+  <div class="dock-item g-experience" onclick="openWindow('experience')">PDF</div>
+  <div class="dock-item g-education" onclick="openWindow('education')">UM</div>
+  <div class="dock-item g-contact" onclick="openWindow('contact')">@</div>
+</div>
+
+<script>
+  let zTop = 20;
+
+  function openWindow(name) {
+    const win = document.getElementById('win-' + name);
+    win.classList.add('open');
+    focusWindow(win);
+  }
+  function closeWindow(id) {
+    document.getElementById(id).classList.remove('open');
+    event.stopPropagation();
+  }
+  function focusWindow(win) {
+    zTop += 1;
+    win.style.zIndex = zTop;
+  }
+  document.querySelectorAll('.window').forEach(win => {
+    win.addEventListener('mousedown', () => focusWindow(win));
+  });
+
+  let dragState = null;
+  function startDrag(e, id) {
+    const win = document.getElementById(id);
+    focusWindow(win);
+    const rect = win.getBoundingClientRect();
+    dragState = { win, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top };
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+  }
+  function onDrag(e) {
+    if (!dragState) return;
+    dragState.win.style.left = (e.clientX - dragState.offsetX) + 'px';
+    dragState.win.style.top = Math.max(28, e.clientY - dragState.offsetY) + 'px';
+  }
+  function stopDrag() {
+    dragState = null;
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+  }
+
+  function tick() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  tick();
+  setInterval(tick, 1000 * 30);
+
+  openWindow('about');
+</script>
+
+</body>
+</html>

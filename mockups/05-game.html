@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jimson Yang — Game HUD mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06070a;
+    --panel: #0c1018;
+    --line: #1f2a3a;
+    --cyan: #4cf3ff;
+    --magenta: #ff3cac;
+    --gold: #ffcc4d;
+    --green: #4dff88;
+    --ink: #d9f4ff;
+    --ink-soft: #6d8299;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: radial-gradient(1200px 700px at 50% -10%, #0e1a2b 0%, var(--bg) 60%);
+    color: var(--ink);
+    font-family: "VT323", monospace;
+    font-size: 20px;
+    line-height: 1.5;
+    position: relative;
+    min-height: 100vh;
+  }
+  .scanlines {
+    position: fixed; inset: 0; pointer-events: none; z-index: 50;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 2px, transparent 4px);
+    mix-blend-mode: overlay;
+  }
+  .pixel { font-family: "Press Start 2P", monospace; }
+  .container { max-width: 920px; margin: 0 auto; padding: 28px 20px 140px; }
+  a { color: inherit; }
+
+  /* corner-bracket HUD panel */
+  .panel {
+    position: relative;
+    background: linear-gradient(180deg, rgba(76,243,255,0.05), rgba(0,0,0,0));
+    border: 1px solid var(--line);
+    padding: 26px 26px;
+    margin-bottom: 28px;
+  }
+  .panel::before, .panel::after,
+  .panel .br-tl, .panel .br-br { content: ""; }
+  .corner { position: absolute; width: 16px; height: 16px; border: 2px solid var(--cyan); }
+  .corner.tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .corner.tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+  .corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+  .corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+  .panel-title {
+    font-family: "Press Start 2P", monospace; font-size: 11px; color: var(--cyan);
+    letter-spacing: 0.05em; margin: 0 0 20px; text-shadow: 0 0 8px rgba(76,243,255,0.6);
+  }
+  .panel-title.magenta { color: var(--magenta); text-shadow: 0 0 8px rgba(255,60,172,0.6); }
+  .panel-title.gold { color: var(--gold); text-shadow: 0 0 8px rgba(255,204,77,0.6); }
+  .panel-title.green { color: var(--green); text-shadow: 0 0 8px rgba(77,255,136,0.6); }
+
+  /* player card */
+  .player-card { display: grid; grid-template-columns: 96px 1fr; gap: 22px; align-items: center; }
+  .avatar {
+    width: 96px; height: 96px; border: 2px solid var(--cyan); background: linear-gradient(135deg, #16324a, #0c1018);
+    display: flex; align-items: center; justify-content: center; font-family: "Press Start 2P"; font-size: 22px; color: var(--cyan);
+    box-shadow: 0 0 24px rgba(76,243,255,0.25) inset;
+  }
+  .player-name { font-family: "Press Start 2P"; font-size: 20px; color: white; margin: 0 0 6px; }
+  .player-sub { color: var(--ink-soft); font-size: 20px; margin: 0 0 14px; }
+  .class-tags { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tag {
+    font-family: "Press Start 2P"; font-size: 9px; padding: 6px 10px; border: 1px solid var(--gold); color: var(--gold);
+  }
+  .xp-row { display: flex; align-items: center; gap: 12px; }
+  .xp-label { font-family: "Press Start 2P"; font-size: 9px; color: var(--ink-soft); white-space: nowrap; }
+  .xp-bar { flex: 1; height: 14px; background: #0a0e14; border: 1px solid var(--line); position: relative; overflow: hidden; }
+  .xp-fill { position: absolute; inset: 0; width: 78%; background: linear-gradient(90deg, var(--cyan), var(--green)); box-shadow: 0 0 12px var(--cyan); }
+
+  /* mission banner */
+  .mission-header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .mission-status { font-family: "Press Start 2P"; font-size: 9px; color: var(--green); border: 1px solid var(--green); padding: 5px 10px; }
+  .mission-title { font-size: 26px; color: white; margin: 10px 0 12px; }
+  .mission-desc { color: var(--ink-soft); font-size: 19px; margin: 0 0 22px; max-width: 640px; }
+  .cutscene-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .cutscene {
+    border: 1px solid var(--line); background: #05070b; aspect-ratio: 16/9; position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cutscene .play { font-family: "Press Start 2P"; color: var(--cyan); font-size: 12px; }
+  .cutscene .cs-label {
+    position: absolute; left: 8px; bottom: 8px; font-size: 15px; color: var(--ink-soft);
+    background: rgba(0,0,0,0.6); padding: 2px 8px;
+  }
+
+  /* quest log */
+  .quest { border-left: 2px solid var(--line); padding: 4px 0 20px 18px; margin-bottom: 4px; position: relative; }
+  .quest:last-child { margin-bottom: 0; padding-bottom: 0; }
+  .quest::before {
+    content: ""; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; background: var(--bg); border: 2px solid var(--green);
+  }
+  .quest.active::before { border-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
+  .quest-title { font-size: 21px; color: white; }
+  .quest-status { font-family: "Press Start 2P"; font-size: 8px; margin-left: 10px; color: var(--green); }
+  .quest.active .quest-status { color: var(--gold); }
+  .quest-meta { color: var(--ink-soft); font-size: 16px; margin: 2px 0 6px; }
+  .quest-desc { color: var(--ink-soft); font-size: 18px; max-width: 620px; }
+
+  /* inventory */
+  .inv-group-label { font-family: "Press Start 2P"; font-size: 9px; color: var(--ink-soft); margin: 22px 0 12px; }
+  .inv-group-label:first-child { margin-top: 0; }
+  .inv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .item {
+    border: 1px solid var(--gold); background: linear-gradient(180deg, rgba(255,204,77,0.06), transparent);
+    padding: 16px; position: relative;
+  }
+  .item.common { border-color: var(--ink-soft); background: linear-gradient(180deg, rgba(109,130,153,0.06), transparent); }
+  .item-rarity { font-family: "Press Start 2P"; font-size: 8px; color: var(--gold); margin-bottom: 8px; letter-spacing: 0.05em; }
+  .item.common .item-rarity { color: var(--ink-soft); }
+  .item-name { color: white; font-size: 19px; margin-bottom: 6px; }
+  .item-desc { color: var(--ink-soft); font-size: 15.5px; }
+
+  /* achievement */
+  .achievement { display: flex; gap: 20px; align-items: center; }
+  .ach-badge {
+    width: 64px; height: 64px; flex: none; border: 2px solid var(--gold); transform: rotate(45deg);
+    display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,204,77,0.3) inset;
+  }
+  .ach-badge span { transform: rotate(-45deg); font-family: "Press Start 2P"; font-size: 16px; color: var(--gold); }
+  .ach-title { color: white; font-size: 21px; margin-bottom: 6px; }
+  .ach-desc { color: var(--ink-soft); font-size: 17px; }
+
+  /* dialogue */
+  .dialogue-box {
+    border: 2px solid var(--cyan); padding: 22px; background: rgba(76,243,255,0.03);
+  }
+  .dialogue-npc { font-family: "Press Start 2P"; font-size: 10px; color: var(--cyan); margin-bottom: 14px; }
+  .dialogue-line { color: var(--ink); font-size: 20px; margin-bottom: 18px; }
+  .choice { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--ink); font-family: "VT323"; font-size: 20px; padding: 10px 0; cursor: pointer; }
+  .choice:hover { color: var(--gold); }
+  .choice::before { content: "▸ "; color: var(--magenta); }
+
+  /* hotbar */
+  .hotbar {
+    position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 20;
+    display: flex; gap: 10px; background: rgba(6,7,10,0.85); border: 1px solid var(--line); padding: 10px; backdrop-filter: blur(6px);
+  }
+  .hotbar a {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 60px; height: 60px; border: 1px solid var(--line); text-decoration: none; color: var(--ink-soft); position: relative;
+  }
+  .hotbar a:hover { border-color: var(--cyan); color: var(--cyan); }
+  .hotbar a .num { position: absolute; top: 2px; left: 4px; font-family: "Press Start 2P"; font-size: 7px; color: var(--ink-soft); }
+  .hotbar a .lbl { font-size: 13px; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+
+<div class="container">
+
+  <!-- PLAYER CARD -->
+  <div class="panel" id="player">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <div class="player-card">
+      <div class="avatar">JY</div>
+      <div>
+        <p class="player-name">JIMSON YANG</p>
+        <p class="player-sub">AI Anime Studio Founder · San Francisco, CA</p>
+        <div class="class-tags">
+          <span class="tag">ENGINEER</span>
+          <span class="tag">OPERATOR</span>
+          <span class="tag">GTM</span>
+        </div>
+        <div class="xp-row">
+          <span class="xp-label">XP</span>
+          <div class="xp-bar"><div class="xp-fill"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CURRENT MISSION -->
+  <div class="panel" id="mission">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <p class="panel-title magenta">◆ CURRENT MISSION</p>
+    <div class="mission-header">
+      <span></span>
+      <span class="mission-status">IN PROGRESS</span>
+    </div>
+    <h2 class="mission-title">Aventos — build an AI anime studio</h2>
+    <p class="mission-desc">Short-form, AI-generated anime built end to end — concept, screenwriting, voice, animation, and post. The bet: anime-style storytelling works as a marketing channel for B2B SaaS companies who all sound and look the same.</p>
+    <div class="cutscene-grid">
+      <div class="cutscene"><span class="play">▶ PLAY</span><span class="cs-label">Aventos anime trailer</span></div>
+      <div class="cutscene"><span class="play">▶ PLAY</span><span class="cs-label">How Asians pay the bill</span></div>
+    </div>
+  </div>
+
+  <!-- QUEST LOG -->
+  <div class="panel" id="quests">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <p class="panel-title">◆ QUEST LOG — EXPERIENCE</p>
+
+    <div class="quest active">
+      <span class="quest-title">Co-Founder — Aventos<span class="quest-status">ACTIVE</span></span>
+      <p class="quest-meta">May 2025 – Present · San Francisco, CA</p>
+      <p class="quest-desc">AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS.</p>
+    </div>
+    <div class="quest">
+      <span class="quest-title">Intern — CitySide Ventures<span class="quest-status">COMPLETE</span></span>
+      <p class="quest-meta">Mar 2023 – Jul 2024</p>
+      <p class="quest-desc">Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors.</p>
+    </div>
+    <div class="quest">
+      <span class="quest-title">Summer Intern — Arboretum Ventures<span class="quest-status">COMPLETE</span></span>
+      <p class="quest-meta">Apr 2023 – Jul 2023</p>
+      <p class="quest-desc">Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand.</p>
+    </div>
+  </div>
+
+  <!-- INVENTORY -->
+  <div class="panel" id="inventory">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <p class="panel-title gold">◆ INVENTORY — PROJECTS</p>
+
+    <p class="inv-group-label">LEGENDARY (FOR WORK)</p>
+    <div class="inv-grid">
+      <div class="item"><div class="item-rarity">★ LEGENDARY</div><div class="item-name">Seedance Internal Tool</div><div class="item-desc">Internal FastAPI + React tool for generating and archiving AI video via BytePlus Seedance — batch generation, S3 archive, presigned delivery.</div></div>
+      <div class="item"><div class="item-rarity">★ LEGENDARY</div><div class="item-name">Manhwa Reader</div><div class="item-desc">A reader built to make sense of messy manhwa file collections.</div></div>
+      <div class="item"><div class="item-rarity">★ LEGENDARY</div><div class="item-name">LLM Citation Tracker</div><div class="item-desc">Tracks when ChatGPT or Google crawl and cite a site when answering user questions.</div></div>
+      <div class="item"><div class="item-rarity">★ LEGENDARY</div><div class="item-name">Tableau Client Site</div><div class="item-desc">A client website build.</div></div>
+    </div>
+
+    <p class="inv-group-label">COMMON (FOR FUN)</p>
+    <div class="inv-grid">
+      <div class="item common"><div class="item-rarity">○ COMMON</div><div class="item-name">Jet Lag: SF</div><div class="item-desc">A mobile app for playing Jet Lag: The Game across San Francisco neighborhoods. SF-Monopoly mode in progress.</div></div>
+    </div>
+  </div>
+
+  <!-- ACHIEVEMENT -->
+  <div class="panel" id="education">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <p class="panel-title green">◆ ACHIEVEMENT UNLOCKED — EDUCATION</p>
+    <div class="achievement">
+      <div class="ach-badge"><span>UM</span></div>
+      <div>
+        <p class="ach-title">University of Michigan — Ross School of Business</p>
+        <p class="ach-desc">BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIALOGUE / CONTACT -->
+  <div class="dialogue-box" id="contact">
+    <p class="dialogue-npc">JIMSON YANG</p>
+    <p class="dialogue-line">"Want to team up? Choose an option below."</p>
+    <a class="choice" href="https://aventos.dev" target="_blank" rel="noreferrer">Visit Aventos [Enter World]</a>
+    <a class="choice" href="mailto:jimsonyangbusiness@gmail.com">Talk (send an email)</a>
+  </div>
+
+</div>
+
+<nav class="hotbar">
+  <a href="#mission"><span class="num">1</span><span class="lbl">Mission</span></a>
+  <a href="#quests"><span class="num">2</span><span class="lbl">Quests</span></a>
+  <a href="#inventory"><span class="num">3</span><span class="lbl">Items</span></a>
+  <a href="#education"><span class="num">4</span><span class="lbl">Award</span></a>
+  <a href="#contact"><span class="num">5</span><span class="lbl">Talk</span></a>
+</nav>
+
+</body>
+</html>
