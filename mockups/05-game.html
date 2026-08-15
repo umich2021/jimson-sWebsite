@@ -57,11 +57,12 @@
   /* ---------- character select shell ---------- */
   #charSelect { position: fixed; inset: 0; display: none; flex-direction: column; }
   .cs-topbar {
-    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 14px;
     padding: 16px 20px; border-bottom: 1px solid var(--line); z-index: 20;
   }
-  .cs-heading { font-size: 14px; color: var(--green); text-shadow: 0 0 8px rgba(77,255,136,0.5); }
-  .cs-links { display: flex; gap: 8px; }
+  .cs-heading { font-size: 14px; color: var(--green); text-shadow: 0 0 8px rgba(77,255,136,0.5); margin: 0 0 8px; }
+  .cs-subtext { color: var(--ink-soft); font-size: 15px; max-width: 520px; margin: 0; line-height: 1.4; }
+  .cs-links { display: flex; gap: 8px; flex: none; }
   .cs-link {
     font-family: "Press Start 2P"; font-size: 9px; background: none; border: 1px solid var(--line); color: var(--ink-soft);
     padding: 9px 12px; cursor: pointer; touch-action: manipulation;
@@ -76,38 +77,71 @@
   /* ---------- character stage (left third) ---------- */
   .char-stage {
     width: 34%; flex: none; border-right: 1px solid var(--line); position: relative;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px;
-    overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px;
+    overflow-x: hidden; overflow-y: auto;
   }
   @media (max-width: 760px) {
     .char-stage { width: 100%; border-right: none; border-bottom: 1px solid var(--line); padding: 24px 20px 30px; }
   }
   .char-glow {
-    position: absolute; width: 260px; height: 260px; border-radius: 50%;
+    position: absolute; width: 340px; height: 340px; border-radius: 50%;
     background: radial-gradient(circle, var(--c) 0%, transparent 70%); opacity: 0.22; filter: blur(6px);
     animation: pulse 2.4s ease-in-out infinite;
   }
   @keyframes pulse { 0%, 100% { transform: scale(0.92); opacity: 0.16; } 50% { transform: scale(1.05); opacity: 0.28; } }
 
-  .char-sprite-wrap { position: relative; z-index: 1; height: 72px; display: flex; align-items: flex-end; transition: opacity .18s ease, transform .18s ease; }
-  .char-sprite { position: relative; width: 40px; height: 56px; }
+  .char-sprite-wrap { position: relative; z-index: 1; height: 130px; display: flex; align-items: flex-end; justify-content: center; transition: opacity .18s ease, transform .18s ease; overflow: visible; }
+  .char-sprite { position: relative; width: 56px; height: 70px; }
   .char-sprite span {
-    position: absolute; top: 0; left: 0; width: 4px; height: 4px; background: transparent;
-    box-shadow:
-      8px 0px 0 #2b1c12, 12px 0px 0 #2b1c12, 16px 0px 0 #2b1c12, 20px 0px 0 #2b1c12,
-      8px 4px 0 #2b1c12, 12px 4px 0 #2b1c12, 16px 4px 0 #2b1c12, 20px 4px 0 #2b1c12,
-      4px 8px 0 #2b1c12, 24px 8px 0 #2b1c12,
-      8px 8px 0 #f2c18c, 12px 8px 0 #f2c18c, 16px 8px 0 #f2c18c, 20px 8px 0 #f2c18c,
-      8px 12px 0 #f2c18c, 12px 12px 0 #f2c18c, 16px 12px 0 #f2c18c, 20px 12px 0 #f2c18c,
-      4px 16px 0 var(--tunic), 8px 16px 0 var(--tunic), 12px 16px 0 var(--tunic), 16px 16px 0 var(--tunic), 20px 16px 0 var(--tunic), 24px 16px 0 var(--tunic),
-      4px 20px 0 var(--tunic), 8px 20px 0 var(--tunic), 12px 20px 0 var(--tunic), 16px 20px 0 var(--tunic), 20px 20px 0 var(--tunic), 24px 20px 0 var(--tunic),
-      4px 24px 0 var(--tunic-dark), 8px 24px 0 var(--tunic-dark), 12px 24px 0 var(--tunic-dark), 16px 24px 0 var(--tunic-dark), 20px 24px 0 var(--tunic-dark), 24px 24px 0 var(--tunic-dark),
-      8px 28px 0 var(--tunic-shadow), 20px 28px 0 var(--tunic-shadow), 8px 32px 0 var(--tunic-shadow), 20px 32px 0 var(--tunic-shadow),
-      4px 36px 0 #2b1c12, 8px 36px 0 #2b1c12, 20px 36px 0 #2b1c12, 24px 36px 0 #2b1c12;
+    position: absolute; top: 0; left: 0; width: 7px; height: 7px; background: transparent;
     animation: idleBob 1.1s steps(2) infinite;
   }
-  @keyframes idleBob { 50% { transform: translateY(-2px); } }
+  .char-sprite .char-body {
+    box-shadow:
+      14px 0px 0 #2b1c12, 21px 0px 0 #2b1c12, 28px 0px 0 #2b1c12, 35px 0px 0 #2b1c12,
+      14px 7px 0 #2b1c12, 21px 7px 0 #2b1c12, 28px 7px 0 #2b1c12, 35px 7px 0 #2b1c12,
+      7px 14px 0 #2b1c12, 42px 14px 0 #2b1c12,
+      14px 14px 0 #f2c18c, 21px 14px 0 #f2c18c, 28px 14px 0 #f2c18c, 35px 14px 0 #f2c18c,
+      14px 21px 0 #f2c18c, 21px 21px 0 #f2c18c, 28px 21px 0 #f2c18c, 35px 21px 0 #f2c18c,
+      7px 28px 0 var(--tunic), 14px 28px 0 var(--tunic), 21px 28px 0 var(--tunic), 28px 28px 0 var(--tunic), 35px 28px 0 var(--tunic), 42px 28px 0 var(--tunic),
+      7px 35px 0 var(--tunic), 14px 35px 0 var(--tunic), 21px 35px 0 var(--tunic), 28px 35px 0 var(--tunic), 35px 35px 0 var(--tunic), 42px 35px 0 var(--tunic),
+      7px 42px 0 var(--tunic-dark), 14px 42px 0 var(--tunic-dark), 21px 42px 0 var(--tunic-dark), 28px 42px 0 var(--tunic-dark), 35px 42px 0 var(--tunic-dark), 42px 42px 0 var(--tunic-dark),
+      14px 49px 0 var(--tunic-shadow), 35px 49px 0 var(--tunic-shadow), 14px 56px 0 var(--tunic-shadow), 35px 56px 0 var(--tunic-shadow),
+      7px 63px 0 #2b1c12, 14px 63px 0 #2b1c12, 35px 63px 0 #2b1c12, 42px 63px 0 #2b1c12;
+  }
+  .char-sprite .char-accessory { z-index: 1; }
+  .acc-engineering {
+    box-shadow:
+      0px 7px 0 var(--c), 49px 7px 0 var(--c),
+      14px -7px 0 var(--c), 21px -7px 0 var(--c), 28px -7px 0 var(--c), 35px -7px 0 var(--c);
+  }
+  .acc-gtm {
+    box-shadow:
+      21px 28px 0 #9c1c30, 28px 28px 0 #9c1c30,
+      21px 35px 0 #9c1c30, 28px 35px 0 #9c1c30,
+      21px 42px 0 #7a1626, 28px 42px 0 #7a1626;
+  }
+  .acc-generalist {
+    box-shadow:
+      7px -7px 0 #17101a, 14px -7px 0 #17101a, 21px -7px 0 #17101a, 28px -7px 0 #17101a, 35px -7px 0 #17101a, 42px -7px 0 #17101a;
+  }
+  @keyframes idleBob { 50% { transform: translateY(-3px); } }
   .char-sprite-wrap.switching { opacity: 0; transform: translateY(6px); }
+
+  .char-prop { position: absolute; right: -46px; bottom: 20px; z-index: 1; animation: propFloat 2.6s ease-in-out infinite; }
+  @keyframes propFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .char-prop > div { display: none; }
+  .prop-engineering .lap-screen { display: block; width: 34px; height: 22px; background: #0a1114; border: 2px solid var(--c); border-bottom: none; box-sizing: border-box; }
+  .prop-engineering .lap-glow { display: block; margin: 7px 5px 0; height: 3px; width: 24px; background: var(--c); box-shadow: 0 0 6px var(--c); }
+  .prop-engineering .lap-base { display: block; width: 40px; height: 5px; margin-left: -3px; background: var(--c); opacity: .55; }
+  .prop-gtm .case-handle { display: block; width: 12px; height: 6px; border: 2px solid var(--c); border-bottom: none; margin: 0 auto; box-sizing: border-box; }
+  .prop-gtm .case-body { display: block; width: 38px; height: 26px; background: var(--c); opacity: .85; position: relative; box-sizing: border-box; }
+  .prop-gtm .case-line { position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: #05100a; opacity: .5; }
+  .prop-generalist .clap-top {
+    display: block; width: 38px; height: 9px; background: repeating-linear-gradient(45deg, #05100a 0 5px, var(--c) 5px 10px);
+    border: 1px solid #05100a; transform: rotate(-8deg); transform-origin: left bottom; box-sizing: border-box;
+  }
+  .prop-generalist .clap-body { display: block; width: 38px; height: 22px; background: var(--c); opacity: .85; margin-top: -1px; box-sizing: border-box; }
 
   .char-nav { display: flex; align-items: center; gap: 16px; z-index: 1; }
   .char-arrow {
@@ -224,7 +258,10 @@
 
 <div id="charSelect">
   <div class="cs-topbar">
-    <p class="pixel cs-heading">◆ CHOOSE YOUR BUILD ◆</p>
+    <div>
+      <p class="pixel cs-heading">◆ CHOOSE YOUR BUILD ◆</p>
+      <p class="cs-subtext">Why the range? Startups don't hand you a job description — pick a build to see the slice of my experience that's actually relevant to what you're hiring for.</p>
+    </div>
     <div class="cs-links">
       <button class="cs-link" id="linkAventos">AVENTOS</button>
       <button class="cs-link" id="linkEducation">EDUCATION</button>
@@ -236,7 +273,18 @@
     <div class="char-stage" id="charStage">
       <div class="char-glow"></div>
       <div class="char-sprite-wrap" id="charSpriteWrap">
-        <div class="char-sprite"><span></span></div>
+        <div class="char-sprite">
+          <span class="char-body"></span>
+          <span class="char-accessory" id="charAccessory"></span>
+        </div>
+        <div class="char-prop" id="charProp">
+          <div class="lap-screen"><div class="lap-glow"></div></div>
+          <div class="lap-base"></div>
+          <div class="case-handle"></div>
+          <div class="case-body"><div class="case-line"></div></div>
+          <div class="clap-top"></div>
+          <div class="clap-body"></div>
+        </div>
       </div>
       <div class="char-nav">
         <button class="char-arrow" id="prevBtn">◀</button>
@@ -280,12 +328,18 @@
   const charTitleEl = document.getElementById("charTitle");
   const charStatsEl = document.getElementById("charStats");
   const charDotsEl = document.getElementById("charDots");
+  const charAccessoryEl = document.getElementById("charAccessory");
+  const charPropEl = document.getElementById("charProp");
 
   const projects = [
     { key: "seedance", rarity: "★ LEGENDARY", common: false, name: "Seedance Internal Tool", desc: "Internal FastAPI + React tool for generating and archiving AI video via BytePlus Seedance — batch generation, S3 archive, presigned delivery." },
     { key: "manhwa", rarity: "★ LEGENDARY", common: false, name: "Manhwa Reader", desc: "A reader built to make sense of messy manhwa file collections." },
     { key: "llm", rarity: "★ LEGENDARY", common: false, name: "LLM Citation Tracker", desc: "Tracks when ChatGPT or Google crawl and cite a site when answering user questions." },
     { key: "tableau", rarity: "★ LEGENDARY", common: false, name: "Tableau Client Site", desc: "A client website build." }
+  ];
+
+  const funProjects = [
+    { key: "jetlag", rarity: "○ COMMON", common: true, name: "Jet Lag: SF", desc: "A mobile app for playing Jet Lag: The Game across San Francisco neighborhoods. SF-Monopoly mode in progress." }
   ];
 
   const experienceEntries = {
@@ -301,7 +355,8 @@
       subhead: "Frontend engineer with a habit of building the backend anyway — Python services, AI video pipelines, and full-stack tools, on top of a product and GTM instinct most engineers don't have.",
       roleFit: "I don't have a five-year run at one company in one title — I have a co-founder role where I built the product, and a string of startups where I did whatever the team needed next. If you're hiring for someone who can own a feature end to end, ship it, and understand why it matters to the business, that's the actual skill underneath the varied titles.",
       stats: [{ label: "ENGINEERING", pct: 95 }, { label: "GTM", pct: 40 }, { label: "HUSTLE", pct: 65 }],
-      experience: ["aventos"]
+      experience: ["aventos"],
+      funProjects: funProjects
     },
     {
       key: "gtm", label: "THE CLOSER", color: "#ffcc4d", tunic: "#ffcc4d", tunicDark: "#b8862f", tunicShadow: "#8a5f1a",
@@ -330,6 +385,19 @@
 
   let charIdx = 0;
 
+  function renderProjectGrid(list) {
+    return list.map(p => `
+      <div class="vault-item" data-key="${p.key}">
+        <div class="mini-chest" id="chest-${p.key}">
+          <div class="mini-chest-lid"></div><div class="mini-chest-body"></div><div class="mini-chest-lock"></div>
+        </div>
+        <div>
+          <div class="vault-item-name">${p.name}</div>
+          <span class="item-rarity${p.common ? " common" : ""}">${p.rarity}</span>
+        </div>
+      </div>`).join("");
+  }
+
   function renderCharacter() {
     const c = characters[charIdx];
     charStageEl.style.setProperty("--c", c.color);
@@ -337,6 +405,8 @@
     charStageEl.style.setProperty("--tunic", c.tunic);
     charStageEl.style.setProperty("--tunic-dark", c.tunicDark);
     charStageEl.style.setProperty("--tunic-shadow", c.tunicShadow);
+    charAccessoryEl.className = "char-accessory acc-" + c.key;
+    charPropEl.className = "char-prop prop-" + c.key;
 
     charClassEl.textContent = "◆ " + c.label;
     charTitleEl.textContent = '"' + c.headline + '"';
@@ -353,16 +423,10 @@
       return `<div class="quest-card"><div class="qc-role">${e.role}</div><div class="qc-meta">${e.meta}</div><div class="qc-desc">${e.desc}</div></div>`;
     }).join("");
 
-    const projHtml = projects.map(p => `
-      <div class="vault-item" data-key="${p.key}">
-        <div class="mini-chest" id="chest-${p.key}">
-          <div class="mini-chest-lid"></div><div class="mini-chest-body"></div><div class="mini-chest-lock"></div>
-        </div>
-        <div>
-          <div class="vault-item-name">${p.name}</div>
-          <span class="item-rarity${p.common ? " common" : ""}">${p.rarity}</span>
-        </div>
-      </div>`).join("");
+    const projHtml = renderProjectGrid(projects);
+    const funHtml = c.funProjects
+      ? `<p class="info-section-label pixel">FOR FUN</p><div class="vault-grid">${renderProjectGrid(c.funProjects)}</div>`
+      : "";
 
     charInfoEl.innerHTML = `
       <p class="info-eyebrow">${c.label} — ROLE FIT</p>
@@ -373,11 +437,13 @@
       <div class="quest-cards">${expHtml}</div>
       <p class="info-section-label pixel">PROJECTS</p>
       <div class="vault-grid">${projHtml}</div>
+      ${funHtml}
     `;
 
+    const allProjects = projects.concat(c.funProjects || []);
     charInfoEl.querySelectorAll(".vault-item").forEach(el => {
       el.addEventListener("click", () => {
-        const p = projects.find(x => x.key === el.dataset.key);
+        const p = allProjects.find(x => x.key === el.dataset.key);
         openItemDetail(p);
       });
     });
