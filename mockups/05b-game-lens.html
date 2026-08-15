@@ -104,6 +104,10 @@
     background: var(--gold); padding: 4px 6px; display: none;
   }
   .select-badge.show { display: block; }
+  .lens-sub { color: var(--ink-soft); font-size: 15px; margin: 4px 0 0; line-height: 1.5; }
+  .change-lens { color: var(--gold); font-size: 13px; cursor: pointer; text-decoration: underline; }
+  .quest-card { transition: opacity .3s ease; }
+  .quest-card.dim { opacity: 0.35; }
 
   /* ---------- game screen shared ---------- */
   .game-screen { max-width: 640px; margin: 0 auto; }
@@ -310,10 +314,34 @@
   <div class="found">Sections explored: <span id="foundCount">0</span>/5</div>
 </div>
 
+<!-- LENS SCREEN -->
+<div class="screen" id="lensScreen">
+  <p class="pixel select-heading">◆ WHAT ARE YOU EVALUATING ME FOR? ◆</p>
+  <p class="select-sub">Same person, different emphasis. You can change this anytime.</p>
+  <div class="select-grid" id="lensGrid">
+    <div class="select-card" data-lens="engineering" style="--c:#4cf3ff">
+      <div class="select-roof"></div>
+      <div class="select-name">ENGINEERING</div>
+      <p class="lens-sub">"I ship frontend for work, backend for fun."</p>
+    </div>
+    <div class="select-card" data-lens="gtm" style="--c:#ffcc4d">
+      <div class="select-roof"></div>
+      <div class="select-name">GTM / GROWTH</div>
+      <p class="lens-sub">"I've done the unglamorous GTM work, and the weird stuff too."</p>
+    </div>
+    <div class="select-card" data-lens="generalist" style="--c:#ff3cac">
+      <div class="select-roof"></div>
+      <div class="select-name">GENERALIST / OPERATOR</div>
+      <p class="lens-sub">"Startups don't hand you a job description. I stopped expecting one."</p>
+    </div>
+  </div>
+  <p class="change-lens" id="skipLens" style="margin-top:26px;">Skip — show me everything →</p>
+</div>
+
 <!-- SELECT SCREEN -->
 <div class="screen" id="selectScreen">
   <p class="pixel select-heading">◆ SELECT A SECTION ◆</p>
-  <p class="select-sub">Everything's readable the moment you open it — the mini-games are just for fun.</p>
+  <p class="select-sub" id="lensStatus"></p>
   <div class="legend">
     <span class="legend-item"><span class="legend-swatch" style="background:var(--cyan)"></span>Engineering</span>
     <span class="legend-item"><span class="legend-swatch" style="background:var(--gold)"></span>GTM / Growth</span>
@@ -381,19 +409,19 @@
   <button class="back-btn" data-color="#4dff88">✕ BACK</button>
   <p class="game-title pixel" style="color:#4dff88">◆ QUEST BOARD — EXPERIENCE</p>
   <div class="quest-cards">
-    <div class="quest-card">
+    <div class="quest-card" data-tags="engineering,gtm,generalist">
       <span class="tag-badge tag-founder">FOUNDER</span>
       <div class="qc-role">Co-Founder — Aventos</div>
       <div class="qc-meta">May 2025 – Present · San Francisco, CA</div>
       <div class="qc-desc">AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS.</div>
     </div>
-    <div class="quest-card">
+    <div class="quest-card" data-tags="gtm,generalist">
       <span class="tag-badge tag-gtm">GTM / GROWTH</span>
       <div class="qc-role">Intern — CitySide Ventures</div>
       <div class="qc-meta">Mar 2023 – Jul 2024</div>
       <div class="qc-desc">Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors.</div>
     </div>
-    <div class="quest-card">
+    <div class="quest-card" data-tags="gtm,generalist">
       <span class="tag-badge tag-gtm">GTM / GROWTH</span>
       <div class="qc-role">Summer Intern — Arboretum Ventures</div>
       <div class="qc-meta">Apr 2023 – Jul 2023</div>
@@ -522,17 +550,62 @@
     }, 560);
   }
 
-  function showScreen(key) {
-    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-    if (key === "select") {
-      selectScreen.classList.add("active");
+  const LENS_META = {
+    engineering: { label: "Engineering", tags: ["engineering"] },
+    gtm: { label: "GTM / Growth", tags: ["gtm"] },
+    generalist: { label: "Generalist / Operator", tags: ["generalist"] }
+  };
+  let currentLens = null;
+
+  function applyLensFilter() {
+    document.querySelectorAll(".quest-card").forEach(card => {
+      const tags = (card.dataset.tags || "").split(",");
+      const relevant = !currentLens || LENS_META[currentLens].tags.some(t => tags.includes(t));
+      card.classList.toggle("dim", !relevant);
+    });
+    const statusEl = document.getElementById("lensStatus");
+    if (currentLens) {
+      statusEl.innerHTML = 'Viewing as: <strong style="color:var(--gold)">' + LENS_META[currentLens].label + '</strong> · <span class="change-lens" id="changeLensLink">change lens</span>';
     } else {
-      document.getElementById("screen-" + key).classList.add("active");
+      statusEl.innerHTML = 'Viewing everything, no lens applied · <span class="change-lens" id="changeLensLink">pick a lens</span>';
+    }
+    document.getElementById("changeLensLink").addEventListener("click", () => activateScreen("lensScreen"));
+  }
+
+  function activateScreen(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  function showScreen(key) {
+    if (key === "select") {
+      activateScreen("selectScreen");
+      applyLensFilter();
+    } else {
+      activateScreen("screen-" + key);
       markExplored(key);
     }
   }
 
-  document.querySelectorAll(".select-card").forEach(card => {
+  document.querySelectorAll("#lensGrid .select-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const rect = card.getBoundingClientRect();
+      const color = getComputedStyle(card).getPropertyValue("--c").trim();
+      playTransition(color, rect.left + rect.width / 2, rect.top + rect.height / 2, () => {
+        currentLens = card.dataset.lens;
+        showScreen("select");
+      });
+    });
+  });
+  document.getElementById("skipLens").addEventListener("click", () => {
+    const rect = document.getElementById("skipLens").getBoundingClientRect();
+    playTransition("#4dff88", rect.left + rect.width / 2, rect.top + rect.height / 2, () => {
+      currentLens = null;
+      showScreen("select");
+    });
+  });
+
+  document.querySelectorAll("#selectScreen .select-card").forEach(card => {
     card.addEventListener("click", () => {
       const key = card.dataset.key;
       const rect = card.getBoundingClientRect();
@@ -743,7 +816,7 @@
     titleEl.style.display = "none";
     hudEl.style.display = "block";
     questRafId = requestAnimationFrame(questLoop);
-    showScreen("select");
+    activateScreen("lensScreen");
   }
   titleEl.addEventListener("click", startGame);
   window.addEventListener("keydown", function startOnce(e) {

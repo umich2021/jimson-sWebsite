@@ -78,17 +78,21 @@
   }
   .window.open { display: block; }
   .win-header {
-    height: 40px; background: var(--win-header); display: flex; align-items: center; gap: 8px; padding: 0 12px;
-    cursor: grab; border-bottom: 1px solid var(--line); touch-action: none;
+    height: 40px; background: var(--win-header); display: flex; flex-direction: row-reverse; align-items: center;
+    gap: 8px; padding: 0 12px; cursor: grab; border-bottom: 1px solid var(--line); touch-action: none;
   }
   .win-header:active { cursor: grabbing; }
-  .traffic { width: 13px; height: 13px; border-radius: 50%; flex: none; }
-  .t-red { background: #ff5f57; }
+  .traffic { width: 16px; height: 16px; border-radius: 50%; flex: none; position: relative; }
+  .t-red { background: #ff5f57; cursor: pointer; }
+  .t-red::after {
+    content: "×"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; line-height: 1; color: #7a1410; font-weight: 700;
+  }
   .t-yellow { background: #febc2e; }
   .t-green { background: #28c840; }
   .win-title {
-    flex: 1; min-width: 0; text-align: center; font-size: 13px; font-weight: 600; color: var(--ink-soft);
-    margin-right: 55px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    flex: 1; min-width: 0; text-align: left; font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .win-body {
     padding: 20px; font-size: 14px; line-height: 1.6; max-height: min(60vh, 60dvh); overflow-y: auto;
@@ -144,6 +148,12 @@
   .dock-item.running::after {
     content: ""; position: absolute; bottom: -8px; width: 4px; height: 4px; border-radius: 50%; background: white;
   }
+  .dock-item::before {
+    content: attr(data-tooltip); position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%) translateY(4px);
+    background: rgba(20,20,24,0.95); color: white; font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 6px;
+    white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s;
+  }
+  .dock-item:hover::before { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   .welcome-hint {
     position: fixed; left: 16px; bottom: 90px; z-index: 4; color: rgba(255,255,255,0.75); font-size: 13px; max-width: 240px;
@@ -182,33 +192,33 @@
 </div>
 
 <div class="desktop-icons">
-  <div class="icon" onclick="openWindow('about')">
+  <div class="icon" onclick="toggleWindow('about')">
     <div class="icon-glyph g-about">TXT</div>
     <div class="icon-label">About_Me.txt</div>
   </div>
-  <div class="icon" onclick="openWindow('aventos')">
+  <div class="icon" onclick="toggleWindow('aventos')">
     <div class="icon-glyph g-aventos">▶</div>
     <div class="icon-label">Aventos.app</div>
   </div>
-  <div class="icon" onclick="openWindow('projects')">
+  <div class="icon" onclick="toggleWindow('projects')">
     <div class="icon-glyph g-projects">▤</div>
     <div class="icon-label">Projects</div>
   </div>
-  <div class="icon" onclick="openWindow('experience')">
+  <div class="icon" onclick="toggleWindow('experience')">
     <div class="icon-glyph g-experience">PDF</div>
     <div class="icon-label">Experience.pdf</div>
   </div>
-  <div class="icon" onclick="openWindow('education')">
+  <div class="icon" onclick="toggleWindow('education')">
     <div class="icon-glyph g-education">UM</div>
     <div class="icon-label">Education.txt</div>
   </div>
-  <div class="icon" onclick="openWindow('contact')">
+  <div class="icon" onclick="toggleWindow('contact')">
     <div class="icon-glyph g-contact">@</div>
     <div class="icon-label">Contact.app</div>
   </div>
 </div>
 
-<p class="welcome-hint">Click an icon to open it. Drag windows by their title bar.</p>
+<p class="welcome-hint">Click an icon to open/close it. Drag windows by their title bar.</p>
 
 <!-- WINDOWS -->
 <div class="window" id="win-about" style="top:80px; left:120px; z-index:10;">
@@ -318,12 +328,12 @@
 </div>
 
 <div class="dock" id="dock">
-  <div class="dock-item g-about" onclick="openWindow('about')">TXT</div>
-  <div class="dock-item g-aventos" onclick="openWindow('aventos')">▶</div>
-  <div class="dock-item g-projects" onclick="openWindow('projects')">▤</div>
-  <div class="dock-item g-experience" onclick="openWindow('experience')">PDF</div>
-  <div class="dock-item g-education" onclick="openWindow('education')">UM</div>
-  <div class="dock-item g-contact" onclick="openWindow('contact')">@</div>
+  <div class="dock-item g-about" data-tooltip="About_Me.txt" onclick="toggleWindow('about')">TXT</div>
+  <div class="dock-item g-aventos" data-tooltip="Aventos.app" onclick="toggleWindow('aventos')">▶</div>
+  <div class="dock-item g-projects" data-tooltip="Projects" onclick="toggleWindow('projects')">▤</div>
+  <div class="dock-item g-experience" data-tooltip="Experience.pdf" onclick="toggleWindow('experience')">PDF</div>
+  <div class="dock-item g-education" data-tooltip="Education.txt" onclick="toggleWindow('education')">UM</div>
+  <div class="dock-item g-contact" data-tooltip="Contact.app" onclick="toggleWindow('contact')">@</div>
 </div>
 
 <script>
@@ -350,6 +360,14 @@
   function closeWindow(id) {
     document.getElementById(id).classList.remove('open');
     if (window.event) window.event.stopPropagation();
+  }
+  function toggleWindow(name) {
+    const win = document.getElementById('win-' + name);
+    if (win.classList.contains('open')) {
+      win.classList.remove('open');
+    } else {
+      openWindow(name);
+    }
   }
   function focusWindow(win) {
     zTop += 1;
@@ -419,8 +437,7 @@
   tick();
   setInterval(tick, 1000 * 30);
 
-  const isTouchUI = ("ontouchstart" in window) || navigator.maxTouchPoints > 0 || window.innerWidth < 700;
-  if (!isTouchUI) openWindow('about');
+  openWindow('about');
 </script>
 
 </body>
