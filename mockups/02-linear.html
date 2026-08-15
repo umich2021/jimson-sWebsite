@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jimson Yang — Linear-inspired mockup</title>
+<style>
+  :root {
+    --bg: #0a0a0c;
+    --panel: #111114;
+    --line: #232327;
+    --ink: #ececef;
+    --ink-soft: #8a8a93;
+    --accent: #5e6ad2;
+    --accent-soft: rgba(94,106,210,0.14);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .sans { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .container { max-width: 980px; margin: 0 auto; padding: 0 32px; }
+  a { color: inherit; text-decoration: none; }
+
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(10,10,12,0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { font-weight: 600; font-size: 14px; letter-spacing: 0.02em; }
+  .brand::before { content: "◆ "; color: var(--accent); }
+  .nav-links { display: flex; gap: 24px; font-size: 13px; color: var(--ink-soft); }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta { border: 1px solid var(--line); padding: 7px 14px; border-radius: 6px; font-size: 13px; color: var(--ink); }
+  .nav-cta:hover { border-color: var(--accent); }
+
+  .hero {
+    padding: 120px 0 90px;
+    background:
+      radial-gradient(600px 300px at 15% 0%, var(--accent-soft), transparent),
+      linear-gradient(180deg, #0a0a0c, #0a0a0c);
+    position: relative;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(180deg, black, transparent 70%);
+    opacity: 0.35;
+  }
+  .hero-inner { position: relative; max-width: 680px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--accent);
+    border: 1px solid rgba(94,106,210,0.35); background: var(--accent-soft);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 22px;
+  }
+  h1.hero-title {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 46px; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 18px; color: white;
+  }
+  .hero-bio { font-size: 15.5px; color: var(--ink-soft); max-width: 540px; margin: 0 0 34px; }
+  .hero-actions { display: flex; gap: 10px; }
+  .btn { padding: 11px 18px; border-radius: 6px; font-size: 13.5px; font-weight: 600; font-family: inherit; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-secondary { border: 1px solid var(--line); color: var(--ink); }
+
+  section { padding: 76px 0; border-top: 1px solid var(--line); }
+  .section-label { color: var(--accent); font-size: 12.5px; letter-spacing: 0.04em; margin: 0 0 14px; }
+  .section-label::before { content: "// "; color: var(--ink-soft); }
+  .section-heading {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 26px; letter-spacing: -0.01em; margin: 0 0 14px; color: white;
+  }
+  .section-lede { color: var(--ink-soft); font-size: 14.5px; max-width: 620px; margin: 0 0 36px; }
+
+  .video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .video-card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .video-thumb { aspect-ratio: 16/9; background: #17171b; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 13px; }
+  .video-card p { padding: 12px 14px; margin: 0; font-size: 13px; color: var(--ink-soft); }
+
+  .project-group-label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); margin: 30px 0 14px; }
+  .project-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; transition: border-color .15s; }
+  .card:hover { border-color: var(--accent); }
+  .card h3 {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    margin: 0 0 6px; font-size: 14.5px; color: white; font-weight: 600;
+  }
+  .card p { margin: 0; color: var(--ink-soft); font-size: 12.5px; }
+
+  .exp-item { display: grid; grid-template-columns: 180px 1fr; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .exp-item:last-child { border-bottom: none; }
+  .exp-role { font-weight: 600; color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .exp-dates { color: var(--ink-soft); font-size: 12px; }
+  .exp-summary { color: var(--ink-soft); }
+
+  footer { padding: 40px 0; text-align: center; color: var(--ink-soft); font-size: 13px; border-top: 1px solid var(--line); }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container nav-inner">
+    <div class="brand">jimson.yang</div>
+    <nav class="nav-links">
+      <a href="#work">work</a>
+      <a href="#experience">experience</a>
+      <a href="#education">education</a>
+    </nav>
+    <a class="nav-cta" href="mailto:jimsonyangbusiness@gmail.com">email →</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container hero-inner">
+    <span class="eyebrow">● Available · San Francisco</span>
+    <h1 class="hero-title">Building an AI anime studio. Probably arguing about 4K vs 2K.</h1>
+    <p class="hero-bio">I co-founded Aventos, an AI anime studio, after a few years doing a little bit of everything at startups — sales, GTM, frontend engineering, and a stint on the VC side doing due diligence. I build my own backend for fun, ship frontend for work.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="https://aventos.dev" target="_blank" rel="noreferrer">Visit Aventos</a>
+      <a class="btn btn-secondary" href="mailto:jimsonyangbusiness@gmail.com">Email me</a>
+    </div>
+  </div>
+</section>
+
+<section id="work">
+  <div class="container">
+    <p class="section-label">aventos</p>
+    <h2 class="section-heading">An AI anime studio, built from scratch</h2>
+    <p class="section-lede">Short-form, AI-generated anime built end to end — concept, screenwriting, voice, animation, and post. The bet: anime-style storytelling works as a marketing channel for B2B SaaS companies who all sound and look the same.</p>
+    <div class="video-grid">
+      <div class="video-card"><div class="video-thumb">▶ trailer.mp4</div><p>Aventos anime trailer</p></div>
+      <div class="video-card"><div class="video-thumb">▶ bill_split.mp4</div><p>How Asians pay the bill</p></div>
+    </div>
+
+    <p class="project-group-label">for work</p>
+    <div class="project-grid">
+      <div class="card"><h3>Seedance Internal Tool</h3><p>Internal FastAPI + React tool for generating and archiving AI video via BytePlus Seedance — batch generation, S3 archive, presigned delivery.</p></div>
+      <div class="card"><h3>Manhwa Reader</h3><p>A reader built to make sense of messy manhwa file collections.</p></div>
+      <div class="card"><h3>LLM Citation Tracker</h3><p>Tracks when ChatGPT or Google crawl and cite a site when answering user questions.</p></div>
+      <div class="card"><h3>Tableau Client Site</h3><p>A client website build.</p></div>
+    </div>
+    <p class="project-group-label">for fun</p>
+    <div class="project-grid">
+      <div class="card"><h3>Jet Lag: SF</h3><p>A mobile app for playing Jet Lag: The Game across San Francisco neighborhoods. SF-Monopoly mode in progress.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="container">
+    <p class="section-label">experience</p>
+    <h2 class="section-heading">Where I've done this before</h2>
+    <div class="exp-item">
+      <div><div class="exp-role">Co-Founder, Aventos</div><div class="exp-dates">May 2025 – Present · SF</div></div>
+      <p class="exp-summary">AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS.</p>
+    </div>
+    <div class="exp-item">
+      <div><div class="exp-role">Intern, CitySide Ventures</div><div class="exp-dates">Mar 2023 – Jul 2024</div></div>
+      <p class="exp-summary">Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors.</p>
+    </div>
+    <div class="exp-item">
+      <div><div class="exp-role">Summer Intern, Arboretum Ventures</div><div class="exp-dates">Apr 2023 – Jul 2023</div></div>
+      <p class="exp-summary">Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand.</p>
+    </div>
+  </div>
+</section>
+
+<section id="education">
+  <div class="container">
+    <p class="section-label">education</p>
+    <h2 class="section-heading">University of Michigan — Ross School of Business</h2>
+    <p class="section-lede">BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    San Francisco, CA · <a href="mailto:jimsonyangbusiness@gmail.com">jimsonyangbusiness@gmail.com</a>
+  </div>
+</footer>
+
+</body>
+</html>
