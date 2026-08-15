@@ -3,274 +3,494 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Jimson Yang — Game HUD mockup</title>
+<title>Jimson Yang — Game mockup</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #06070a;
-    --panel: #0c1018;
-    --line: #1f2a3a;
+    --bg: #0a1a12;
+    --grass1: #163a24;
+    --grass2: #123020;
+    --path: #4a3f2a;
+    --line: #2a4a34;
     --cyan: #4cf3ff;
     --magenta: #ff3cac;
     --gold: #ffcc4d;
     --green: #4dff88;
     --ink: #d9f4ff;
-    --ink-soft: #6d8299;
+    --ink-soft: #8fae9c;
   }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  * { box-sizing: border-box; user-select: none; }
+  html, body { height: 100%; margin: 0; }
   body {
-    margin: 0;
-    background: radial-gradient(1200px 700px at 50% -10%, #0e1a2b 0%, var(--bg) 60%);
+    background: #05100a;
     color: var(--ink);
     font-family: "VT323", monospace;
     font-size: 20px;
-    line-height: 1.5;
-    position: relative;
-    min-height: 100vh;
-  }
-  .scanlines {
-    position: fixed; inset: 0; pointer-events: none; z-index: 50;
-    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 2px, transparent 4px);
-    mix-blend-mode: overlay;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; overflow: hidden;
   }
   .pixel { font-family: "Press Start 2P", monospace; }
-  .container { max-width: 920px; margin: 0 auto; padding: 28px 20px 140px; }
-  a { color: inherit; }
-
-  /* corner-bracket HUD panel */
-  .panel {
-    position: relative;
-    background: linear-gradient(180deg, rgba(76,243,255,0.05), rgba(0,0,0,0));
-    border: 1px solid var(--line);
-    padding: 26px 26px;
-    margin-bottom: 28px;
+  .scanlines {
+    position: fixed; inset: 0; pointer-events: none; z-index: 90;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 2px, transparent 4px);
+    mix-blend-mode: overlay;
   }
-  .panel::before, .panel::after,
-  .panel .br-tl, .panel .br-br { content: ""; }
+
+  /* ---------- title screen ---------- */
+  #title {
+    position: fixed; inset: 0; z-index: 200; background: #05100a;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+    text-align: center; cursor: pointer;
+  }
+  #title .pixel.big { font-size: 30px; color: var(--green); text-shadow: 0 0 16px rgba(77,255,136,0.6); letter-spacing: 0.03em; }
+  #title .sub { color: var(--ink-soft); font-size: 20px; letter-spacing: 0.05em; }
+  #title .press {
+    font-family: "Press Start 2P"; font-size: 12px; color: var(--gold); margin-top: 30px;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---------- HUD ---------- */
+  #hud {
+    position: fixed; top: 16px; left: 16px; z-index: 60; display: none;
+    background: rgba(6,16,10,0.85); border: 1px solid var(--line); padding: 12px 16px;
+    min-width: 230px; backdrop-filter: blur(4px);
+  }
+  #hud .row { display: flex; align-items: center; gap: 10px; }
+  #hud .name { font-family: "Press Start 2P"; font-size: 11px; color: white; }
+  #hud .lvl { font-family: "Press Start 2P"; font-size: 9px; color: var(--gold); }
+  #hud .xp-bar { margin-top: 8px; height: 10px; background: #0a0e14; border: 1px solid var(--line); overflow: hidden; }
+  #hud .xp-fill { height: 100%; width: 78%; background: linear-gradient(90deg, var(--cyan), var(--green)); box-shadow: 0 0 8px var(--cyan); }
+  #hud .found { font-size: 15px; color: var(--ink-soft); margin-top: 8px; }
+
+  #controls {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 60; display: none;
+    font-family: "Press Start 2P"; font-size: 9px; color: var(--ink-soft);
+    background: rgba(6,16,10,0.85); border: 1px solid var(--line); padding: 10px 18px; letter-spacing: 0.03em;
+  }
+  #controls b { color: var(--cyan); }
+
+  /* ---------- map ---------- */
+  #stage { position: relative; }
+  #map {
+    position: relative; width: 880px; height: 520px; overflow: hidden;
+    background-image:
+      repeating-conic-gradient(var(--grass1) 0% 25%, var(--grass2) 0% 50%);
+    background-size: 40px 40px;
+    border: 2px solid var(--line);
+    box-shadow: 0 0 60px rgba(0,0,0,0.6), 0 0 0 4px #05100a;
+    display: none;
+  }
+  .path { position: absolute; background: var(--path); opacity: 0.55; }
+
+  .building {
+    position: absolute; border: 2px solid var(--line); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; padding: 8px; cursor: pointer;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.3);
+  }
+  .building .roof { position: absolute; top: -14px; left: -2px; right: -2px; height: 22px; }
+  .building .bname { font-family: "Press Start 2P"; font-size: 10px; color: white; margin-top: 4px; }
+  .building .bsub { font-size: 14px; color: var(--ink-soft); margin-top: 4px; }
+  .b-mission { background: rgba(255,60,172,0.10); border-color: var(--magenta); }
+  .b-mission .roof { background: var(--magenta); }
+  .b-quest { background: rgba(77,255,136,0.10); border-color: var(--green); }
+  .b-quest .roof { background: var(--green); }
+  .b-shop { background: rgba(255,204,77,0.10); border-color: var(--gold); }
+  .b-shop .roof { background: var(--gold); }
+  .b-academy { background: rgba(199,146,234,0.12); border-color: #c792ea; }
+  .b-academy .roof { background: #c792ea; }
+  .b-tavern { background: rgba(76,243,255,0.10); border-color: var(--cyan); }
+  .b-tavern .roof { background: var(--cyan); }
+
+  .prompt {
+    position: absolute; transform: translate(-50%, -100%); font-family: "Press Start 2P"; font-size: 9px;
+    color: #05100a; background: var(--gold); padding: 6px 10px; white-space: nowrap; display: none; z-index: 40;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  }
+  .prompt::after {
+    content: ""; position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--gold);
+  }
+
+  .player { position: absolute; width: 32px; height: 44px; z-index: 30; }
+  .player .shadow {
+    position: absolute; bottom: -2px; left: 4px; width: 24px; height: 8px; border-radius: 50%;
+    background: rgba(0,0,0,0.45); filter: blur(1px);
+  }
+  .player .sprite { position: relative; width: 32px; height: 40px; image-rendering: pixelated; transition: transform .08s; }
+  .player .sprite span {
+    position: absolute; top: 0; left: 0; width: 4px; height: 4px; background: transparent;
+    box-shadow:
+      8px 0px 0 #2b1c12, 12px 0px 0 #2b1c12, 16px 0px 0 #2b1c12, 20px 0px 0 #2b1c12,
+      8px 4px 0 #2b1c12, 12px 4px 0 #2b1c12, 16px 4px 0 #2b1c12, 20px 4px 0 #2b1c12,
+      4px 8px 0 #2b1c12, 24px 8px 0 #2b1c12,
+      8px 8px 0 #f2c18c, 12px 8px 0 #f2c18c, 16px 8px 0 #f2c18c, 20px 8px 0 #f2c18c,
+      8px 12px 0 #f2c18c, 12px 12px 0 #f2c18c, 16px 12px 0 #f2c18c, 20px 12px 0 #f2c18c,
+      4px 16px 0 #4cf3ff, 8px 16px 0 #4cf3ff, 12px 16px 0 #4cf3ff, 16px 16px 0 #4cf3ff, 20px 16px 0 #4cf3ff, 24px 16px 0 #4cf3ff,
+      4px 20px 0 #4cf3ff, 8px 20px 0 #4cf3ff, 12px 20px 0 #4cf3ff, 16px 20px 0 #4cf3ff, 20px 20px 0 #4cf3ff, 24px 20px 0 #4cf3ff,
+      4px 24px 0 #1b6fa8, 8px 24px 0 #1b6fa8, 12px 24px 0 #1b6fa8, 16px 24px 0 #1b6fa8, 20px 24px 0 #1b6fa8, 24px 24px 0 #1b6fa8,
+      8px 28px 0 #1b4a9e, 20px 28px 0 #1b4a9e, 8px 32px 0 #1b4a9e, 20px 32px 0 #1b4a9e,
+      4px 36px 0 #2b1c12, 8px 36px 0 #2b1c12, 20px 36px 0 #2b1c12, 24px 36px 0 #2b1c12;
+  }
+  .player.walking .sprite { animation: bob 0.3s steps(2) infinite; }
+  @keyframes bob { 50% { transform: translateY(-2px); } }
+  .player.face-left .sprite { transform: scaleX(-1); }
+
+  .tree { position: absolute; width: 26px; height: 34px; }
+  .tree .trunk { position: absolute; bottom: 0; left: 10px; width: 6px; height: 10px; background: #4a3222; }
+  .tree .leaves { position: absolute; top: 0; left: 0; width: 26px; height: 24px; background: #1f5c38; border-radius: 40% 60% 55% 45%; box-shadow: inset 0 -6px 0 rgba(0,0,0,0.15); }
+
+  /* ---------- modal ---------- */
+  #modalBackdrop {
+    position: fixed; inset: 0; z-index: 150; background: rgba(3,8,5,0.75); backdrop-filter: blur(2px);
+    display: none; align-items: center; justify-content: center; padding: 24px;
+  }
+  .panel {
+    position: relative; width: 100%; max-width: 560px; max-height: 82vh; overflow-y: auto;
+    background: linear-gradient(180deg, rgba(76,243,255,0.06), #0c1018 40%); border: 1px solid var(--line); padding: 28px;
+  }
   .corner { position: absolute; width: 16px; height: 16px; border: 2px solid var(--cyan); }
   .corner.tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
   .corner.tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
   .corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
   .corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+  .panel-close {
+    position: absolute; top: 14px; right: 14px; background: none; border: 1px solid var(--line); color: var(--ink-soft);
+    font-family: "Press Start 2P"; font-size: 10px; padding: 6px 10px; cursor: pointer;
+  }
+  .panel-close:hover { color: var(--gold); border-color: var(--gold); }
+  .panel-title { font-family: "Press Start 2P"; font-size: 12px; color: var(--cyan); margin: 0 0 20px; letter-spacing: 0.04em; }
 
-  .panel-title {
-    font-family: "Press Start 2P", monospace; font-size: 11px; color: var(--cyan);
-    letter-spacing: 0.05em; margin: 0 0 20px; text-shadow: 0 0 8px rgba(76,243,255,0.6);
-  }
-  .panel-title.magenta { color: var(--magenta); text-shadow: 0 0 8px rgba(255,60,172,0.6); }
-  .panel-title.gold { color: var(--gold); text-shadow: 0 0 8px rgba(255,204,77,0.6); }
-  .panel-title.green { color: var(--green); text-shadow: 0 0 8px rgba(77,255,136,0.6); }
+  .mission-title { font-size: 26px; color: white; margin: 0 0 10px; }
+  .mission-desc { color: var(--ink-soft); font-size: 18px; margin: 0 0 20px; }
+  .cutscene-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .cutscene { border: 1px solid var(--line); background: #05070b; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative; }
+  .cutscene .play { font-family: "Press Start 2P"; color: var(--cyan); font-size: 11px; }
+  .cutscene .cs-label { position: absolute; left: 8px; bottom: 8px; font-size: 14px; color: var(--ink-soft); background: rgba(0,0,0,0.6); padding: 2px 8px; }
 
-  /* player card */
-  .player-card { display: grid; grid-template-columns: 96px 1fr; gap: 22px; align-items: center; }
-  .avatar {
-    width: 96px; height: 96px; border: 2px solid var(--cyan); background: linear-gradient(135deg, #16324a, #0c1018);
-    display: flex; align-items: center; justify-content: center; font-family: "Press Start 2P"; font-size: 22px; color: var(--cyan);
-    box-shadow: 0 0 24px rgba(76,243,255,0.25) inset;
-  }
-  .player-name { font-family: "Press Start 2P"; font-size: 20px; color: white; margin: 0 0 6px; }
-  .player-sub { color: var(--ink-soft); font-size: 20px; margin: 0 0 14px; }
-  .class-tags { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-  .tag {
-    font-family: "Press Start 2P"; font-size: 9px; padding: 6px 10px; border: 1px solid var(--gold); color: var(--gold);
-  }
-  .xp-row { display: flex; align-items: center; gap: 12px; }
-  .xp-label { font-family: "Press Start 2P"; font-size: 9px; color: var(--ink-soft); white-space: nowrap; }
-  .xp-bar { flex: 1; height: 14px; background: #0a0e14; border: 1px solid var(--line); position: relative; overflow: hidden; }
-  .xp-fill { position: absolute; inset: 0; width: 78%; background: linear-gradient(90deg, var(--cyan), var(--green)); box-shadow: 0 0 12px var(--cyan); }
-
-  /* mission banner */
-  .mission-header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-  .mission-status { font-family: "Press Start 2P"; font-size: 9px; color: var(--green); border: 1px solid var(--green); padding: 5px 10px; }
-  .mission-title { font-size: 26px; color: white; margin: 10px 0 12px; }
-  .mission-desc { color: var(--ink-soft); font-size: 19px; margin: 0 0 22px; max-width: 640px; }
-  .cutscene-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .cutscene {
-    border: 1px solid var(--line); background: #05070b; aspect-ratio: 16/9; position: relative;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .cutscene .play { font-family: "Press Start 2P"; color: var(--cyan); font-size: 12px; }
-  .cutscene .cs-label {
-    position: absolute; left: 8px; bottom: 8px; font-size: 15px; color: var(--ink-soft);
-    background: rgba(0,0,0,0.6); padding: 2px 8px;
-  }
-
-  /* quest log */
-  .quest { border-left: 2px solid var(--line); padding: 4px 0 20px 18px; margin-bottom: 4px; position: relative; }
+  .quest { border-left: 2px solid var(--line); padding: 4px 0 18px 16px; margin-bottom: 4px; position: relative; }
   .quest:last-child { margin-bottom: 0; padding-bottom: 0; }
-  .quest::before {
-    content: ""; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; background: var(--bg); border: 2px solid var(--green);
-  }
+  .quest::before { content: ""; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; background: #0c1018; border: 2px solid var(--green); }
   .quest.active::before { border-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
-  .quest-title { font-size: 21px; color: white; }
-  .quest-status { font-family: "Press Start 2P"; font-size: 8px; margin-left: 10px; color: var(--green); }
+  .quest-title { font-size: 20px; color: white; }
+  .quest-status { font-family: "Press Start 2P"; font-size: 8px; margin-left: 8px; color: var(--green); }
   .quest.active .quest-status { color: var(--gold); }
-  .quest-meta { color: var(--ink-soft); font-size: 16px; margin: 2px 0 6px; }
-  .quest-desc { color: var(--ink-soft); font-size: 18px; max-width: 620px; }
+  .quest-meta { color: var(--ink-soft); font-size: 15px; margin: 2px 0 6px; }
+  .quest-desc { color: var(--ink-soft); font-size: 17px; }
 
-  /* inventory */
-  .inv-group-label { font-family: "Press Start 2P"; font-size: 9px; color: var(--ink-soft); margin: 22px 0 12px; }
+  .inv-group-label { font-family: "Press Start 2P"; font-size: 8px; color: var(--ink-soft); margin: 18px 0 10px; }
   .inv-group-label:first-child { margin-top: 0; }
-  .inv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-  .item {
-    border: 1px solid var(--gold); background: linear-gradient(180deg, rgba(255,204,77,0.06), transparent);
-    padding: 16px; position: relative;
-  }
-  .item.common { border-color: var(--ink-soft); background: linear-gradient(180deg, rgba(109,130,153,0.06), transparent); }
-  .item-rarity { font-family: "Press Start 2P"; font-size: 8px; color: var(--gold); margin-bottom: 8px; letter-spacing: 0.05em; }
+  .inv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .item { border: 1px solid var(--gold); background: linear-gradient(180deg, rgba(255,204,77,0.06), transparent); padding: 13px; }
+  .item.common { border-color: var(--ink-soft); background: linear-gradient(180deg, rgba(143,174,156,0.06), transparent); }
+  .item-rarity { font-family: "Press Start 2P"; font-size: 7px; color: var(--gold); margin-bottom: 6px; }
   .item.common .item-rarity { color: var(--ink-soft); }
-  .item-name { color: white; font-size: 19px; margin-bottom: 6px; }
-  .item-desc { color: var(--ink-soft); font-size: 15.5px; }
+  .item-name { color: white; font-size: 17px; margin-bottom: 4px; }
+  .item-desc { color: var(--ink-soft); font-size: 14px; }
 
-  /* achievement */
-  .achievement { display: flex; gap: 20px; align-items: center; }
-  .ach-badge {
-    width: 64px; height: 64px; flex: none; border: 2px solid var(--gold); transform: rotate(45deg);
-    display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,204,77,0.3) inset;
-  }
-  .ach-badge span { transform: rotate(-45deg); font-family: "Press Start 2P"; font-size: 16px; color: var(--gold); }
-  .ach-title { color: white; font-size: 21px; margin-bottom: 6px; }
-  .ach-desc { color: var(--ink-soft); font-size: 17px; }
+  .achievement { display: flex; gap: 18px; align-items: center; }
+  .ach-badge { width: 58px; height: 58px; flex: none; border: 2px solid #c792ea; transform: rotate(45deg); display: flex; align-items: center; justify-content: center; }
+  .ach-badge span { transform: rotate(-45deg); font-family: "Press Start 2P"; font-size: 14px; color: #c792ea; }
+  .ach-title { color: white; font-size: 19px; margin-bottom: 4px; }
+  .ach-desc { color: var(--ink-soft); font-size: 16px; }
 
-  /* dialogue */
-  .dialogue-box {
-    border: 2px solid var(--cyan); padding: 22px; background: rgba(76,243,255,0.03);
-  }
-  .dialogue-npc { font-family: "Press Start 2P"; font-size: 10px; color: var(--cyan); margin-bottom: 14px; }
-  .dialogue-line { color: var(--ink); font-size: 20px; margin-bottom: 18px; }
-  .choice { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--ink); font-family: "VT323"; font-size: 20px; padding: 10px 0; cursor: pointer; }
+  .dialogue-npc { font-family: "Press Start 2P"; font-size: 9px; color: var(--cyan); margin-bottom: 12px; }
+  .dialogue-line { color: var(--ink); font-size: 19px; margin-bottom: 16px; }
+  .choice { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--ink); font-family: "VT323"; font-size: 19px; padding: 8px 0; cursor: pointer; text-decoration: none; }
   .choice:hover { color: var(--gold); }
   .choice::before { content: "▸ "; color: var(--magenta); }
 
-  /* hotbar */
-  .hotbar {
-    position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 20;
-    display: flex; gap: 10px; background: rgba(6,7,10,0.85); border: 1px solid var(--line); padding: 10px; backdrop-filter: blur(6px);
+  #toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-140%); z-index: 250;
+    font-family: "Press Start 2P"; font-size: 10px; color: #05100a; background: var(--green);
+    padding: 12px 18px; box-shadow: 0 6px 18px rgba(0,0,0,0.4); transition: transform .35s ease; white-space: nowrap;
   }
-  .hotbar a {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    width: 60px; height: 60px; border: 1px solid var(--line); text-decoration: none; color: var(--ink-soft); position: relative;
-  }
-  .hotbar a:hover { border-color: var(--cyan); color: var(--cyan); }
-  .hotbar a .num { position: absolute; top: 2px; left: 4px; font-family: "Press Start 2P"; font-size: 7px; color: var(--ink-soft); }
-  .hotbar a .lbl { font-size: 13px; margin-top: 6px; }
+  #toast.show { transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 <div class="scanlines"></div>
 
-<div class="container">
-
-  <!-- PLAYER CARD -->
-  <div class="panel" id="player">
-    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
-    <div class="player-card">
-      <div class="avatar">JY</div>
-      <div>
-        <p class="player-name">JIMSON YANG</p>
-        <p class="player-sub">AI Anime Studio Founder · San Francisco, CA</p>
-        <div class="class-tags">
-          <span class="tag">ENGINEER</span>
-          <span class="tag">OPERATOR</span>
-          <span class="tag">GTM</span>
-        </div>
-        <div class="xp-row">
-          <span class="xp-label">XP</span>
-          <div class="xp-bar"><div class="xp-fill"></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CURRENT MISSION -->
-  <div class="panel" id="mission">
-    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
-    <p class="panel-title magenta">◆ CURRENT MISSION</p>
-    <div class="mission-header">
-      <span></span>
-      <span class="mission-status">IN PROGRESS</span>
-    </div>
-    <h2 class="mission-title">Aventos — build an AI anime studio</h2>
-    <p class="mission-desc">Short-form, AI-generated anime built end to end — concept, screenwriting, voice, animation, and post. The bet: anime-style storytelling works as a marketing channel for B2B SaaS companies who all sound and look the same.</p>
-    <div class="cutscene-grid">
-      <div class="cutscene"><span class="play">▶ PLAY</span><span class="cs-label">Aventos anime trailer</span></div>
-      <div class="cutscene"><span class="play">▶ PLAY</span><span class="cs-label">How Asians pay the bill</span></div>
-    </div>
-  </div>
-
-  <!-- QUEST LOG -->
-  <div class="panel" id="quests">
-    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
-    <p class="panel-title">◆ QUEST LOG — EXPERIENCE</p>
-
-    <div class="quest active">
-      <span class="quest-title">Co-Founder — Aventos<span class="quest-status">ACTIVE</span></span>
-      <p class="quest-meta">May 2025 – Present · San Francisco, CA</p>
-      <p class="quest-desc">AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS.</p>
-    </div>
-    <div class="quest">
-      <span class="quest-title">Intern — CitySide Ventures<span class="quest-status">COMPLETE</span></span>
-      <p class="quest-meta">Mar 2023 – Jul 2024</p>
-      <p class="quest-desc">Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors.</p>
-    </div>
-    <div class="quest">
-      <span class="quest-title">Summer Intern — Arboretum Ventures<span class="quest-status">COMPLETE</span></span>
-      <p class="quest-meta">Apr 2023 – Jul 2023</p>
-      <p class="quest-desc">Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand.</p>
-    </div>
-  </div>
-
-  <!-- INVENTORY -->
-  <div class="panel" id="inventory">
-    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
-    <p class="panel-title gold">◆ INVENTORY — PROJECTS</p>
-
-    <p class="inv-group-label">LEGENDARY (FOR WORK)</p>
-    <div class="inv-grid">
-      <div class="item"><div class="item-rarity">★ LEGENDARY</div><div class="item-name">Seedance Internal Tool</div><div class="item-desc">Internal FastAPI + React tool for generating and archiving AI video via BytePlus Seedance — batch generation, S3 archive, presigned delivery.</div></div>
-      <div class="item"><div class="item-rarity">★ LEGENDARY</div><div class="item-name">Manhwa Reader</div><div class="item-desc">A reader built to make sense of messy manhwa file collections.</div></div>
-      <div class="item"><div class="item-rarity">★ LEGENDARY</div><div class="item-name">LLM Citation Tracker</div><div class="item-desc">Tracks when ChatGPT or Google crawl and cite a site when answering user questions.</div></div>
-      <div class="item"><div class="item-rarity">★ LEGENDARY</div><div class="item-name">Tableau Client Site</div><div class="item-desc">A client website build.</div></div>
-    </div>
-
-    <p class="inv-group-label">COMMON (FOR FUN)</p>
-    <div class="inv-grid">
-      <div class="item common"><div class="item-rarity">○ COMMON</div><div class="item-name">Jet Lag: SF</div><div class="item-desc">A mobile app for playing Jet Lag: The Game across San Francisco neighborhoods. SF-Monopoly mode in progress.</div></div>
-    </div>
-  </div>
-
-  <!-- ACHIEVEMENT -->
-  <div class="panel" id="education">
-    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
-    <p class="panel-title green">◆ ACHIEVEMENT UNLOCKED — EDUCATION</p>
-    <div class="achievement">
-      <div class="ach-badge"><span>UM</span></div>
-      <div>
-        <p class="ach-title">University of Michigan — Ross School of Business</p>
-        <p class="ach-desc">BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- DIALOGUE / CONTACT -->
-  <div class="dialogue-box" id="contact">
-    <p class="dialogue-npc">JIMSON YANG</p>
-    <p class="dialogue-line">"Want to team up? Choose an option below."</p>
-    <a class="choice" href="https://aventos.dev" target="_blank" rel="noreferrer">Visit Aventos [Enter World]</a>
-    <a class="choice" href="mailto:jimsonyangbusiness@gmail.com">Talk (send an email)</a>
-  </div>
-
+<div id="title">
+  <p class="pixel big">◆ JIMSON RPG ◆</p>
+  <p class="sub">AI ANIME STUDIO FOUNDER EDITION</p>
+  <p class="press">PRESS ANY KEY / CLICK TO START</p>
 </div>
 
-<nav class="hotbar">
-  <a href="#mission"><span class="num">1</span><span class="lbl">Mission</span></a>
-  <a href="#quests"><span class="num">2</span><span class="lbl">Quests</span></a>
-  <a href="#inventory"><span class="num">3</span><span class="lbl">Items</span></a>
-  <a href="#education"><span class="num">4</span><span class="lbl">Award</span></a>
-  <a href="#contact"><span class="num">5</span><span class="lbl">Talk</span></a>
-</nav>
+<div id="hud">
+  <div class="row">
+    <span class="name">JIMSON YANG</span>
+    <span class="lvl">LVL 25</span>
+  </div>
+  <div class="xp-bar"><div class="xp-fill"></div></div>
+  <div class="found">Areas found: <span id="foundCount">0</span>/5</div>
+</div>
+
+<div id="controls"><b>WASD/ARROWS</b> MOVE &nbsp; <b>E</b> INTERACT</div>
+
+<div id="stage">
+  <div id="map">
+    <!-- buildings, props, player injected by JS -->
+  </div>
+</div>
+
+<div id="modalBackdrop">
+  <div class="panel" id="panelBody">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <button class="panel-close" id="panelClose">✕ CLOSE</button>
+    <div id="panelContent"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const MAP_W = 880, MAP_H = 520;
+  const PLAYER_W = 32, PLAYER_H = 44;
+
+  const buildings = [
+    {
+      key: "aventos", cls: "b-mission", x: 40, y: 40, w: 170, h: 120,
+      name: "MISSION HALL", sub: "Aventos",
+      render: () => `
+        <p class="panel-title">◆ CURRENT MISSION — AVENTOS</p>
+        <h2 class="mission-title">Build an AI anime studio</h2>
+        <p class="mission-desc">Short-form, AI-generated anime built end to end — concept, screenwriting, voice, animation, and post. The bet: anime-style storytelling works as a marketing channel for B2B SaaS companies who all sound and look the same.</p>
+        <div class="cutscene-grid">
+          <div class="cutscene"><span class="play">▶ PLAY</span><span class="cs-label">Aventos anime trailer</span></div>
+          <div class="cutscene"><span class="play">▶ PLAY</span><span class="cs-label">How Asians pay the bill</span></div>
+        </div>`
+    },
+    {
+      key: "experience", cls: "b-quest", x: 670, y: 40, w: 170, h: 120,
+      name: "QUEST BOARD", sub: "Experience",
+      render: () => `
+        <p class="panel-title">◆ QUEST LOG — EXPERIENCE</p>
+        <div class="quest active">
+          <span class="quest-title">Co-Founder — Aventos<span class="quest-status">ACTIVE</span></span>
+          <p class="quest-meta">May 2025 – Present · San Francisco, CA</p>
+          <p class="quest-desc">AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS.</p>
+        </div>
+        <div class="quest">
+          <span class="quest-title">Intern — CitySide Ventures<span class="quest-status">COMPLETE</span></span>
+          <p class="quest-meta">Mar 2023 – Jul 2024</p>
+          <p class="quest-desc">Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors.</p>
+        </div>
+        <div class="quest">
+          <span class="quest-title">Summer Intern — Arboretum Ventures<span class="quest-status">COMPLETE</span></span>
+          <p class="quest-meta">Apr 2023 – Jul 2023</p>
+          <p class="quest-desc">Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand.</p>
+        </div>`
+    },
+    {
+      key: "projects", cls: "b-shop", x: 40, y: 350, w: 170, h: 120,
+      name: "ITEM SHOP", sub: "Projects",
+      render: () => `
+        <p class="panel-title">◆ INVENTORY — PROJECTS</p>
+        <p class="inv-group-label">LEGENDARY (FOR WORK)</p>
+        <div class="inv-grid">
+          <div class="item"><div class="item-rarity">★ LEGENDARY</div><div class="item-name">Seedance Internal Tool</div><div class="item-desc">FastAPI + React tool for generating and archiving AI video via BytePlus Seedance.</div></div>
+          <div class="item"><div class="item-rarity">★ LEGENDARY</div><div class="item-name">Manhwa Reader</div><div class="item-desc">A reader built to make sense of messy manhwa file collections.</div></div>
+          <div class="item"><div class="item-rarity">★ LEGENDARY</div><div class="item-name">LLM Citation Tracker</div><div class="item-desc">Tracks when ChatGPT or Google crawl and cite a site.</div></div>
+          <div class="item"><div class="item-rarity">★ LEGENDARY</div><div class="item-name">Tableau Client Site</div><div class="item-desc">A client website build.</div></div>
+        </div>
+        <p class="inv-group-label">COMMON (FOR FUN)</p>
+        <div class="inv-grid">
+          <div class="item common"><div class="item-rarity">○ COMMON</div><div class="item-name">Jet Lag: SF</div><div class="item-desc">Mobile app for playing Jet Lag: The Game across SF neighborhoods.</div></div>
+        </div>`
+    },
+    {
+      key: "education", cls: "b-academy", x: 670, y: 350, w: 170, h: 120,
+      name: "ACADEMY", sub: "Education",
+      render: () => `
+        <p class="panel-title">◆ ACHIEVEMENT UNLOCKED — EDUCATION</p>
+        <div class="achievement">
+          <div class="ach-badge"><span>UM</span></div>
+          <div>
+            <p class="ach-title">University of Michigan — Ross School of Business</p>
+            <p class="ach-desc">BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
+          </div>
+        </div>`
+    },
+    {
+      key: "contact", cls: "b-tavern", x: 355, y: 195, w: 170, h: 120,
+      name: "TAVERN", sub: "Contact",
+      render: () => `
+        <p class="dialogue-npc">JIMSON YANG</p>
+        <p class="dialogue-line">"Want to team up? Choose an option below."</p>
+        <a class="choice" href="https://aventos.dev" target="_blank" rel="noreferrer">Visit Aventos [Enter World]</a>
+        <a class="choice" href="mailto:jimsonyangbusiness@gmail.com">Talk (send an email)</a>`
+    }
+  ];
+
+  const trees = [
+    { x: 260, y: 30 }, { x: 300, y: 60 }, { x: 620, y: 30 },
+    { x: 20, y: 220 }, { x: 850, y: 220 }, { x: 260, y: 460 }, { x: 600, y: 460 },
+    { x: 440, y: 470 }
+  ];
+
+  const mapEl = document.getElementById("map");
+  const titleEl = document.getElementById("title");
+  const hudEl = document.getElementById("hud");
+  const controlsEl = document.getElementById("controls");
+  const foundCountEl = document.getElementById("foundCount");
+
+  buildings.forEach(b => {
+    const el = document.createElement("div");
+    el.className = "building " + b.cls;
+    el.style.left = b.x + "px";
+    el.style.top = b.y + "px";
+    el.style.width = b.w + "px";
+    el.style.height = b.h + "px";
+    el.innerHTML = `<div class="roof"></div><div class="bname">${b.name}</div><div class="bsub">${b.sub}</div>`;
+    el.addEventListener("click", () => openPanel(b));
+    mapEl.appendChild(el);
+
+    const prompt = document.createElement("div");
+    prompt.className = "prompt";
+    prompt.id = "prompt-" + b.key;
+    prompt.textContent = "PRESS E — " + b.name;
+    prompt.style.left = (b.x + b.w / 2) + "px";
+    prompt.style.top = (b.y - 10) + "px";
+    prompt.addEventListener("click", () => openPanel(b));
+    mapEl.appendChild(prompt);
+  });
+
+  trees.forEach(t => {
+    const el = document.createElement("div");
+    el.className = "tree";
+    el.style.left = t.x + "px";
+    el.style.top = t.y + "px";
+    el.innerHTML = `<div class="leaves"></div><div class="trunk"></div>`;
+    mapEl.appendChild(el);
+  });
+
+  const path1 = document.createElement("div");
+  path1.className = "path";
+  path1.style.left = "215px"; path1.style.top = "230px"; path1.style.width = "450px"; path1.style.height = "60px";
+  mapEl.appendChild(path1);
+  const path2 = document.createElement("div");
+  path2.className = "path";
+  path2.style.left = "410px"; path2.style.top = "40px"; path2.style.width = "60px"; path2.style.height = "440px";
+  mapEl.appendChild(path2);
+
+  const playerEl = document.createElement("div");
+  playerEl.className = "player";
+  playerEl.innerHTML = `<div class="shadow"></div><div class="sprite"><span></span></div>`;
+  mapEl.appendChild(playerEl);
+
+  let player = { x: 420, y: 440 };
+  let facing = "right";
+  const keys = {};
+  let paused = true;
+  let nearBuilding = null;
+  const visited = new Set();
+
+  function rectsOverlap(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  function tryMove(dx, dy) {
+    const next = { x: player.x + dx, y: player.y + dy, w: PLAYER_W, h: PLAYER_H };
+    next.x = Math.max(0, Math.min(MAP_W - PLAYER_W, next.x));
+    next.y = Math.max(0, Math.min(MAP_H - PLAYER_H, next.y));
+    for (const b of buildings) {
+      if (rectsOverlap({ x: next.x, y: player.y, w: PLAYER_W, h: PLAYER_H }, b)) next.x = player.x;
+      if (rectsOverlap({ x: next.x, y: next.y, w: PLAYER_W, h: PLAYER_H }, b)) next.y = player.y;
+    }
+    player.x = next.x;
+    player.y = next.y;
+  }
+
+  function updateNearBuilding() {
+    let closest = null, closestDist = Infinity;
+    const px = player.x + PLAYER_W / 2, py = player.y + PLAYER_H / 2;
+    for (const b of buildings) {
+      const bx = b.x + b.w / 2, by = b.y + b.h / 2;
+      const expanded = { x: b.x - 28, y: b.y - 28, w: b.w + 56, h: b.h + 56 };
+      if (rectsOverlap({ x: player.x, y: player.y, w: PLAYER_W, h: PLAYER_H }, expanded)) {
+        const d = Math.hypot(px - bx, py - by);
+        if (d < closestDist) { closestDist = d; closest = b; }
+      }
+    }
+    if (closest !== nearBuilding) {
+      document.querySelectorAll(".prompt").forEach(p => p.style.display = "none");
+      if (closest) document.getElementById("prompt-" + closest.key).style.display = "block";
+      nearBuilding = closest;
+    }
+  }
+
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(40, now - last);
+    last = now;
+    if (!paused) {
+      const speed = 0.24 * dt;
+      let dx = 0, dy = 0;
+      if (keys["arrowleft"] || keys["a"]) { dx -= speed; facing = "left"; }
+      if (keys["arrowright"] || keys["d"]) { dx += speed; facing = "right"; }
+      if (keys["arrowup"] || keys["w"]) dy -= speed;
+      if (keys["arrowdown"] || keys["s"]) dy += speed;
+      const moving = dx !== 0 || dy !== 0;
+      if (dx !== 0) tryMove(dx, 0);
+      if (dy !== 0) tryMove(0, dy);
+      playerEl.classList.toggle("walking", moving);
+      playerEl.classList.toggle("face-left", facing === "left");
+      updateNearBuilding();
+    }
+    playerEl.style.left = player.x + "px";
+    playerEl.style.top = player.y + "px";
+    requestAnimationFrame(loop);
+  }
+
+  function showToast(text) {
+    const t = document.getElementById("toast");
+    t.textContent = text;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 2200);
+  }
+
+  function openPanel(b) {
+    paused = true;
+    document.getElementById("panelContent").innerHTML = b.render();
+    document.getElementById("modalBackdrop").style.display = "flex";
+    if (!visited.has(b.key)) {
+      visited.add(b.key);
+      foundCountEl.textContent = visited.size;
+      showToast("✦ NEW AREA FOUND: " + b.name);
+    }
+  }
+  function closePanel() {
+    document.getElementById("modalBackdrop").style.display = "none";
+    paused = false;
+  }
+  document.getElementById("panelClose").addEventListener("click", closePanel);
+  document.getElementById("modalBackdrop").addEventListener("click", (e) => {
+    if (e.target.id === "modalBackdrop") closePanel();
+  });
+
+  window.addEventListener("keydown", (e) => {
+    keys[e.key.toLowerCase()] = true;
+    if (e.key.toLowerCase() === "e" && !paused && nearBuilding) openPanel(nearBuilding);
+    if (e.key === "Escape") closePanel();
+  });
+  window.addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
+
+  function startGame() {
+    titleEl.style.display = "none";
+    mapEl.style.display = "block";
+    hudEl.style.display = "block";
+    controlsEl.style.display = "block";
+    paused = false;
+  }
+  titleEl.addEventListener("click", startGame);
+  window.addEventListener("keydown", function startOnce(e) {
+    if (titleEl.style.display !== "none") { startGame(); window.removeEventListener("keydown", startOnce); }
+  });
+
+  requestAnimationFrame(loop);
+</script>
 
 </body>
 </html>
