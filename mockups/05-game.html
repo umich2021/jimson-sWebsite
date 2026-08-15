@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 <title>Jimson Yang — Game mockup</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -17,19 +17,24 @@
     --magenta: #ff3cac;
     --gold: #ffcc4d;
     --green: #4dff88;
+    --purple: #c792ea;
     --ink: #d9f4ff;
     --ink-soft: #8fae9c;
   }
-  * { box-sizing: border-box; user-select: none; }
-  html, body { height: 100%; margin: 0; }
+  * { box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
   body {
     background: #05100a;
     color: var(--ink);
     font-family: "VT323", monospace;
     font-size: 20px;
     display: flex; align-items: center; justify-content: center;
-    min-height: 100vh; overflow: hidden;
+    min-height: 100vh; min-height: 100dvh;
+    overflow: hidden;
+    touch-action: none;
+    padding: 96px 12px 72px;
   }
+  body.touch-ui { padding: 96px 12px 168px; }
   .pixel { font-family: "Press Start 2P", monospace; }
   .scanlines {
     position: fixed; inset: 0; pointer-events: none; z-index: 90;
@@ -41,7 +46,7 @@
   #title {
     position: fixed; inset: 0; z-index: 200; background: #05100a;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
-    text-align: center; cursor: pointer;
+    text-align: center; cursor: pointer; padding: 24px;
   }
   #title .pixel.big { font-size: 30px; color: var(--green); text-shadow: 0 0 16px rgba(77,255,136,0.6); letter-spacing: 0.03em; }
   #title .sub { color: var(--ink-soft); font-size: 20px; letter-spacing: 0.05em; }
@@ -50,12 +55,16 @@
     animation: blink 1s steps(1) infinite;
   }
   @keyframes blink { 50% { opacity: 0; } }
+  @media (max-width: 480px) {
+    #title .pixel.big { font-size: 20px; }
+    #title .sub { font-size: 16px; }
+  }
 
   /* ---------- HUD ---------- */
   #hud {
     position: fixed; top: 16px; left: 16px; z-index: 60; display: none;
     background: rgba(6,16,10,0.85); border: 1px solid var(--line); padding: 12px 16px;
-    min-width: 230px; backdrop-filter: blur(4px);
+    min-width: 210px; backdrop-filter: blur(4px);
   }
   #hud .row { display: flex; align-items: center; gap: 10px; }
   #hud .name { font-family: "Press Start 2P"; font-size: 11px; color: white; }
@@ -63,20 +72,55 @@
   #hud .xp-bar { margin-top: 8px; height: 10px; background: #0a0e14; border: 1px solid var(--line); overflow: hidden; }
   #hud .xp-fill { height: 100%; width: 78%; background: linear-gradient(90deg, var(--cyan), var(--green)); box-shadow: 0 0 8px var(--cyan); }
   #hud .found { font-size: 15px; color: var(--ink-soft); margin-top: 8px; }
+  @media (max-width: 480px) {
+    #hud { top: 8px; left: 8px; padding: 8px 12px; min-width: 160px; }
+    #hud .name { font-size: 9px; }
+    #hud .lvl { font-size: 7px; }
+    #hud .found { font-size: 12px; }
+  }
 
   #controls {
     position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 60; display: none;
     font-family: "Press Start 2P"; font-size: 9px; color: var(--ink-soft);
     background: rgba(6,16,10,0.85); border: 1px solid var(--line); padding: 10px 18px; letter-spacing: 0.03em;
+    white-space: nowrap;
   }
   #controls b { color: var(--cyan); }
+  body.touch-ui #controls { display: none !important; }
+
+  /* ---------- touch controls ---------- */
+  .touch-controls {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 70; display: none;
+    align-items: flex-end; justify-content: space-between; padding: 0 18px 18px; pointer-events: none;
+  }
+  body.touch-ui .touch-controls { display: flex; }
+  .dpad {
+    display: grid; grid-template-columns: 52px 52px 52px; grid-template-rows: 52px 52px 52px; gap: 4px;
+    pointer-events: auto;
+  }
+  .dbtn {
+    background: rgba(6,16,10,0.8); border: 2px solid var(--line); color: var(--cyan);
+    font-family: "Press Start 2P"; font-size: 14px; display: flex; align-items: center; justify-content: center;
+    touch-action: none; padding: 0;
+  }
+  .dbtn:active { background: rgba(76,243,255,0.25); }
+  .dbtn-up { grid-column: 2; grid-row: 1; }
+  .dbtn-left { grid-column: 1; grid-row: 2; }
+  .dbtn-right { grid-column: 3; grid-row: 2; }
+  .dbtn-down { grid-column: 2; grid-row: 3; }
+  .interact-btn {
+    pointer-events: auto; width: 74px; height: 74px; border-radius: 50%; background: var(--gold); color: #05100a;
+    font-family: "Press Start 2P"; font-size: 11px; border: 3px solid #05100a; box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+    touch-action: none; margin-bottom: 4px;
+  }
+  .interact-btn:active { transform: scale(.94); }
 
   /* ---------- map ---------- */
   #stage { position: relative; }
   #map {
-    position: relative; width: 880px; height: 520px; overflow: hidden;
-    background-image:
-      repeating-conic-gradient(var(--grass1) 0% 25%, var(--grass2) 0% 50%);
+    position: absolute; top: 0; left: 0; width: 880px; height: 520px; overflow: hidden;
+    transform-origin: top left;
+    background-image: repeating-conic-gradient(var(--grass1) 0% 25%, var(--grass2) 0% 50%);
     background-size: 40px 40px;
     border: 2px solid var(--line);
     box-shadow: 0 0 60px rgba(0,0,0,0.6), 0 0 0 4px #05100a;
@@ -98,8 +142,8 @@
   .b-quest .roof { background: var(--green); }
   .b-shop { background: rgba(255,204,77,0.10); border-color: var(--gold); }
   .b-shop .roof { background: var(--gold); }
-  .b-academy { background: rgba(199,146,234,0.12); border-color: #c792ea; }
-  .b-academy .roof { background: #c792ea; }
+  .b-academy { background: rgba(199,146,234,0.12); border-color: var(--purple); }
+  .b-academy .roof { background: var(--purple); }
   .b-tavern { background: rgba(76,243,255,0.10); border-color: var(--cyan); }
   .b-tavern .roof { background: var(--cyan); }
 
@@ -149,6 +193,7 @@
   .panel {
     position: relative; width: 100%; max-width: 560px; max-height: 82vh; overflow-y: auto;
     background: linear-gradient(180deg, rgba(76,243,255,0.06), #0c1018 40%); border: 1px solid var(--line); padding: 28px;
+    -webkit-overflow-scrolling: touch;
   }
   .corner { position: absolute; width: 16px; height: 16px; border: 2px solid var(--cyan); }
   .corner.tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
@@ -157,10 +202,15 @@
   .corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
   .panel-close {
     position: absolute; top: 14px; right: 14px; background: none; border: 1px solid var(--line); color: var(--ink-soft);
-    font-family: "Press Start 2P"; font-size: 10px; padding: 6px 10px; cursor: pointer;
+    font-family: "Press Start 2P"; font-size: 10px; padding: 8px 12px; cursor: pointer; touch-action: manipulation;
   }
   .panel-close:hover { color: var(--gold); border-color: var(--gold); }
   .panel-title { font-family: "Press Start 2P"; font-size: 12px; color: var(--cyan); margin: 0 0 20px; letter-spacing: 0.04em; }
+
+  @media (max-width: 480px) {
+    .panel { padding: 20px; max-height: 78vh; }
+    .panel-title { font-size: 10px; }
+  }
 
   .mission-title { font-size: 26px; color: white; margin: 0 0 10px; }
   .mission-desc { color: var(--ink-soft); font-size: 18px; margin: 0 0 20px; }
@@ -182,6 +232,7 @@
   .inv-group-label { font-family: "Press Start 2P"; font-size: 8px; color: var(--ink-soft); margin: 18px 0 10px; }
   .inv-group-label:first-child { margin-top: 0; }
   .inv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (max-width: 480px) { .inv-grid { grid-template-columns: 1fr; } }
   .item { border: 1px solid var(--gold); background: linear-gradient(180deg, rgba(255,204,77,0.06), transparent); padding: 13px; }
   .item.common { border-color: var(--ink-soft); background: linear-gradient(180deg, rgba(143,174,156,0.06), transparent); }
   .item-rarity { font-family: "Press Start 2P"; font-size: 7px; color: var(--gold); margin-bottom: 6px; }
@@ -190,16 +241,43 @@
   .item-desc { color: var(--ink-soft); font-size: 14px; }
 
   .achievement { display: flex; gap: 18px; align-items: center; }
-  .ach-badge { width: 58px; height: 58px; flex: none; border: 2px solid #c792ea; transform: rotate(45deg); display: flex; align-items: center; justify-content: center; }
-  .ach-badge span { transform: rotate(-45deg); font-family: "Press Start 2P"; font-size: 14px; color: #c792ea; }
+  .ach-badge { width: 58px; height: 58px; flex: none; border: 2px solid var(--purple); transform: rotate(45deg); display: flex; align-items: center; justify-content: center; }
+  .ach-badge span { transform: rotate(-45deg); font-family: "Press Start 2P"; font-size: 14px; color: var(--purple); }
   .ach-title { color: white; font-size: 19px; margin-bottom: 4px; }
   .ach-desc { color: var(--ink-soft); font-size: 16px; }
 
   .dialogue-npc { font-family: "Press Start 2P"; font-size: 9px; color: var(--cyan); margin-bottom: 12px; }
   .dialogue-line { color: var(--ink); font-size: 19px; margin-bottom: 16px; }
-  .choice { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--ink); font-family: "VT323"; font-size: 19px; padding: 8px 0; cursor: pointer; text-decoration: none; }
+  .choice { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--ink); font-family: "VT323"; font-size: 19px; padding: 10px 0; cursor: pointer; text-decoration: none; touch-action: manipulation; }
   .choice:hover { color: var(--gold); }
   .choice::before { content: "▸ "; color: var(--magenta); }
+
+  /* ---------- loot chest ---------- */
+  .chest-stage { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px 0 30px; min-height: 220px; }
+  .chest-glow {
+    position: absolute; width: 240px; height: 240px; border-radius: 50%;
+    background: radial-gradient(circle, var(--glow) 0%, transparent 70%); opacity: 0; filter: blur(4px); pointer-events: none;
+  }
+  .chest-glow.burst { animation: glowBurst .7s ease-out forwards; }
+  @keyframes glowBurst { 0% { opacity: 0; transform: scale(.3); } 45% { opacity: .9; transform: scale(1.2); } 100% { opacity: 0; transform: scale(1.5); } }
+  .chest { position: relative; width: 120px; height: 92px; margin-top: 20px; perspective: 240px; }
+  .chest-body { position: absolute; bottom: 0; left: 0; width: 120px; height: 56px; background: #5a3a22; border: 3px solid #2b1c12; border-radius: 0 0 10px 10px; }
+  .chest-lid {
+    position: absolute; top: 0; left: 0; width: 120px; height: 46px; background: #7a4f2c; border: 3px solid #2b1c12;
+    border-radius: 10px 10px 0 0; transform-origin: bottom center; transform: rotateX(0deg);
+    transition: transform .55s cubic-bezier(.25,1.1,.4,1.3); transform-style: preserve-3d;
+  }
+  .chest.opened .chest-lid { transform: rotateX(-120deg) translateY(-4px); }
+  .chest-lock { position: absolute; top: 38px; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; border: 2px solid #2b1c12; border-radius: 5px; z-index: 2; }
+  @keyframes chestShake {
+    0%, 100% { transform: rotate(0deg) translateX(0); }
+    20% { transform: rotate(-6deg) translateX(-3px); }
+    40% { transform: rotate(5deg) translateX(3px); }
+    60% { transform: rotate(-4deg) translateX(-2px); }
+    80% { transform: rotate(3deg) translateX(2px); }
+  }
+  .chest.shake { animation: chestShake .12s linear infinite; }
+  .chest-hint { margin-top: 26px; font-size: 11px; color: var(--gold); letter-spacing: 0.04em; }
 
   #toast {
     position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-140%); z-index: 250;
@@ -207,6 +285,9 @@
     padding: 12px 18px; box-shadow: 0 6px 18px rgba(0,0,0,0.4); transition: transform .35s ease; white-space: nowrap;
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
+  @media (max-width: 480px) {
+    #toast { font-size: 8px; padding: 10px 14px; max-width: 90vw; white-space: normal; text-align: center; }
+  }
 </style>
 </head>
 <body>
@@ -215,7 +296,7 @@
 <div id="title">
   <p class="pixel big">◆ JIMSON RPG ◆</p>
   <p class="sub">AI ANIME STUDIO FOUNDER EDITION</p>
-  <p class="press">PRESS ANY KEY / CLICK TO START</p>
+  <p class="press">PRESS ANY KEY / TAP TO START</p>
 </div>
 
 <div id="hud">
@@ -235,6 +316,16 @@
   </div>
 </div>
 
+<div class="touch-controls">
+  <div class="dpad">
+    <button class="dbtn dbtn-up" data-key="w">▲</button>
+    <button class="dbtn dbtn-left" data-key="a">◀</button>
+    <button class="dbtn dbtn-right" data-key="d">▶</button>
+    <button class="dbtn dbtn-down" data-key="s">▼</button>
+  </div>
+  <button class="interact-btn" id="interactBtn">E</button>
+</div>
+
 <div id="modalBackdrop">
   <div class="panel" id="panelBody">
     <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
@@ -249,9 +340,12 @@
   const MAP_W = 880, MAP_H = 520;
   const PLAYER_W = 32, PLAYER_H = 44;
 
+  const isTouchUI = ("ontouchstart" in window) || navigator.maxTouchPoints > 0 || window.innerWidth < 820;
+  if (isTouchUI) document.body.classList.add("touch-ui");
+
   const buildings = [
     {
-      key: "aventos", cls: "b-mission", x: 40, y: 40, w: 170, h: 120,
+      key: "aventos", cls: "b-mission", x: 40, y: 40, w: 170, h: 120, color: "#ff3cac",
       name: "MISSION HALL", sub: "Aventos",
       render: () => `
         <p class="panel-title">◆ CURRENT MISSION — AVENTOS</p>
@@ -263,7 +357,7 @@
         </div>`
     },
     {
-      key: "experience", cls: "b-quest", x: 670, y: 40, w: 170, h: 120,
+      key: "experience", cls: "b-quest", x: 670, y: 40, w: 170, h: 120, color: "#4dff88",
       name: "QUEST BOARD", sub: "Experience",
       render: () => `
         <p class="panel-title">◆ QUEST LOG — EXPERIENCE</p>
@@ -284,7 +378,7 @@
         </div>`
     },
     {
-      key: "projects", cls: "b-shop", x: 40, y: 350, w: 170, h: 120,
+      key: "projects", cls: "b-shop", x: 40, y: 350, w: 170, h: 120, color: "#ffcc4d",
       name: "ITEM SHOP", sub: "Projects",
       render: () => `
         <p class="panel-title">◆ INVENTORY — PROJECTS</p>
@@ -301,7 +395,7 @@
         </div>`
     },
     {
-      key: "education", cls: "b-academy", x: 670, y: 350, w: 170, h: 120,
+      key: "education", cls: "b-academy", x: 670, y: 350, w: 170, h: 120, color: "#c792ea",
       name: "ACADEMY", sub: "Education",
       render: () => `
         <p class="panel-title">◆ ACHIEVEMENT UNLOCKED — EDUCATION</p>
@@ -314,7 +408,7 @@
         </div>`
     },
     {
-      key: "contact", cls: "b-tavern", x: 355, y: 195, w: 170, h: 120,
+      key: "contact", cls: "b-tavern", x: 355, y: 195, w: 170, h: 120, color: "#4cf3ff",
       name: "TAVERN", sub: "Contact",
       render: () => `
         <p class="dialogue-npc">JIMSON YANG</p>
@@ -330,6 +424,7 @@
     { x: 440, y: 470 }
   ];
 
+  const stageEl = document.getElementById("stage");
   const mapEl = document.getElementById("map");
   const titleEl = document.getElementById("title");
   const hudEl = document.getElementById("hud");
@@ -344,16 +439,16 @@
     el.style.width = b.w + "px";
     el.style.height = b.h + "px";
     el.innerHTML = `<div class="roof"></div><div class="bname">${b.name}</div><div class="bsub">${b.sub}</div>`;
-    el.addEventListener("click", () => openPanel(b));
+    el.addEventListener("click", () => openChest(b));
     mapEl.appendChild(el);
 
     const prompt = document.createElement("div");
     prompt.className = "prompt";
     prompt.id = "prompt-" + b.key;
-    prompt.textContent = "PRESS E — " + b.name;
+    prompt.textContent = (isTouchUI ? "TAP — " : "PRESS E — ") + b.name;
     prompt.style.left = (b.x + b.w / 2) + "px";
     prompt.style.top = (b.y - 10) + "px";
-    prompt.addEventListener("click", () => openPanel(b));
+    prompt.addEventListener("click", () => openChest(b));
     mapEl.appendChild(prompt);
   });
 
@@ -451,16 +546,40 @@
     setTimeout(() => t.classList.remove("show"), 2200);
   }
 
-  function openPanel(b) {
+  function openChest(b) {
+    if (document.getElementById("modalBackdrop").style.display === "flex") return;
     paused = true;
-    document.getElementById("panelContent").innerHTML = b.render();
+    document.getElementById("panelClose").style.visibility = "hidden";
+    document.getElementById("panelContent").innerHTML = `
+      <div class="chest-stage">
+        <div class="chest-glow" id="chestGlow" style="--glow:${b.color}"></div>
+        <div class="chest" id="chestEl">
+          <div class="chest-lid" id="chestLid"></div>
+          <div class="chest-body"></div>
+          <div class="chest-lock" style="background:${b.color}"></div>
+        </div>
+        <p class="chest-hint pixel" id="chestHint">A CHEST APPEARS…</p>
+      </div>`;
     document.getElementById("modalBackdrop").style.display = "flex";
-    if (!visited.has(b.key)) {
-      visited.add(b.key);
-      foundCountEl.textContent = visited.size;
-      showToast("✦ NEW AREA FOUND: " + b.name);
-    }
+    const chestEl = document.getElementById("chestEl");
+    requestAnimationFrame(() => chestEl.classList.add("shake"));
+    setTimeout(() => {
+      chestEl.classList.remove("shake");
+      chestEl.classList.add("opened");
+      document.getElementById("chestGlow").classList.add("burst");
+      document.getElementById("chestHint").textContent = "LOOT FOUND!";
+    }, 600);
+    setTimeout(() => {
+      document.getElementById("panelContent").innerHTML = b.render();
+      document.getElementById("panelClose").style.visibility = "visible";
+      if (!visited.has(b.key)) {
+        visited.add(b.key);
+        foundCountEl.textContent = visited.size;
+        showToast("✦ NEW AREA FOUND: " + b.name);
+      }
+    }, 1450);
   }
+
   function closePanel() {
     document.getElementById("modalBackdrop").style.display = "none";
     paused = false;
@@ -470,12 +589,42 @@
     if (e.target.id === "modalBackdrop") closePanel();
   });
 
+  function doInteract() {
+    if (!paused && nearBuilding) openChest(nearBuilding);
+  }
+
   window.addEventListener("keydown", (e) => {
     keys[e.key.toLowerCase()] = true;
-    if (e.key.toLowerCase() === "e" && !paused && nearBuilding) openPanel(nearBuilding);
+    if (e.key.toLowerCase() === "e") doInteract();
     if (e.key === "Escape") closePanel();
   });
   window.addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
+
+  document.querySelectorAll(".dbtn").forEach(btn => {
+    const k = btn.dataset.key;
+    const press = (e) => { keys[k] = true; e.preventDefault(); };
+    const release = (e) => { keys[k] = false; if (e) e.preventDefault(); };
+    btn.addEventListener("pointerdown", press);
+    btn.addEventListener("pointerup", release);
+    btn.addEventListener("pointerleave", release);
+    btn.addEventListener("pointercancel", release);
+  });
+  document.getElementById("interactBtn").addEventListener("pointerdown", (e) => { doInteract(); e.preventDefault(); });
+
+  function fitStage() {
+    const cs = getComputedStyle(document.body);
+    const padTop = parseFloat(cs.paddingTop) || 0;
+    const padBottom = parseFloat(cs.paddingBottom) || 0;
+    const padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    const availW = window.innerWidth - padX;
+    const availH = window.innerHeight - padTop - padBottom;
+    const scale = Math.min(1, availW / MAP_W, availH / MAP_H);
+    mapEl.style.transform = "scale(" + scale + ")";
+    stageEl.style.width = (MAP_W * scale) + "px";
+    stageEl.style.height = (MAP_H * scale) + "px";
+  }
+  window.addEventListener("resize", fitStage);
+  window.addEventListener("orientationchange", fitStage);
 
   function startGame() {
     titleEl.style.display = "none";
@@ -483,12 +632,14 @@
     hudEl.style.display = "block";
     controlsEl.style.display = "block";
     paused = false;
+    fitStage();
   }
   titleEl.addEventListener("click", startGame);
   window.addEventListener("keydown", function startOnce(e) {
     if (titleEl.style.display !== "none") { startGame(); window.removeEventListener("keydown", startOnce); }
   });
 
+  fitStage();
   requestAnimationFrame(loop);
 </script>
 

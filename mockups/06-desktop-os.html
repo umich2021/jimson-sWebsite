@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 <title>Jimson Yang — Desktop OS mockup</title>
 <style>
   :root {
@@ -15,8 +15,8 @@
     --ink-soft: #6b6b70;
     --accent: #4c8bf5;
   }
-  * { box-sizing: border-box; user-select: none; }
-  html, body { height: 100%; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -26,8 +26,12 @@
       linear-gradient(160deg, #2b2350 0%, #1a1330 45%, #0d0a1a 100%);
     overflow: hidden;
     height: 100vh;
+    height: 100dvh;
     position: relative;
     color: var(--ink);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
   }
   a { color: inherit; }
 
@@ -38,24 +42,24 @@
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 14px; font-size: 13px; color: #fff;
   }
-  .menubar-left { display: flex; align-items: center; gap: 18px; }
-  .menubar-logo { font-weight: 700; }
-  .menubar-item { opacity: 0.85; }
-  .menubar-right { display: flex; align-items: center; gap: 14px; opacity: 0.9; font-variant-numeric: tabular-nums; }
+  .menubar-left { display: flex; align-items: center; gap: 18px; overflow: hidden; }
+  .menubar-logo { font-weight: 700; white-space: nowrap; }
+  .menubar-item { opacity: 0.85; white-space: nowrap; }
+  .menubar-right { display: flex; align-items: center; gap: 14px; opacity: 0.9; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
   /* desktop icons */
   .desktop-icons {
-    position: fixed; top: 44px; right: 24px; z-index: 5;
-    display: flex; flex-direction: column; gap: 22px; align-items: center;
+    position: fixed; top: 44px; right: 12px; z-index: 5;
+    display: flex; flex-direction: column; gap: 18px; align-items: center;
   }
   .icon {
     width: 84px; display: flex; flex-direction: column; align-items: center; gap: 6px;
-    cursor: pointer; padding: 6px; border-radius: 8px;
+    cursor: pointer; padding: 6px; border-radius: 8px; touch-action: manipulation;
   }
   .icon:hover, .icon.selected { background: rgba(255,255,255,0.12); }
   .icon-glyph {
     width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 13px; color: white; box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    font-weight: 700; font-size: 13px; color: white; box-shadow: 0 6px 16px rgba(0,0,0,0.35); flex: none;
   }
   .icon-label { font-size: 12px; color: white; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
 
@@ -68,40 +72,40 @@
 
   /* windows */
   .window {
-    position: absolute; width: 460px; background: var(--win-bg); border-radius: 10px;
+    position: absolute; width: 460px; max-width: 92vw; background: var(--win-bg); border-radius: 10px;
     box-shadow: 0 30px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,0,0,0.08);
-    display: none; overflow: hidden;
+    display: none; overflow: hidden; touch-action: none;
   }
   .window.open { display: block; }
   .win-header {
-    height: 38px; background: var(--win-header); display: flex; align-items: center; gap: 8px; padding: 0 12px;
-    cursor: grab; border-bottom: 1px solid var(--line);
+    height: 40px; background: var(--win-header); display: flex; align-items: center; gap: 8px; padding: 0 12px;
+    cursor: grab; border-bottom: 1px solid var(--line); touch-action: none;
   }
   .win-header:active { cursor: grabbing; }
-  .traffic { width: 12px; height: 12px; border-radius: 50%; }
+  .traffic { width: 13px; height: 13px; border-radius: 50%; flex: none; }
   .t-red { background: #ff5f57; }
   .t-yellow { background: #febc2e; }
   .t-green { background: #28c840; }
   .win-title {
-    flex: 1; text-align: center; font-size: 13px; font-weight: 600; color: var(--ink-soft);
-    margin-right: 54px;
+    flex: 1; min-width: 0; text-align: center; font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    margin-right: 55px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
-  .win-body { padding: 20px; font-size: 14px; line-height: 1.6; max-height: 60vh; overflow-y: auto; }
+  .win-body {
+    padding: 20px; font-size: 14px; line-height: 1.6; max-height: min(60vh, 60dvh); overflow-y: auto;
+    touch-action: pan-y; -webkit-overflow-scrolling: touch;
+  }
   .win-body h2 { font-size: 17px; margin: 0 0 10px; }
   .win-body p { color: #3a3a3c; margin: 0 0 12px; }
   .win-body .soft { color: var(--ink-soft); font-size: 12.5px; }
 
-  /* about window: text-editor style */
   #win-about .win-body { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: white; }
 
-  /* aventos window: media player style */
   #win-aventos .win-body { background: #17171b; color: #eee; }
   #win-aventos .win-body p { color: #b8b8bc; }
   .video-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
   .video-thumb { aspect-ratio: 16/9; background: #0d0d10; border: 1px solid #2b2b30; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ff6b9d; font-size: 12px; }
 
-  /* projects window: finder list */
-  .file-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .file-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); touch-action: pan-y; }
   .file-row:last-child { border-bottom: none; }
   .file-icon { width: 34px; height: 34px; border-radius: 7px; background: linear-gradient(135deg, #ffd166, #f77f00); flex: none; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:700; }
   .file-icon.fun { background: linear-gradient(135deg, #7ee787, #1f9d55); }
@@ -110,7 +114,6 @@
   .group-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); margin: 14px 0 4px; }
   .group-label:first-child { margin-top: 0; }
 
-  /* experience window: pdf-preview style */
   #win-experience .win-body { background: #3a3a3c; padding: 24px; }
   .pdf-page { background: white; padding: 22px; border-radius: 2px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
   .pdf-page:last-child { margin-bottom: 0; }
@@ -118,11 +121,10 @@
   .pdf-meta { color: var(--ink-soft); font-size: 11.5px; margin: 2px 0 8px; }
   .pdf-summary { font-size: 12.5px; color: #3a3a3c; }
 
-  /* contact window: mail compose style */
   .mail-field { display: flex; border-bottom: 1px solid var(--line); padding: 8px 0; font-size: 13px; }
-  .mail-field .label { width: 60px; color: var(--ink-soft); }
+  .mail-field .label { width: 60px; color: var(--ink-soft); flex: none; }
   .mail-send {
-    margin-top: 16px; background: var(--accent); color: white; border: none; padding: 9px 18px; border-radius: 6px;
+    margin-top: 16px; background: var(--accent); color: white; border: none; padding: 11px 18px; border-radius: 6px;
     font-size: 13px; font-weight: 600; cursor: pointer; display: inline-block; text-decoration: none;
   }
 
@@ -131,10 +133,12 @@
     position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 100;
     display: flex; gap: 10px; padding: 8px 12px; border-radius: 18px;
     background: var(--dock-bg); backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    max-width: 94vw;
   }
   .dock-item {
     width: 46px; height: 46px; border-radius: 11px; display: flex; align-items: center; justify-content: center;
     color: white; font-size: 11px; font-weight: 700; cursor: pointer; transition: transform .12s; position: relative;
+    flex: none; touch-action: manipulation;
   }
   .dock-item:hover { transform: translateY(-6px) scale(1.06); }
   .dock-item.running::after {
@@ -142,7 +146,21 @@
   }
 
   .welcome-hint {
-    position: fixed; left: 24px; bottom: 90px; z-index: 4; color: rgba(255,255,255,0.75); font-size: 13px; max-width: 240px;
+    position: fixed; left: 16px; bottom: 90px; z-index: 4; color: rgba(255,255,255,0.75); font-size: 13px; max-width: 240px;
+  }
+
+  @media (max-width: 700px) {
+    .menubar-item { display: none; }
+    .desktop-icons { top: 34px; right: 6px; gap: 12px; }
+    .icon { width: 62px; padding: 4px; }
+    .icon-glyph { width: 42px; height: 42px; font-size: 10px; border-radius: 10px; }
+    .icon-label { font-size: 9.5px; }
+    .window { width: 92vw !important; }
+    .win-header { height: 44px; }
+    .win-body { padding: 16px; font-size: 13.5px; }
+    .dock { gap: 6px; padding: 6px 8px; bottom: 8px; }
+    .dock-item { width: 40px; height: 40px; font-size: 9.5px; border-radius: 9px; }
+    .welcome-hint { display: none; }
   }
 </style>
 </head>
@@ -194,7 +212,7 @@
 
 <!-- WINDOWS -->
 <div class="window" id="win-about" style="top:80px; left:120px; z-index:10;">
-  <div class="win-header" onmousedown="startDrag(event,'win-about')">
+  <div class="win-header" data-target="win-about">
     <span class="traffic t-red" onclick="closeWindow('win-about')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">About_Me.txt</span>
   </div>
@@ -205,7 +223,7 @@
 </div>
 
 <div class="window" id="win-aventos" style="top:120px; left:400px; z-index:9;">
-  <div class="win-header" onmousedown="startDrag(event,'win-aventos')">
+  <div class="win-header" data-target="win-aventos">
     <span class="traffic t-red" onclick="closeWindow('win-aventos')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">Aventos.app</span>
   </div>
@@ -220,7 +238,7 @@
 </div>
 
 <div class="window" id="win-projects" style="top:160px; left:200px; z-index:8; width:500px;">
-  <div class="win-header" onmousedown="startDrag(event,'win-projects')">
+  <div class="win-header" data-target="win-projects">
     <span class="traffic t-red" onclick="closeWindow('win-projects')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">Projects</span>
   </div>
@@ -251,7 +269,7 @@
 </div>
 
 <div class="window" id="win-experience" style="top:100px; left:520px; z-index:7;">
-  <div class="win-header" onmousedown="startDrag(event,'win-experience')">
+  <div class="win-header" data-target="win-experience">
     <span class="traffic t-red" onclick="closeWindow('win-experience')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">Experience.pdf</span>
   </div>
@@ -275,7 +293,7 @@
 </div>
 
 <div class="window" id="win-education" style="top:220px; left:340px; z-index:6; width:380px;">
-  <div class="win-header" onmousedown="startDrag(event,'win-education')">
+  <div class="win-header" data-target="win-education">
     <span class="traffic t-red" onclick="closeWindow('win-education')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">Education.txt</span>
   </div>
@@ -287,7 +305,7 @@
 </div>
 
 <div class="window" id="win-contact" style="top:150px; left:260px; z-index:5; width:420px;">
-  <div class="win-header" onmousedown="startDrag(event,'win-contact')">
+  <div class="win-header" data-target="win-contact">
     <span class="traffic t-red" onclick="closeWindow('win-contact')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">New Message</span>
   </div>
@@ -311,14 +329,27 @@
 <script>
   let zTop = 20;
 
+  function clampWindow(win) {
+    const rect = win.getBoundingClientRect();
+    const maxLeft = Math.max(4, window.innerWidth - rect.width - 4);
+    const maxTop = Math.max(32, window.innerHeight - 60);
+    let left = parseFloat(win.style.left) || 0;
+    let top = parseFloat(win.style.top) || 32;
+    left = Math.min(Math.max(4, left), maxLeft);
+    top = Math.min(Math.max(28, top), maxTop);
+    win.style.left = left + 'px';
+    win.style.top = top + 'px';
+  }
+
   function openWindow(name) {
     const win = document.getElementById('win-' + name);
     win.classList.add('open');
     focusWindow(win);
+    clampWindow(win);
   }
   function closeWindow(id) {
     document.getElementById(id).classList.remove('open');
-    event.stopPropagation();
+    if (window.event) window.event.stopPropagation();
   }
   function focusWindow(win) {
     zTop += 1;
@@ -326,27 +357,59 @@
   }
   document.querySelectorAll('.window').forEach(win => {
     win.addEventListener('mousedown', () => focusWindow(win));
+    win.addEventListener('touchstart', () => focusWindow(win), { passive: true });
   });
+
+  window.addEventListener('resize', () => {
+    document.querySelectorAll('.window.open').forEach(clampWindow);
+  });
+
+  function getPoint(e) {
+    if (e.touches && e.touches.length) return e.touches[0];
+    if (e.changedTouches && e.changedTouches.length) return e.changedTouches[0];
+    return e;
+  }
 
   let dragState = null;
   function startDrag(e, id) {
     const win = document.getElementById(id);
     focusWindow(win);
     const rect = win.getBoundingClientRect();
-    dragState = { win, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top };
+    const p = getPoint(e);
+    dragState = { win, offsetX: p.clientX - rect.left, offsetY: p.clientY - rect.top };
     document.addEventListener('mousemove', onDrag);
     document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchmove', onDrag, { passive: false });
+    document.addEventListener('touchend', stopDrag);
+    document.addEventListener('touchcancel', stopDrag);
+    e.preventDefault();
   }
   function onDrag(e) {
     if (!dragState) return;
-    dragState.win.style.left = (e.clientX - dragState.offsetX) + 'px';
-    dragState.win.style.top = Math.max(28, e.clientY - dragState.offsetY) + 'px';
+    const p = getPoint(e);
+    const rect = dragState.win.getBoundingClientRect();
+    let left = p.clientX - dragState.offsetX;
+    let top = p.clientY - dragState.offsetY;
+    left = Math.min(Math.max(4, left), Math.max(4, window.innerWidth - rect.width - 4));
+    top = Math.min(Math.max(28, top), Math.max(28, window.innerHeight - 40));
+    dragState.win.style.left = left + 'px';
+    dragState.win.style.top = top + 'px';
+    e.preventDefault();
   }
   function stopDrag() {
     dragState = null;
     document.removeEventListener('mousemove', onDrag);
     document.removeEventListener('mouseup', stopDrag);
+    document.removeEventListener('touchmove', onDrag);
+    document.removeEventListener('touchend', stopDrag);
+    document.removeEventListener('touchcancel', stopDrag);
   }
+
+  document.querySelectorAll('.win-header').forEach(header => {
+    const id = header.dataset.target;
+    header.addEventListener('mousedown', e => startDrag(e, id));
+    header.addEventListener('touchstart', e => startDrag(e, id), { passive: false });
+  });
 
   function tick() {
     const now = new Date();
@@ -355,7 +418,8 @@
   tick();
   setInterval(tick, 1000 * 30);
 
-  openWindow('about');
+  const isTouchUI = ("ontouchstart" in window) || navigator.maxTouchPoints > 0 || window.innerWidth < 700;
+  if (!isTouchUI) openWindow('about');
 </script>
 
 </body>
