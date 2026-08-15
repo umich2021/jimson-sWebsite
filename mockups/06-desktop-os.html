@@ -407,8 +407,9 @@
 
   document.querySelectorAll('.win-header').forEach(header => {
     const id = header.dataset.target;
-    header.addEventListener('mousedown', e => startDrag(e, id));
-    header.addEventListener('touchstart', e => startDrag(e, id), { passive: false });
+    const maybeDrag = (e) => { if (!e.target.closest('.traffic')) startDrag(e, id); };
+    header.addEventListener('mousedown', maybeDrag);
+    header.addEventListener('touchstart', maybeDrag, { passive: false });
   });
 
   function tick() {
