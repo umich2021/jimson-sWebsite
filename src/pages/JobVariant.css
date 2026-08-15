@@ -1,0 +1,27 @@
+.hero-pro {
+  padding-top: var(--space-7);
+}
+
+.back-link {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: var(--space-5);
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+.hero-pro-subhead {
+  max-width: 40rem;
+  font-size: 1.1rem;
+}
+
+.role-fit-statement {
+  max-width: 42rem;
+  font-size: 1.05rem;
+  color: var(--text);
+}

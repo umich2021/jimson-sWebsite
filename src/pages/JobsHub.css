@@ -1,0 +1,32 @@
+.jobs-hub-lede {
+  max-width: 36rem;
+  font-size: 1.05rem;
+  margin-bottom: var(--space-6);
+}
+
+.jobs-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--space-5);
+}
+
+.jobs-hub-card {
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.jobs-hub-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.jobs-hub-card h2 {
+  font-size: 1.25rem;
+}
+
+.jobs-hub-card-cta {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 0.85rem;
+}

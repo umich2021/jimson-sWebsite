@@ -1,0 +1,27 @@
+.project-card {
+  display: block;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.project-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: var(--space-2);
+}
+
+.project-card p {
+  font-size: 0.9rem;
+  margin-bottom: var(--space-3);
+}
+
+.project-card-repo {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+}
