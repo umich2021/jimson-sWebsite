@@ -1,0 +1,7 @@
+startups/projects that was done
+
+* aventos studio-ai anime. obv pull the info that we've already done here. some of the videos have done 70k+ views like the trailer for ai anime. obv we get the deal with the publisher for 98.5million views for my cat is a vegetarian, we also got a distributor bluebox.tv to distribute our content
+* project-geo/aeo-llm citation reader. went from 0-1 with b2b saas sales. this tracks and on how well your showing up on chatgpt/claude ai when users are asking questions for brand discoverinability. i built tech stack as well
+* pink inference-cofounder. was on the business side. this was a startup that did various other projects including everything from wetware of biological computing to building data centers using oil and gas. tbh didn't really have any impressive revenue numbers becuase most of it was deep tech. it did raise 100k from 1517 fund tho(include that because for corproate they are going to care that it did raise a pre seed round)
+* project-editing in the cad for archiecture(totally forgot the software name) the point was to look at a piece of floor plan and automatically follow the rules and everything for zoning and to make an ai agent that did architecture, unfortunately i can't think of stats that was impressive-i think that was very much an exploratory phase
+* project-ai anime platform. we released our internal toolings as a platform(to create good ai anime like a creative suite) and aventos studio purchased 10k worth of credits thereby generating 10k in revenue. 

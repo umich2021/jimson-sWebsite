@@ -62,7 +62,7 @@
   }
   .cs-heading { font-size: 14px; color: var(--green); text-shadow: 0 0 8px rgba(77,255,136,0.5); margin: 0 0 8px; }
   .cs-subtext { color: var(--ink-soft); font-size: 15px; max-width: 520px; margin: 0; line-height: 1.4; }
-  .cs-links { display: flex; gap: 8px; flex: none; }
+  .cs-links { display: flex; gap: 8px; flex: none; flex-wrap: wrap; }
   .cs-link {
     font-family: "Press Start 2P"; font-size: 9px; background: none; border: 1px solid var(--line); color: var(--ink-soft);
     padding: 9px 12px; cursor: pointer; touch-action: manipulation;
@@ -179,6 +179,13 @@
   .quest-card .qc-role { font-size: 20px; color: white; }
   .quest-card .qc-meta { color: var(--ink-soft); font-size: 15px; margin: 2px 0 6px; }
   .quest-card .qc-desc { color: var(--ink-soft); font-size: 17px; }
+  .quest-card .qc-link { display: inline-block; margin-top: 6px; font-size: 15px; color: var(--cyan); text-decoration: none; }
+  .quest-card .qc-link:hover { color: var(--gold); }
+
+  .stat-chip-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+  .stat-chip { border: 1px solid var(--line); padding: 10px 14px; text-align: center; flex: 1; min-width: 110px; }
+  .stat-chip .num { font-family: "Press Start 2P"; font-size: 13px; color: var(--gold); }
+  .stat-chip .lbl { font-size: 13px; color: var(--ink-soft); margin-top: 6px; }
 
   .vault-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
   .vault-item { border: 1px solid var(--line); padding: 12px; display: flex; gap: 10px; align-items: center; cursor: pointer; text-align: left; }
@@ -264,6 +271,7 @@
     </div>
     <div class="cs-links">
       <button class="cs-link" id="linkAventos">AVENTOS</button>
+      <button class="cs-link" id="linkPink">PINK INFERENCE</button>
       <button class="cs-link" id="linkEducation">EDUCATION</button>
       <button class="cs-link" id="linkContact">CONTACT</button>
     </div>
@@ -334,7 +342,6 @@
   const projects = [
     { key: "seedance", rarity: "★ LEGENDARY", common: false, name: "Seedance Internal Tool", desc: "Internal FastAPI + React tool for generating and archiving AI video via BytePlus Seedance — batch generation, S3 archive, presigned delivery." },
     { key: "manhwa", rarity: "★ LEGENDARY", common: false, name: "Manhwa Reader", desc: "A reader built to make sense of messy manhwa file collections." },
-    { key: "llm", rarity: "★ LEGENDARY", common: false, name: "LLM Citation Tracker", desc: "Tracks when ChatGPT or Google crawl and cite a site when answering user questions." },
     { key: "tableau", rarity: "★ LEGENDARY", common: false, name: "Tableau Client Site", desc: "A client website build." }
   ];
 
@@ -343,7 +350,9 @@
   ];
 
   const experienceEntries = {
-    aventos: { role: "Co-Founder — Aventos", meta: "May 2025 – Present · San Francisco, CA", desc: "AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS." },
+    aventos: { role: "Co-Founder — Aventos", meta: "May 2025 – Present · San Francisco, CA", desc: "AI anime studio. Own the full stack of building it — product, engineering, and go-to-market. Landed a publisher deal driving 98.5M views, a distribution deal with BlueBox.tv, and turned internal tooling into a platform with its first $10K in revenue." },
+    geo: { role: "Founder — Project GEO", meta: "2024 – 2025", desc: "AEO/LLM citation tracker — tracks how well a brand shows up when people ask ChatGPT or Claude AI questions about brand discoverability. Built the entire tech stack solo and took it 0 to 1 in B2B SaaS sales.", link: { url: "https://github.com/umich2021/tracking_LLMs_bots", label: "view the code" } },
+    pink: { role: "Co-Founder, Business — Pink Inference", meta: "2023 – 2024", desc: "Business side of a deep-tech venture studio running wildly different bets at once — from wetware/biological computing to data centers built on oil & gas infrastructure. Revenue wasn't the story; raised a $100K pre-seed round from 1517 Fund." },
     cityside: { role: "Intern — CitySide Ventures", meta: "Mar 2023 – Jul 2024", desc: "Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors." },
     arboretum: { role: "Summer Intern — Arboretum Ventures", meta: "Apr 2023 – Jul 2023", desc: "Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand." }
   };
@@ -352,27 +361,27 @@
     {
       key: "engineering", label: "THE CODER", color: "#4cf3ff", tunic: "#4cf3ff", tunicDark: "#1b6fa8", tunicShadow: "#1b4a9e",
       headline: "I ship frontend for work, backend for fun.",
-      subhead: "Frontend engineer with a habit of building the backend anyway — Python services, AI video pipelines, and full-stack tools, on top of a product and GTM instinct most engineers don't have.",
-      roleFit: "I don't have a five-year run at one company in one title — I have a co-founder role where I built the product, and a string of startups where I did whatever the team needed next. If you're hiring for someone who can own a feature end to end, ship it, and understand why it matters to the business, that's the actual skill underneath the varied titles.",
+      subhead: "Frontend engineer with a habit of building the backend anyway — Python services, AI video pipelines, and a full-stack AEO tracker (Project GEO) I built solo, on top of a product and GTM instinct most engineers don't have.",
+      roleFit: "I don't have a five-year run at one company in one title — I have a co-founder role where I built the product, and a solo SaaS product (Project GEO) I built and sold end to end. If you're hiring for someone who can own a feature end to end, ship it, and understand why it matters to the business, that's the actual skill underneath the varied titles.",
       stats: [{ label: "ENGINEERING", pct: 95 }, { label: "GTM", pct: 40 }, { label: "HUSTLE", pct: 65 }],
-      experience: ["aventos"],
+      experience: ["aventos", "geo"],
       funProjects: funProjects
     },
     {
       key: "gtm", label: "THE CLOSER", color: "#ffcc4d", tunic: "#ffcc4d", tunicDark: "#b8862f", tunicShadow: "#8a5f1a",
       headline: "I've done the unglamorous GTM work, and the weird stuff too.",
-      subhead: "Market research and due diligence on one end (CitySide, Arboretum), building an entirely new content-driven GTM channel on the other (Aventos — anime as B2B marketing).",
-      roleFit: "My background isn't a straight line through one GTM playbook — it's diligence work that taught me how to evaluate a market fast, plus a founder seat where I had to build distribution from zero with no playbook to copy. That combination is the point, not a gap.",
+      subhead: "Market research and due diligence on one end (CitySide, Arboretum), a $100K pre-seed raise on another (Pink Inference), and taking a B2B SaaS product 0-1 solo (Project GEO) alongside an entirely new content-driven GTM channel (Aventos — anime as B2B marketing).",
+      roleFit: "My background isn't a straight line through one GTM playbook — it's diligence work that taught me how to evaluate a market fast, a founder seat where I had to build distribution from zero with no playbook to copy, and a fundraise where I had to sell a vision instead of a product. That combination is the point, not a gap.",
       stats: [{ label: "GTM", pct: 95 }, { label: "ENGINEERING", pct: 35 }, { label: "HUSTLE", pct: 80 }],
-      experience: ["aventos", "cityside", "arboretum"]
+      experience: ["aventos", "geo", "pink", "cityside", "arboretum"]
     },
     {
       key: "generalist", label: "THE PRODUCER", color: "#ff3cac", tunic: "#ff3cac", tunicDark: "#b81f78", tunicShadow: "#8a1257",
       headline: "Startups don't hand you a job description. I stopped expecting one.",
-      subhead: "Sales, GTM, frontend engineering, and enough VC due diligence to know how investors actually evaluate a company — usually all inside the same six-month stretch.",
+      subhead: "Sales, GTM, frontend engineering, fundraising, and enough VC due diligence to know how investors actually evaluate a company — usually all inside the same six-month stretch.",
       roleFit: "I don't fit neatly into one box on a resume, and I've made peace with that — most people who've actually worked at early-stage startups don't. The breadth isn't scattershot, it's what happens when you're one of the first ten people at a company and the work finds you instead of the other way around.",
       stats: [{ label: "ENGINEERING", pct: 70 }, { label: "GTM", pct: 70 }, { label: "HUSTLE", pct: 95 }],
-      experience: ["aventos", "cityside", "arboretum"]
+      experience: ["aventos", "pink", "cityside", "arboretum"]
     }
   ];
 
@@ -420,7 +429,8 @@
 
     const expHtml = c.experience.map(key => {
       const e = experienceEntries[key];
-      return `<div class="quest-card"><div class="qc-role">${e.role}</div><div class="qc-meta">${e.meta}</div><div class="qc-desc">${e.desc}</div></div>`;
+      const linkHtml = e.link ? `<a class="qc-link" href="${e.link.url}" target="_blank" rel="noreferrer">▸ ${e.link.label}</a>` : "";
+      return `<div class="quest-card"><div class="qc-role">${e.role}</div><div class="qc-meta">${e.meta}</div><div class="qc-desc">${e.desc}</div>${linkHtml}</div>`;
     }).join("");
 
     const projHtml = renderProjectGrid(projects);
@@ -510,9 +520,27 @@
   document.getElementById("linkAventos").addEventListener("click", () => {
     openInfoModal("◆ MISSION HALL — AVENTOS", `
       <p>Aventos is an AI anime studio — short-form, AI-generated anime built end to end, from concept and screenwriting to voice, animation, and post. The bet: anime-style storytelling doesn't just work as entertainment, it works as a marketing channel for B2B SaaS companies who all sound and look the same.</p>
+      <p>Landed a publisher deal for "My Cat Is a Vegetarian" and a distribution deal with BlueBox.tv, and turned our internal AI-video tooling into a platform product — first paying customer was our own production team.</p>
+      <div class="stat-chip-row">
+        <div class="stat-chip"><div class="num">70K+</div><div class="lbl">trailer views</div></div>
+        <div class="stat-chip"><div class="num">98.5M</div><div class="lbl">views via publisher deal</div></div>
+        <div class="stat-chip"><div class="num">$10K</div><div class="lbl">platform revenue</div></div>
+      </div>
       <div class="cutscene-grid">
         <div class="cutscene"><span class="play">▶ PLAY</span><span class="cs-label">Aventos anime trailer</span></div>
         <div class="cutscene"><span class="play">▶ PLAY</span><span class="cs-label">How Asians pay the bill</span></div>
+      </div>`);
+  });
+  document.getElementById("linkPink").addEventListener("click", () => {
+    openInfoModal("◆ GUILD HALL — PINK INFERENCE", `
+      <p>A deep-tech venture studio. I was the business-side co-founder — GTM, fundraising, and figuring out how to sell things nobody else is building yet.</p>
+      <p>The portfolio ran wide on purpose — everything from wetware/biological computing to building data centers on oil-and-gas infrastructure. Deep tech, long time horizons, not built for quick revenue.</p>
+      <div class="ach-row">
+        <div class="ach-badge"><span style="font-size:8px;">$100K</span></div>
+        <div>
+          <p style="color:white;font-size:19px;margin:0 0 4px;">Pre-seed round raised</p>
+          <p style="margin:0;">From 1517 Fund</p>
+        </div>
       </div>`);
   });
   document.getElementById("linkEducation").addEventListener("click", () => {

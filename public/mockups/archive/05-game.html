@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Jimson Yang — Character select mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05100a;
+    --panel: #0c1712;
+    --line: #23392c;
+    --cyan: #4cf3ff;
+    --magenta: #ff3cac;
+    --gold: #ffcc4d;
+    --green: #4dff88;
+    --purple: #c792ea;
+    --ink: #d9f4ff;
+    --ink-soft: #8fae9c;
+    --c: #4cf3ff;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "VT323", monospace;
+    font-size: 20px;
+    min-height: 100vh; min-height: 100dvh;
+  }
+  .pixel { font-family: "Press Start 2P", monospace; }
+  .scanlines {
+    position: fixed; inset: 0; pointer-events: none; z-index: 90;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 2px, transparent 4px);
+    mix-blend-mode: overlay;
+  }
+
+  /* ---------- title screen ---------- */
+  #title {
+    position: fixed; inset: 0; z-index: 200; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+    text-align: center; cursor: pointer; padding: 24px;
+  }
+  #title .pixel.big { font-size: 30px; color: var(--green); text-shadow: 0 0 16px rgba(77,255,136,0.6); letter-spacing: 0.03em; }
+  #title .sub { color: var(--ink-soft); font-size: 20px; letter-spacing: 0.05em; }
+  #title .press {
+    font-family: "Press Start 2P"; font-size: 12px; color: var(--gold); margin-top: 30px;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (max-width: 480px) {
+    #title .pixel.big { font-size: 20px; }
+    #title .sub { font-size: 16px; }
+  }
+
+  /* ---------- character select shell ---------- */
+  #charSelect { position: fixed; inset: 0; display: none; flex-direction: column; }
+  .cs-topbar {
+    display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    padding: 16px 20px; border-bottom: 1px solid var(--line); z-index: 20;
+  }
+  .cs-heading { font-size: 14px; color: var(--green); text-shadow: 0 0 8px rgba(77,255,136,0.5); margin: 0 0 8px; }
+  .cs-subtext { color: var(--ink-soft); font-size: 15px; max-width: 520px; margin: 0; line-height: 1.4; }
+  .cs-links { display: flex; gap: 8px; flex: none; flex-wrap: wrap; }
+  .cs-link {
+    font-family: "Press Start 2P"; font-size: 9px; background: none; border: 1px solid var(--line); color: var(--ink-soft);
+    padding: 9px 12px; cursor: pointer; touch-action: manipulation;
+  }
+  .cs-link:hover { color: var(--gold); border-color: var(--gold); }
+
+  .cs-body { flex: 1; display: flex; overflow: hidden; }
+  @media (max-width: 760px) {
+    .cs-body { flex-direction: column; overflow-y: auto; }
+  }
+
+  /* ---------- character stage (left third) ---------- */
+  .char-stage {
+    width: 34%; flex: none; border-right: 1px solid var(--line); position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px;
+    overflow-x: hidden; overflow-y: auto;
+  }
+  @media (max-width: 760px) {
+    .char-stage { width: 100%; border-right: none; border-bottom: 1px solid var(--line); padding: 24px 20px 30px; }
+  }
+  .char-glow {
+    position: absolute; width: 340px; height: 340px; border-radius: 50%;
+    background: radial-gradient(circle, var(--c) 0%, transparent 70%); opacity: 0.22; filter: blur(6px);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { transform: scale(0.92); opacity: 0.16; } 50% { transform: scale(1.05); opacity: 0.28; } }
+
+  .char-sprite-wrap { position: relative; z-index: 1; height: 130px; display: flex; align-items: flex-end; justify-content: center; transition: opacity .18s ease, transform .18s ease; overflow: visible; }
+  .char-sprite { position: relative; width: 56px; height: 70px; }
+  .char-sprite span {
+    position: absolute; top: 0; left: 0; width: 7px; height: 7px; background: transparent;
+    animation: idleBob 1.1s steps(2) infinite;
+  }
+  .char-sprite .char-body {
+    box-shadow:
+      14px 0px 0 #2b1c12, 21px 0px 0 #2b1c12, 28px 0px 0 #2b1c12, 35px 0px 0 #2b1c12,
+      14px 7px 0 #2b1c12, 21px 7px 0 #2b1c12, 28px 7px 0 #2b1c12, 35px 7px 0 #2b1c12,
+      7px 14px 0 #2b1c12, 42px 14px 0 #2b1c12,
+      14px 14px 0 #f2c18c, 21px 14px 0 #f2c18c, 28px 14px 0 #f2c18c, 35px 14px 0 #f2c18c,
+      14px 21px 0 #f2c18c, 21px 21px 0 #f2c18c, 28px 21px 0 #f2c18c, 35px 21px 0 #f2c18c,
+      7px 28px 0 var(--tunic), 14px 28px 0 var(--tunic), 21px 28px 0 var(--tunic), 28px 28px 0 var(--tunic), 35px 28px 0 var(--tunic), 42px 28px 0 var(--tunic),
+      7px 35px 0 var(--tunic), 14px 35px 0 var(--tunic), 21px 35px 0 var(--tunic), 28px 35px 0 var(--tunic), 35px 35px 0 var(--tunic), 42px 35px 0 var(--tunic),
+      7px 42px 0 var(--tunic-dark), 14px 42px 0 var(--tunic-dark), 21px 42px 0 var(--tunic-dark), 28px 42px 0 var(--tunic-dark), 35px 42px 0 var(--tunic-dark), 42px 42px 0 var(--tunic-dark),
+      14px 49px 0 var(--tunic-shadow), 35px 49px 0 var(--tunic-shadow), 14px 56px 0 var(--tunic-shadow), 35px 56px 0 var(--tunic-shadow),
+      7px 63px 0 #2b1c12, 14px 63px 0 #2b1c12, 35px 63px 0 #2b1c12, 42px 63px 0 #2b1c12;
+  }
+  .char-sprite .char-accessory { z-index: 1; }
+  .acc-engineering {
+    box-shadow:
+      0px 7px 0 var(--c), 49px 7px 0 var(--c),
+      14px -7px 0 var(--c), 21px -7px 0 var(--c), 28px -7px 0 var(--c), 35px -7px 0 var(--c);
+  }
+  .acc-gtm {
+    box-shadow:
+      21px 28px 0 #9c1c30, 28px 28px 0 #9c1c30,
+      21px 35px 0 #9c1c30, 28px 35px 0 #9c1c30,
+      21px 42px 0 #7a1626, 28px 42px 0 #7a1626;
+  }
+  .acc-generalist {
+    box-shadow:
+      7px -7px 0 #17101a, 14px -7px 0 #17101a, 21px -7px 0 #17101a, 28px -7px 0 #17101a, 35px -7px 0 #17101a, 42px -7px 0 #17101a;
+  }
+  @keyframes idleBob { 50% { transform: translateY(-3px); } }
+  .char-sprite-wrap.switching { opacity: 0; transform: translateY(6px); }
+
+  .char-prop { position: absolute; right: -46px; bottom: 20px; z-index: 1; animation: propFloat 2.6s ease-in-out infinite; }
+  @keyframes propFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .char-prop > div { display: none; }
+  .prop-engineering .lap-screen { display: block; width: 34px; height: 22px; background: #0a1114; border: 2px solid var(--c); border-bottom: none; box-sizing: border-box; }
+  .prop-engineering .lap-glow { display: block; margin: 7px 5px 0; height: 3px; width: 24px; background: var(--c); box-shadow: 0 0 6px var(--c); }
+  .prop-engineering .lap-base { display: block; width: 40px; height: 5px; margin-left: -3px; background: var(--c); opacity: .55; }
+  .prop-gtm .case-handle { display: block; width: 12px; height: 6px; border: 2px solid var(--c); border-bottom: none; margin: 0 auto; box-sizing: border-box; }
+  .prop-gtm .case-body { display: block; width: 38px; height: 26px; background: var(--c); opacity: .85; position: relative; box-sizing: border-box; }
+  .prop-gtm .case-line { position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: #05100a; opacity: .5; }
+  .prop-generalist .clap-top {
+    display: block; width: 38px; height: 9px; background: repeating-linear-gradient(45deg, #05100a 0 5px, var(--c) 5px 10px);
+    border: 1px solid #05100a; transform: rotate(-8deg); transform-origin: left bottom; box-sizing: border-box;
+  }
+  .prop-generalist .clap-body { display: block; width: 38px; height: 22px; background: var(--c); opacity: .85; margin-top: -1px; box-sizing: border-box; }
+
+  .char-nav { display: flex; align-items: center; gap: 16px; z-index: 1; }
+  .char-arrow {
+    font-family: "Press Start 2P"; font-size: 16px; background: none; border: 2px solid var(--c); color: var(--c);
+    width: 44px; height: 44px; cursor: pointer; touch-action: manipulation; flex: none;
+  }
+  .char-arrow:hover { background: var(--c); color: #05100a; }
+  .char-dots { display: flex; gap: 8px; }
+  .char-dot { width: 8px; height: 8px; border: 1px solid var(--ink-soft); background: transparent; }
+  .char-dot.active { background: var(--c); border-color: var(--c); }
+
+  .char-class {
+    font-size: 10px; color: var(--c); letter-spacing: 0.05em; z-index: 1; text-shadow: 0 0 8px var(--c);
+  }
+  .char-title { color: var(--ink-soft); font-size: 17px; text-align: center; max-width: 260px; z-index: 1; font-style: italic; }
+  .char-stats { width: 100%; max-width: 220px; display: flex; flex-direction: column; gap: 8px; z-index: 1; }
+  .stat-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .stat-label { font-family: "Press Start 2P"; font-size: 7px; color: var(--ink-soft); width: 66px; flex: none; }
+  .stat-bar { flex: 1; height: 8px; background: #0a0e14; border: 1px solid var(--line); overflow: hidden; }
+  .stat-fill { height: 100%; background: var(--c); box-shadow: 0 0 6px var(--c); transition: width .3s ease; }
+
+  /* ---------- info panel (right two-thirds) ---------- */
+  .char-info { flex: 1; overflow-y: auto; padding: 30px 34px 50px; -webkit-overflow-scrolling: touch; transition: opacity .18s ease, transform .18s ease; }
+  .char-info.switching { opacity: 0; transform: translateX(8px); }
+  @media (max-width: 760px) { .char-info { padding: 24px 20px 40px; } }
+
+  .info-eyebrow { font-family: "Press Start 2P"; font-size: 10px; color: var(--c); margin: 0 0 14px; letter-spacing: 0.04em; }
+  .info-subhead { color: var(--ink); font-size: 19px; margin: 0 0 22px; }
+  .info-rolefit-label { font-family: "Press Start 2P"; font-size: 9px; color: var(--ink-soft); margin: 0 0 10px; }
+  .info-rolefit { color: var(--ink-soft); font-size: 17px; margin: 0 0 30px; padding-left: 14px; border-left: 2px solid var(--c); }
+
+  .info-section-label { font-family: "Press Start 2P"; font-size: 9px; color: var(--ink-soft); margin: 0 0 14px; }
+  .quest-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
+  .quest-card { border-left: 2px solid var(--c); padding: 4px 0 4px 16px; }
+  .quest-card .qc-role { font-size: 20px; color: white; }
+  .quest-card .qc-meta { color: var(--ink-soft); font-size: 15px; margin: 2px 0 6px; }
+  .quest-card .qc-desc { color: var(--ink-soft); font-size: 17px; }
+  .quest-card .qc-link { display: inline-block; margin-top: 6px; font-size: 15px; color: var(--cyan); text-decoration: none; }
+  .quest-card .qc-link:hover { color: var(--gold); }
+
+  .stat-chip-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+  .stat-chip { border: 1px solid var(--line); padding: 10px 14px; text-align: center; flex: 1; min-width: 110px; }
+  .stat-chip .num { font-family: "Press Start 2P"; font-size: 13px; color: var(--gold); }
+  .stat-chip .lbl { font-size: 13px; color: var(--ink-soft); margin-top: 6px; }
+
+  .vault-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .vault-item { border: 1px solid var(--line); padding: 12px; display: flex; gap: 10px; align-items: center; cursor: pointer; text-align: left; }
+  .vault-item:hover { border-color: var(--c); }
+  .mini-chest { position: relative; width: 40px; height: 30px; flex: none; perspective: 140px; }
+  .mini-chest-body { position: absolute; bottom: 0; left: 0; width: 40px; height: 18px; background: #5a3a22; border: 2px solid #2b1c12; border-radius: 0 0 5px 5px; }
+  .mini-chest-lid {
+    position: absolute; top: 0; left: 0; width: 40px; height: 15px; background: #7a4f2c; border: 2px solid #2b1c12;
+    border-radius: 5px 5px 0 0; transform-origin: bottom center; transition: transform .5s cubic-bezier(.25,1.1,.4,1.3); transform-style: preserve-3d;
+  }
+  .mini-chest-lock { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 7px; height: 7px; border: 1px solid #2b1c12; border-radius: 2px; z-index: 2; }
+  @keyframes chestShake {
+    0%, 100% { transform: rotate(0deg); } 20% { transform: rotate(-6deg); } 40% { transform: rotate(5deg); }
+    60% { transform: rotate(-4deg); } 80% { transform: rotate(3deg); }
+  }
+  .mini-chest.shake { animation: chestShake .12s linear 3; }
+  .mini-chest.opened .mini-chest-lid { transform: rotateX(-120deg) translateY(-3px); }
+  .vault-item-name { color: white; font-size: 15.5px; }
+  .item-rarity { font-family: "Press Start 2P"; font-size: 7px; color: var(--gold); margin-top: 4px; display: inline-block; }
+  .item-rarity.common { color: var(--ink-soft); }
+
+  /* ---------- modals ---------- */
+  #infoModalOverlay, #itemDetailOverlay {
+    position: fixed; inset: 0; z-index: 180; background: rgba(3,8,5,0.82); backdrop-filter: blur(2px);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  #infoModalOverlay.active, #itemDetailOverlay.active { display: flex; }
+  .modal-panel {
+    position: relative; width: 100%; max-width: 480px; max-height: 84vh; overflow-y: auto;
+    background: var(--panel); border: 1px solid var(--line); padding: 26px;
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 14px; background: none; border: 1px solid var(--line); color: var(--ink-soft);
+    font-family: "Press Start 2P"; font-size: 9px; padding: 8px 10px; cursor: pointer; touch-action: manipulation;
+  }
+  .modal-close:hover { color: var(--gold); border-color: var(--gold); }
+  .modal-title { font-family: "Press Start 2P"; font-size: 12px; margin: 0 0 18px; padding-right: 90px; }
+  .modal-body { color: var(--ink-soft); font-size: 17px; }
+  .modal-body p { margin: 0 0 14px; }
+
+  .cutscene-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  .cutscene { border: 1px solid var(--line); background: #05070b; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative; }
+  .cutscene .play { font-family: "Press Start 2P"; color: var(--magenta); font-size: 11px; }
+  .cutscene .cs-label { position: absolute; left: 8px; bottom: 8px; font-size: 13px; color: var(--ink-soft); background: rgba(0,0,0,0.6); padding: 2px 8px; }
+
+  .ach-row { display: flex; gap: 16px; align-items: center; }
+  .ach-badge { width: 50px; height: 50px; flex: none; border: 2px solid var(--purple); transform: rotate(45deg); display: flex; align-items: center; justify-content: center; }
+  .ach-badge span { transform: rotate(-45deg); font-family: "Press Start 2P"; font-size: 12px; color: var(--purple); }
+
+  .dialogue-npc { font-family: "Press Start 2P"; font-size: 9px; color: var(--cyan); margin-bottom: 12px; }
+  .choice { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--ink); font-family: "VT323"; font-size: 19px; padding: 8px 0; cursor: pointer; text-decoration: none; touch-action: manipulation; }
+  .choice:hover { color: var(--gold); }
+  .choice::before { content: "▸ "; color: var(--cyan); }
+
+  .item-detail-image {
+    width: 100%; aspect-ratio: 16/9; border: 1px dashed var(--line); display: flex; align-items: center; justify-content: center;
+    text-align: center; color: var(--ink-soft); font-family: "Press Start 2P"; font-size: 10px; line-height: 1.8; margin-bottom: 18px;
+  }
+  .item-detail-name { color: white; font-size: 22px; margin: 0 0 6px; }
+  .item-detail-rarity { margin-bottom: 12px; display: block; }
+  .item-detail-desc { color: var(--ink-soft); font-size: 17px; }
+
+  @media (max-width: 480px) {
+    .cs-heading { font-size: 11px; }
+    .cs-link { font-size: 8px; padding: 8px 9px; }
+  }
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+
+<div id="title">
+  <p class="pixel big">◆ JIMSON RPG ◆</p>
+  <p class="sub">AI ANIME STUDIO FOUNDER EDITION</p>
+  <p class="press">PRESS ANY KEY / TAP TO START</p>
+</div>
+
+<div id="charSelect">
+  <div class="cs-topbar">
+    <div>
+      <p class="pixel cs-heading">◆ CHOOSE YOUR BUILD ◆</p>
+      <p class="cs-subtext">Why the range? Startups don't hand you a job description — pick a build to see the slice of my experience that's actually relevant to what you're hiring for.</p>
+    </div>
+    <div class="cs-links">
+      <button class="cs-link" id="linkAventos">AVENTOS</button>
+      <button class="cs-link" id="linkPink">PINK INFERENCE</button>
+      <button class="cs-link" id="linkEducation">EDUCATION</button>
+      <button class="cs-link" id="linkContact">CONTACT</button>
+    </div>
+  </div>
+
+  <div class="cs-body">
+    <div class="char-stage" id="charStage">
+      <div class="char-glow"></div>
+      <div class="char-sprite-wrap" id="charSpriteWrap">
+        <div class="char-sprite">
+          <span class="char-body"></span>
+          <span class="char-accessory" id="charAccessory"></span>
+        </div>
+        <div class="char-prop" id="charProp">
+          <div class="lap-screen"><div class="lap-glow"></div></div>
+          <div class="lap-base"></div>
+          <div class="case-handle"></div>
+          <div class="case-body"><div class="case-line"></div></div>
+          <div class="clap-top"></div>
+          <div class="clap-body"></div>
+        </div>
+      </div>
+      <div class="char-nav">
+        <button class="char-arrow" id="prevBtn">◀</button>
+        <div class="char-dots" id="charDots"></div>
+        <button class="char-arrow" id="nextBtn">▶</button>
+      </div>
+      <p class="pixel char-class" id="charClass"></p>
+      <p class="char-title" id="charTitle"></p>
+      <div class="char-stats" id="charStats"></div>
+    </div>
+
+    <div class="char-info" id="charInfo"></div>
+  </div>
+</div>
+
+<div id="infoModalOverlay">
+  <div class="modal-panel">
+    <button class="modal-close" id="infoModalClose">✕ CLOSE</button>
+    <p class="modal-title" id="infoModalTitle"></p>
+    <div class="modal-body" id="infoModalBody"></div>
+  </div>
+</div>
+
+<div id="itemDetailOverlay">
+  <div class="modal-panel">
+    <button class="modal-close" id="itemDetailClose">✕ CLOSE</button>
+    <div class="item-detail-image">SCREENSHOT<br>COMING SOON</div>
+    <h2 class="item-detail-name" id="itemDetailName"></h2>
+    <span class="item-rarity item-detail-rarity" id="itemDetailRarity"></span>
+    <p class="item-detail-desc" id="itemDetailDesc"></p>
+  </div>
+</div>
+
+<script>
+  const titleEl = document.getElementById("title");
+  const charSelectEl = document.getElementById("charSelect");
+  const charStageEl = document.getElementById("charStage");
+  const charSpriteWrapEl = document.getElementById("charSpriteWrap");
+  const charInfoEl = document.getElementById("charInfo");
+  const charClassEl = document.getElementById("charClass");
+  const charTitleEl = document.getElementById("charTitle");
+  const charStatsEl = document.getElementById("charStats");
+  const charDotsEl = document.getElementById("charDots");
+  const charAccessoryEl = document.getElementById("charAccessory");
+  const charPropEl = document.getElementById("charProp");
+
+  const projects = [
+    { key: "seedance", rarity: "★ LEGENDARY", common: false, name: "Seedance Internal Tool", desc: "Internal FastAPI + React tool for generating and archiving AI video via BytePlus Seedance — batch generation, S3 archive, presigned delivery." },
+    { key: "manhwa", rarity: "★ LEGENDARY", common: false, name: "Manhwa Reader", desc: "A reader built to make sense of messy manhwa file collections." },
+    { key: "tableau", rarity: "★ LEGENDARY", common: false, name: "Tableau Client Site", desc: "A client website build." }
+  ];
+
+  const funProjects = [
+    { key: "jetlag", rarity: "○ COMMON", common: true, name: "Jet Lag: SF", desc: "A mobile app for playing Jet Lag: The Game across San Francisco neighborhoods. SF-Monopoly mode in progress." }
+  ];
+
+  const experienceEntries = {
+    aventos: { role: "Co-Founder — Aventos", meta: "May 2025 – Present · San Francisco, CA", desc: "AI anime studio. Own the full stack of building it — product, engineering, and go-to-market. Landed a publisher deal driving 98.5M views, a distribution deal with BlueBox.tv, and turned internal tooling into a platform with its first $10K in revenue." },
+    geo: { role: "Founder — Project GEO", meta: "2024 – 2025", desc: "AEO/LLM citation tracker — tracks how well a brand shows up when people ask ChatGPT or Claude AI questions about brand discoverability. Built the entire tech stack solo and took it 0 to 1 in B2B SaaS sales.", link: { url: "https://github.com/umich2021/tracking_LLMs_bots", label: "view the code" } },
+    pink: { role: "Co-Founder, Business — Pink Inference", meta: "2023 – 2024", desc: "Business side of a deep-tech venture studio running wildly different bets at once — from wetware/biological computing to data centers built on oil & gas infrastructure. Revenue wasn't the story; raised a $100K pre-seed round from 1517 Fund." },
+    cityside: { role: "Intern — CitySide Ventures", meta: "Mar 2023 – Jul 2024", desc: "Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors." },
+    arboretum: { role: "Summer Intern — Arboretum Ventures", meta: "Apr 2023 – Jul 2023", desc: "Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand." }
+  };
+
+  const characters = [
+    {
+      key: "engineering", label: "THE CODER", color: "#4cf3ff", tunic: "#4cf3ff", tunicDark: "#1b6fa8", tunicShadow: "#1b4a9e",
+      headline: "I ship frontend for work, backend for fun.",
+      subhead: "Frontend engineer with a habit of building the backend anyway — Python services, AI video pipelines, and a full-stack AEO tracker (Project GEO) I built solo, on top of a product and GTM instinct most engineers don't have.",
+      roleFit: "I don't have a five-year run at one company in one title — I have a co-founder role where I built the product, and a solo SaaS product (Project GEO) I built and sold end to end. If you're hiring for someone who can own a feature end to end, ship it, and understand why it matters to the business, that's the actual skill underneath the varied titles.",
+      stats: [{ label: "ENGINEERING", pct: 95 }, { label: "GTM", pct: 40 }, { label: "HUSTLE", pct: 65 }],
+      experience: ["aventos", "geo"],
+      funProjects: funProjects
+    },
+    {
+      key: "gtm", label: "THE CLOSER", color: "#ffcc4d", tunic: "#ffcc4d", tunicDark: "#b8862f", tunicShadow: "#8a5f1a",
+      headline: "I've done the unglamorous GTM work, and the weird stuff too.",
+      subhead: "Market research and due diligence on one end (CitySide, Arboretum), a $100K pre-seed raise on another (Pink Inference), and taking a B2B SaaS product 0-1 solo (Project GEO) alongside an entirely new content-driven GTM channel (Aventos — anime as B2B marketing).",
+      roleFit: "My background isn't a straight line through one GTM playbook — it's diligence work that taught me how to evaluate a market fast, a founder seat where I had to build distribution from zero with no playbook to copy, and a fundraise where I had to sell a vision instead of a product. That combination is the point, not a gap.",
+      stats: [{ label: "GTM", pct: 95 }, { label: "ENGINEERING", pct: 35 }, { label: "HUSTLE", pct: 80 }],
+      experience: ["aventos", "geo", "pink", "cityside", "arboretum"]
+    },
+    {
+      key: "generalist", label: "THE PRODUCER", color: "#ff3cac", tunic: "#ff3cac", tunicDark: "#b81f78", tunicShadow: "#8a1257",
+      headline: "Startups don't hand you a job description. I stopped expecting one.",
+      subhead: "Sales, GTM, frontend engineering, fundraising, and enough VC due diligence to know how investors actually evaluate a company — usually all inside the same six-month stretch.",
+      roleFit: "I don't fit neatly into one box on a resume, and I've made peace with that — most people who've actually worked at early-stage startups don't. The breadth isn't scattershot, it's what happens when you're one of the first ten people at a company and the work finds you instead of the other way around.",
+      stats: [{ label: "ENGINEERING", pct: 70 }, { label: "GTM", pct: 70 }, { label: "HUSTLE", pct: 95 }],
+      experience: ["aventos", "pink", "cityside", "arboretum"]
+    }
+  ];
+
+  characters.forEach((c, i) => {
+    const dot = document.createElement("div");
+    dot.className = "char-dot";
+    dot.dataset.idx = i;
+    charDotsEl.appendChild(dot);
+  });
+
+  let charIdx = 0;
+
+  function renderProjectGrid(list) {
+    return list.map(p => `
+      <div class="vault-item" data-key="${p.key}">
+        <div class="mini-chest" id="chest-${p.key}">
+          <div class="mini-chest-lid"></div><div class="mini-chest-body"></div><div class="mini-chest-lock"></div>
+        </div>
+        <div>
+          <div class="vault-item-name">${p.name}</div>
+          <span class="item-rarity${p.common ? " common" : ""}">${p.rarity}</span>
+        </div>
+      </div>`).join("");
+  }
+
+  function renderCharacter() {
+    const c = characters[charIdx];
+    charStageEl.style.setProperty("--c", c.color);
+    charInfoEl.style.setProperty("--c", c.color);
+    charStageEl.style.setProperty("--tunic", c.tunic);
+    charStageEl.style.setProperty("--tunic-dark", c.tunicDark);
+    charStageEl.style.setProperty("--tunic-shadow", c.tunicShadow);
+    charAccessoryEl.className = "char-accessory acc-" + c.key;
+    charPropEl.className = "char-prop prop-" + c.key;
+
+    charClassEl.textContent = "◆ " + c.label;
+    charTitleEl.textContent = '"' + c.headline + '"';
+    charStatsEl.innerHTML = c.stats.map(s => `
+      <div class="stat-row">
+        <span class="stat-label">${s.label}</span>
+        <div class="stat-bar"><div class="stat-fill" style="width:${s.pct}%"></div></div>
+      </div>`).join("");
+
+    document.querySelectorAll(".char-dot").forEach((d, i) => d.classList.toggle("active", i === charIdx));
+
+    const expHtml = c.experience.map(key => {
+      const e = experienceEntries[key];
+      const linkHtml = e.link ? `<a class="qc-link" href="${e.link.url}" target="_blank" rel="noreferrer">▸ ${e.link.label}</a>` : "";
+      return `<div class="quest-card"><div class="qc-role">${e.role}</div><div class="qc-meta">${e.meta}</div><div class="qc-desc">${e.desc}</div>${linkHtml}</div>`;
+    }).join("");
+
+    const projHtml = renderProjectGrid(projects);
+    const funHtml = c.funProjects
+      ? `<p class="info-section-label pixel">FOR FUN</p><div class="vault-grid">${renderProjectGrid(c.funProjects)}</div>`
+      : "";
+
+    charInfoEl.innerHTML = `
+      <p class="info-eyebrow">${c.label} — ROLE FIT</p>
+      <p class="info-subhead">${c.subhead}</p>
+      <p class="info-rolefit-label pixel">WHY THE BREADTH</p>
+      <p class="info-rolefit">${c.roleFit}</p>
+      <p class="info-section-label pixel">RELEVANT EXPERIENCE</p>
+      <div class="quest-cards">${expHtml}</div>
+      <p class="info-section-label pixel">PROJECTS</p>
+      <div class="vault-grid">${projHtml}</div>
+      ${funHtml}
+    `;
+
+    const allProjects = projects.concat(c.funProjects || []);
+    charInfoEl.querySelectorAll(".vault-item").forEach(el => {
+      el.addEventListener("click", () => {
+        const p = allProjects.find(x => x.key === el.dataset.key);
+        openItemDetail(p);
+      });
+    });
+  }
+
+  function switchCharacter(newIdx) {
+    charSpriteWrapEl.classList.add("switching");
+    charInfoEl.classList.add("switching");
+    setTimeout(() => {
+      charIdx = (newIdx + characters.length) % characters.length;
+      renderCharacter();
+      charSpriteWrapEl.classList.remove("switching");
+      charInfoEl.classList.remove("switching");
+    }, 180);
+  }
+
+  document.getElementById("prevBtn").addEventListener("click", () => switchCharacter(charIdx - 1));
+  document.getElementById("nextBtn").addEventListener("click", () => switchCharacter(charIdx + 1));
+  charDotsEl.addEventListener("click", (e) => {
+    const dot = e.target.closest(".char-dot");
+    if (dot) switchCharacter(parseInt(dot.dataset.idx));
+  });
+  window.addEventListener("keydown", (e) => {
+    if (titleEl.style.display !== "none") return;
+    if (e.key === "ArrowLeft") switchCharacter(charIdx - 1);
+    if (e.key === "ArrowRight") switchCharacter(charIdx + 1);
+  });
+
+  /* ---------- item detail modal ---------- */
+  function openItemDetail(item) {
+    const chest = document.getElementById("chest-" + item.key);
+    if (chest) {
+      chest.classList.remove("opened");
+      void chest.offsetWidth;
+      chest.classList.add("shake");
+      setTimeout(() => { chest.classList.remove("shake"); chest.classList.add("opened"); }, 400);
+    }
+    document.getElementById("itemDetailName").textContent = item.name;
+    document.getElementById("itemDetailRarity").textContent = item.rarity;
+    document.getElementById("itemDetailRarity").className = "item-rarity item-detail-rarity" + (item.common ? " common" : "");
+    document.getElementById("itemDetailDesc").textContent = item.desc;
+    document.getElementById("itemDetailOverlay").classList.add("active");
+  }
+  document.getElementById("itemDetailClose").addEventListener("click", () => {
+    document.getElementById("itemDetailOverlay").classList.remove("active");
+  });
+  document.getElementById("itemDetailOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "itemDetailOverlay") document.getElementById("itemDetailOverlay").classList.remove("active");
+  });
+
+  /* ---------- universal info modals ---------- */
+  function openInfoModal(title, bodyHtml) {
+    document.getElementById("infoModalTitle").textContent = title;
+    document.getElementById("infoModalBody").innerHTML = bodyHtml;
+    document.getElementById("infoModalOverlay").classList.add("active");
+  }
+  document.getElementById("infoModalClose").addEventListener("click", () => {
+    document.getElementById("infoModalOverlay").classList.remove("active");
+  });
+  document.getElementById("infoModalOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "infoModalOverlay") document.getElementById("infoModalOverlay").classList.remove("active");
+  });
+
+  document.getElementById("linkAventos").addEventListener("click", () => {
+    openInfoModal("◆ MISSION HALL — AVENTOS", `
+      <p>Aventos is an AI anime studio — short-form, AI-generated anime built end to end, from concept and screenwriting to voice, animation, and post. The bet: anime-style storytelling doesn't just work as entertainment, it works as a marketing channel for B2B SaaS companies who all sound and look the same.</p>
+      <p>Landed a publisher deal for "My Cat Is a Vegetarian" and a distribution deal with BlueBox.tv, and turned our internal AI-video tooling into a platform product — first paying customer was our own production team.</p>
+      <div class="stat-chip-row">
+        <div class="stat-chip"><div class="num">70K+</div><div class="lbl">trailer views</div></div>
+        <div class="stat-chip"><div class="num">98.5M</div><div class="lbl">views via publisher deal</div></div>
+        <div class="stat-chip"><div class="num">$10K</div><div class="lbl">platform revenue</div></div>
+      </div>
+      <div class="cutscene-grid">
+        <div class="cutscene"><span class="play">▶ PLAY</span><span class="cs-label">Aventos anime trailer</span></div>
+        <div class="cutscene"><span class="play">▶ PLAY</span><span class="cs-label">How Asians pay the bill</span></div>
+      </div>`);
+  });
+  document.getElementById("linkPink").addEventListener("click", () => {
+    openInfoModal("◆ GUILD HALL — PINK INFERENCE", `
+      <p>A deep-tech venture studio. I was the business-side co-founder — GTM, fundraising, and figuring out how to sell things nobody else is building yet.</p>
+      <p>The portfolio ran wide on purpose — everything from wetware/biological computing to building data centers on oil-and-gas infrastructure. Deep tech, long time horizons, not built for quick revenue.</p>
+      <div class="ach-row">
+        <div class="ach-badge"><span style="font-size:8px;">$100K</span></div>
+        <div>
+          <p style="color:white;font-size:19px;margin:0 0 4px;">Pre-seed round raised</p>
+          <p style="margin:0;">From 1517 Fund</p>
+        </div>
+      </div>`);
+  });
+  document.getElementById("linkEducation").addEventListener("click", () => {
+    openInfoModal("◆ ACADEMY — EDUCATION", `
+      <div class="ach-row">
+        <div class="ach-badge"><span>UM</span></div>
+        <div>
+          <p style="color:white;font-size:19px;margin:0 0 4px;">University of Michigan — Ross School of Business</p>
+          <p style="margin:0;">BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
+        </div>
+      </div>`);
+  });
+  document.getElementById("linkContact").addEventListener("click", () => {
+    openInfoModal("◆ TAVERN — CONTACT", `
+      <p class="dialogue-npc">JIMSON YANG</p>
+      <p>"Want to team up? Choose an option below."</p>
+      <a class="choice" href="https://aventos.dev" target="_blank" rel="noreferrer">Visit Aventos [Enter World]</a>
+      <a class="choice" href="mailto:jimsonyangbusiness@gmail.com">Talk (send an email)</a>`);
+  });
+
+  /* ---------- title / boot ---------- */
+  function startGame() {
+    titleEl.style.display = "none";
+    charSelectEl.style.display = "flex";
+    renderCharacter();
+  }
+  titleEl.addEventListener("click", startGame);
+  window.addEventListener("keydown", function startOnce(e) {
+    if (titleEl.style.display !== "none") { startGame(); window.removeEventListener("keydown", startOnce); }
+  });
+</script>
+
+</body>
+</html>
