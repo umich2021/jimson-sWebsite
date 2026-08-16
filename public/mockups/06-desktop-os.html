@@ -116,8 +116,23 @@
   /* desktop icons */
   .desktop-icons {
     position: fixed; top: 44px; right: 12px; z-index: 5;
-    display: flex; flex-direction: column; gap: 18px; align-items: center;
+    display: flex; flex-direction: row; align-items: stretch; gap: 8px;
+    max-height: calc(100dvh - 130px);
   }
+  .icon-list {
+    display: flex; flex-direction: column; gap: 18px; align-items: center;
+    overflow-y: auto; overflow-x: hidden;
+    touch-action: pan-y; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; padding: 2px 0;
+  }
+  .icon-list::-webkit-scrollbar { display: none; }
+  .icon-dots {
+    display: flex; flex-direction: column; align-items: center; justify-content: space-evenly;
+    padding: 2px 0; opacity: 0; pointer-events: none; transition: opacity .25s ease;
+  }
+  .icon-dots.visible { opacity: 1; }
+  .icon-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.32); transition: background .15s ease, transform .15s ease; flex: none; }
+  .icon-dot.active { background: rgba(255,255,255,0.9); transform: scale(1.5); }
   .icon {
     width: 84px; display: flex; flex-direction: column; align-items: center; gap: 6px;
     cursor: pointer; padding: 6px; border-radius: 8px; touch-action: manipulation;
@@ -140,7 +155,7 @@
 
   /* windows */
   .window {
-    position: absolute; width: 460px; max-width: 92vw; min-width: 280px; min-height: 160px;
+    position: absolute; width: 520px; max-width: 92vw; min-width: 280px; min-height: 160px;
     background: var(--win-bg); border-radius: 10px;
     box-shadow: 0 30px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,0,0,0.08);
     display: none; flex-direction: column; overflow: hidden; touch-action: none;
@@ -262,9 +277,45 @@
     position: fixed; left: 16px; bottom: 90px; z-index: 4; color: rgba(255,255,255,0.75); font-size: 13px; max-width: 260px;
   }
 
+  /* boot sequence (retro / playful chime) */
+  .boot-screen {
+    position: fixed; inset: 0; z-index: 500; background: #000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px;
+    cursor: pointer; opacity: 1; transition: opacity 0.5s ease;
+  }
+  .boot-screen.hidden { opacity: 0; pointer-events: none; }
+  .boot-logo {
+    font-size: 60px; color: #fff; transform: scale(0.2) rotate(-8deg); opacity: 0;
+    animation: retroBounce 0.9s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes retroBounce {
+    0% { transform: scale(0.2) rotate(-8deg); opacity: 0; }
+    55% { transform: scale(1.18) rotate(5deg); opacity: 1; }
+    75% { transform: scale(0.93) rotate(-2deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .boot-wordmark {
+    font-size: 17px; font-weight: 700; letter-spacing: 0.06em; color: #fff; opacity: 0;
+    animation: retroFadeUp .5s ease .55s forwards;
+  }
+  @keyframes retroFadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .boot-caption {
+    color: rgba(255,255,255,0.6); font-size: 13px; text-align: center; max-width: 280px;
+    min-height: 16px; opacity: 0; animation: retroFadeUp .5s ease 1.05s forwards;
+  }
+
+  /* desktop chrome entrance (revealed as the boot screen fades) */
+  .menubar { transition: transform .5s cubic-bezier(.3,0,.15,1); }
+  .menubar.pre-boot { transform: translateY(-100%); }
+  .dock { transition: transform .5s cubic-bezier(.3,0,.15,1); }
+  .dock.pre-boot { transform: translateX(-50%) translateY(140%); }
+  .desktop-icons { transition: opacity .6s ease; }
+  .desktop-icons.pre-boot { opacity: 0; }
+
   @media (max-width: 700px) {
     .menubar-item { display: none; }
-    .desktop-icons { top: 34px; right: 6px; gap: 12px; }
+    .desktop-icons { top: 34px; right: 6px; gap: 5px; }
+    .icon-list { gap: 12px; }
     .icon { width: 62px; padding: 4px; }
     .icon-glyph { width: 42px; height: 42px; font-size: 10px; border-radius: 10px; }
     .icon-label { font-size: 9.5px; }
@@ -280,7 +331,13 @@
 </head>
 <body>
 
-<div class="menubar">
+<div class="boot-screen" id="bootScreen">
+  <div class="boot-logo">◆</div>
+  <div class="boot-wordmark">JimsonOS</div>
+  <p class="boot-caption" id="bootCaption"></p>
+</div>
+
+<div class="menubar pre-boot">
   <div class="menubar-left">
     <span class="menubar-logo">◆ JimsonOS</span>
 
@@ -334,7 +391,8 @@
   </div>
 </div>
 
-<div class="desktop-icons">
+<div class="desktop-icons pre-boot" id="desktopIcons">
+<div class="icon-list" id="iconList">
   <div class="icon" data-key="about" onclick="toggleWindow('about')">
     <div class="icon-glyph g-about">TXT</div>
     <div class="icon-label">About_Me.txt</div>
@@ -368,11 +426,13 @@
     <div class="icon-label">Contact.app</div>
   </div>
 </div>
+<div class="icon-dots" id="iconDots"></div>
+</div>
 
 <p class="welcome-hint">Click an icon to open it. Drag windows by their title bar, resize from the bottom-right corner, or right-click the desktop.</p>
 
 <!-- WINDOWS -->
-<div class="window" id="win-about" style="top:80px; left:120px; z-index:12; height:260px;">
+<div class="window" id="win-about" style="top:80px; left:120px; z-index:12; height:320px;">
   <div class="win-header" data-target="win-about">
     <span class="traffic t-red" onclick="closeWindow('win-about')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">About_Me.txt</span>
@@ -383,7 +443,7 @@
   </div>
 </div>
 
-<div class="window" id="win-aventos" style="top:110px; left:340px; z-index:11; height:420px;">
+<div class="window" id="win-aventos" style="top:110px; left:340px; z-index:11; height:480px;">
   <div class="win-header" data-target="win-aventos">
     <span class="traffic t-red" onclick="closeWindow('win-aventos')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">Aventos.app</span>
@@ -421,7 +481,7 @@
   </div>
 </div>
 
-<div class="window" id="win-geo" style="top:140px; left:580px; z-index:10; width:420px; height:320px;">
+<div class="window" id="win-geo" style="top:140px; left:580px; z-index:10; width:500px; height:380px;">
   <div class="win-header" data-target="win-geo">
     <span class="traffic t-red" onclick="closeWindow('win-geo')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">ProjectGEO.app</span>
@@ -448,7 +508,7 @@
   </div>
 </div>
 
-<div class="window" id="win-pink" style="top:170px; left:240px; z-index:9; width:420px; height:340px;">
+<div class="window" id="win-pink" style="top:170px; left:240px; z-index:9; width:500px; height:400px;">
   <div class="win-header" data-target="win-pink">
     <span class="traffic t-red" onclick="closeWindow('win-pink')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">PinkInference.app</span>
@@ -477,7 +537,7 @@
   </div>
 </div>
 
-<div class="window" id="win-projects" style="top:200px; left:420px; z-index:8; width:500px; height:380px;">
+<div class="window" id="win-projects" style="top:200px; left:420px; z-index:8; width:580px; height:440px;">
   <div class="win-header" data-target="win-projects">
     <span class="traffic t-red" onclick="closeWindow('win-projects')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">Projects</span>
@@ -510,7 +570,7 @@
   </div>
 </div>
 
-<div class="window" id="win-experience" style="top:100px; left:520px; z-index:7; height:440px;">
+<div class="window" id="win-experience" style="top:100px; left:520px; z-index:7; height:500px;">
   <div class="win-header" data-target="win-experience">
     <span class="traffic t-red" onclick="closeWindow('win-experience')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">Experience.pdf</span>
@@ -556,7 +616,7 @@
   </div>
 </div>
 
-<div class="window" id="win-contact" style="top:150px; left:260px; z-index:5; width:420px; height:260px;">
+<div class="window" id="win-contact" style="top:150px; left:260px; z-index:5; width:480px; height:300px;">
   <div class="win-header" data-target="win-contact">
     <span class="traffic t-red" onclick="closeWindow('win-contact')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">New Message</span>
@@ -569,7 +629,7 @@
   </div>
 </div>
 
-<div class="dock" id="dock">
+<div class="dock pre-boot" id="dock">
   <div class="dock-item g-about" data-tooltip="About_Me.txt" onclick="toggleWindow('about')">TXT</div>
   <div class="dock-item g-aventos" data-tooltip="Aventos.app" onclick="toggleWindow('aventos')">▶</div>
   <div class="dock-item g-geo" data-tooltip="ProjectGEO.app" onclick="toggleWindow('geo')">GEO</div>
@@ -848,10 +908,46 @@
     }
   }
   function toggleDesktopIcons() {
-    const icons = document.querySelector('.desktop-icons');
+    const icons = document.getElementById('desktopIcons');
     const willShow = icons.style.display === 'none';
     icons.style.display = willShow ? 'flex' : 'none';
     document.getElementById('viewIconsOption').classList.toggle('checked', willShow);
+  }
+
+  /* ---------- icon-rail snap scroll + dot indicator ---------- */
+  function setupIconDots() {
+    const list = document.getElementById('iconList');
+    const dotsWrap = document.getElementById('iconDots');
+    const icons = Array.from(list.querySelectorAll('.icon'));
+
+    icons.forEach(() => {
+      const dot = document.createElement('div');
+      dot.className = 'icon-dot';
+      dotsWrap.appendChild(dot);
+    });
+    const dots = Array.from(dotsWrap.children);
+
+    function updateVisibility() {
+      dotsWrap.classList.toggle('visible', list.scrollHeight > list.clientHeight + 2);
+    }
+
+    function updateActive() {
+      if (!dots.length) return;
+      const center = list.getBoundingClientRect().top + list.clientHeight / 2;
+      let closest = 0;
+      let minDist = Infinity;
+      icons.forEach((icon, i) => {
+        const r = icon.getBoundingClientRect();
+        const dist = Math.abs((r.top + r.height / 2) - center);
+        if (dist < minDist) { minDist = dist; closest = i; }
+      });
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === closest));
+    }
+
+    list.addEventListener('scroll', updateActive, { passive: true });
+    window.addEventListener('resize', () => { updateVisibility(); updateActive(); });
+    updateVisibility();
+    updateActive();
   }
   const wallpapers = [
     "radial-gradient(1200px 800px at 80% 10%, #6a5acd33, transparent 60%), radial-gradient(1000px 700px at 10% 90%, #ff6b9733, transparent 60%), linear-gradient(160deg, #2b2350 0%, #1a1330 45%, #0d0a1a 100%)",
@@ -993,7 +1089,62 @@
   tick();
   setInterval(tick, 1000 * 30);
 
-  openWindow('about');
+  /* ---------- boot sequence (retro / playful chime) ---------- */
+  function runBootSequence() {
+    const boot = document.getElementById('bootScreen');
+    const caption = document.getElementById('bootCaption');
+    const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const messages = [
+      'Starting JimsonOS…',
+      'Booting frontend + backend…',
+      'Warming up the anime render pipeline…',
+      'Loading GTM instincts…'
+    ];
+
+    let finished = false;
+    let startTimer = null;
+    let msgTimer = null;
+    let autoTimer = null;
+
+    function finish() {
+      if (finished) return;
+      finished = true;
+      clearTimeout(startTimer);
+      clearInterval(msgTimer);
+      clearTimeout(autoTimer);
+      boot.classList.add('hidden');
+      document.querySelector('.menubar').classList.remove('pre-boot');
+      document.querySelector('.dock').classList.remove('pre-boot');
+      document.getElementById('desktopIcons').classList.remove('pre-boot');
+      setTimeout(() => {
+        boot.remove();
+        openWindow('about');
+      }, reducedMotion ? 0 : 500);
+    }
+
+    if (reducedMotion) {
+      finish();
+      return;
+    }
+
+    let i = 0;
+    startTimer = setTimeout(() => {
+      caption.textContent = messages[0];
+      msgTimer = setInterval(() => {
+        i = (i + 1) % messages.length;
+        caption.textContent = messages[i];
+      }, 550);
+    }, 1050);
+
+    autoTimer = setTimeout(finish, 3000);
+    boot.addEventListener('click', finish);
+    window.addEventListener('keydown', function skipOnce() {
+      finish();
+      window.removeEventListener('keydown', skipOnce);
+    });
+  }
+  runBootSequence();
+  setupIconDots();
 </script>
 
 </body>

@@ -3,6 +3,6 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  // GitHub Pages serves this repo at /jimson-sWebsite/, not the domain root.
-  base: "/jimson-sWebsite/",
+  // Served from the custom domain root (www.jimsonyang.com), not a GitHub Pages project subpath.
+  base: "/",
 });
