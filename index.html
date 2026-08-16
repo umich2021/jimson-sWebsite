@@ -1,13 +1,1152 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Jimson Yang</title>
-    <meta name="description" content="Jimson Yang — co-founder of Aventos, an AI anime studio. Builder across sales, GTM, and engineering." />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Jimson Yang</title>
+<meta name="description" content="Jimson Yang — co-founder of Aventos, an AI anime studio. Builder across sales, GTM, and engineering." />
+<style>
+  :root {
+    --menubar: rgba(30,30, 34, 0.55);
+    --dock-bg: rgba(255,255,255,0.12);
+    --win-bg: #f4f4f6;
+    --win-header: #e4e4e8;
+    --line: #d3d3d9;
+    --ink: #1c1c1e;
+    --ink-soft: #6b6b70;
+    --accent: #4c8bf5;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(1200px 800px at 80% 10%, #6a5acd33, transparent 60%),
+      radial-gradient(1000px 700px at 10% 90%, #ff6b9733, transparent 60%),
+      linear-gradient(160deg, #2b2350 0%, #1a1330 45%, #0d0a1a 100%);
+    overflow: hidden;
+    height: 100vh;
+    height: 100dvh;
+    position: relative;
+    color: var(--ink);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  a { color: inherit; }
+
+  /* menu bar */
+  .menubar {
+    position: fixed; top: 0; left: 0; right: 0; height: 28px; z-index: 100;
+    background: var(--menubar); backdrop-filter: blur(14px);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 14px; font-size: 13px; color: #fff;
+  }
+  .menubar-left { display: flex; align-items: center; gap: 6px; overflow: visible; }
+  .menubar-logo { font-weight: 700; white-space: nowrap; margin-right: 12px; }
+  .menu { position: relative; }
+  .menubar-item {
+    opacity: 0.85; white-space: nowrap; cursor: pointer; padding: 4px 7px; border-radius: 5px;
+    touch-action: manipulation;
+  }
+  .menubar-item:hover { opacity: 1; background: rgba(255,255,255,0.12); }
+  .menu.open .menubar-item { opacity: 1; background: rgba(255,255,255,0.18); }
+  .menubar-right { display: flex; align-items: center; gap: 14px; opacity: 0.9; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* dropdown menus (menubar + context menu share this look) */
+  .menu-dropdown, .context-menu {
+    position: absolute; top: 26px; left: 0; min-width: 220px; background: rgba(28,28,32,0.98);
+    backdrop-filter: blur(16px); border-radius: 8px; box-shadow: 0 14px 34px rgba(0,0,0,0.5); padding: 6px;
+    display: none; z-index: 200; border: 1px solid rgba(255,255,255,0.08);
+  }
+  .menu.open .menu-dropdown { display: block; }
+  .context-menu { position: fixed; top: auto; z-index: 250; }
+  .context-menu.open { display: block; }
+  .menu-option {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 8px 10px; border-radius: 5px;
+    font-size: 13px; color: #eee; cursor: pointer; white-space: nowrap; touch-action: manipulation;
+  }
+  .menu-option:hover { background: var(--accent); color: white; }
+  .menu-option.hidden { display: none; }
+  .menu-option.checked::before { content: "✓"; margin-right: 8px; opacity: 0.8; }
+  .menu-option .menu-shortcut { color: rgba(255,255,255,0.4); font-size: 11.5px; }
+  .menu-option:hover .menu-shortcut { color: rgba(255,255,255,0.85); }
+  .menu-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 5px 4px; }
+
+  /* toast */
+  .toast {
+    position: fixed; top: 40px; left: 50%; transform: translateX(-50%) translateY(-8px); z-index: 400;
+    background: rgba(20,20,24,0.95); color: white; font-size: 13px; font-weight: 600; padding: 10px 16px;
+    border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.4); max-width: 90vw; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* generic modal (Quit / About OS / Shortcuts / Get Info) */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 300; background: rgba(10,10,14,0.55); backdrop-filter: blur(3px);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-panel {
+    position: relative; width: 100%; max-width: 380px; background: var(--win-bg); border-radius: 12px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5); padding: 24px; font-size: 14px; line-height: 1.6; color: var(--ink);
+  }
+  .modal-panel h3 { margin: 0 0 12px; font-size: 16px; }
+  .modal-panel p { margin: 0 0 10px; color: #3a3a3c; }
+  .modal-panel p.soft { color: var(--ink-soft); font-size: 12.5px; }
+  .modal-close {
+    position: absolute; top: 12px; right: 12px; width: 26px; height: 26px; border-radius: 50%; border: none;
+    background: rgba(0,0,0,0.06); color: var(--ink-soft); cursor: pointer; font-size: 12px; touch-action: manipulation;
+  }
+  .modal-close:hover { background: rgba(0,0,0,0.12); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .modal-btn {
+    padding: 9px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--line);
+    background: #fff; color: var(--ink); text-decoration: none; display: inline-block; touch-action: manipulation;
+  }
+  .modal-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .shortcut-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0;
+    border-bottom: 1px solid var(--line); font-size: 13px;
+  }
+  .shortcut-row:last-child { border-bottom: none; }
+  .kbd { background: rgba(0,0,0,0.06); padding: 3px 8px; border-radius: 5px; font-size: 11.5px; color: var(--ink-soft); white-space: nowrap; }
+
+  /* desktop icons */
+  .desktop-icons {
+    position: fixed; top: 44px; right: 12px; z-index: 5;
+    display: flex; flex-direction: row; align-items: stretch; gap: 8px;
+    max-height: calc(100dvh - 130px);
+  }
+  .icon-list {
+    display: flex; flex-direction: column; gap: 18px; align-items: center;
+    overflow-y: auto; overflow-x: hidden;
+    touch-action: pan-y; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; padding: 2px 0;
+  }
+  .icon-list::-webkit-scrollbar { display: none; }
+  .icon-dots {
+    display: flex; flex-direction: column; align-items: center; justify-content: space-evenly;
+    padding: 2px 0; opacity: 0; pointer-events: none; transition: opacity .25s ease;
+  }
+  .icon-dots.visible { opacity: 1; }
+  .icon-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.32); transition: background .15s ease, transform .15s ease; flex: none; }
+  .icon-dot.active { background: rgba(255,255,255,0.9); transform: scale(1.5); }
+  .icon {
+    width: 84px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    cursor: pointer; padding: 6px; border-radius: 8px; touch-action: manipulation;
+  }
+  .icon:hover, .icon.selected { background: rgba(255,255,255,0.12); }
+  .icon-glyph {
+    width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: white; box-shadow: 0 6px 16px rgba(0,0,0,0.35); flex: none;
+  }
+  .icon-label { font-size: 12px; color: white; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+
+  .g-about { background: linear-gradient(135deg, #5ac8fa, #007aff); }
+  .g-aventos { background: linear-gradient(135deg, #ff6b9d, #b83280); }
+  .g-geo { background: linear-gradient(135deg, #5eead4, #0891b2); }
+  .g-pink { background: linear-gradient(135deg, #f0abfc, #a21caf); }
+  .g-projects { background: linear-gradient(135deg, #ffd166, #f77f00); }
+  .g-experience { background: linear-gradient(135deg, #7ee787, #1f9d55); }
+  .g-education { background: linear-gradient(135deg, #c792ea, #6a3fbf); }
+  .g-contact { background: linear-gradient(135deg, #ff8a65, #d84315); }
+
+  /* windows */
+  .window {
+    position: absolute; width: 520px; max-width: 92vw; min-width: 280px; min-height: 160px;
+    background: var(--win-bg); border-radius: 10px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,0,0,0.08);
+    display: none; flex-direction: column; overflow: hidden; touch-action: none;
+  }
+  .window.open { display: flex; }
+  .win-header {
+    flex: none; height: 40px; background: var(--win-header); display: flex; flex-direction: row-reverse; align-items: center;
+    gap: 8px; padding: 0 12px; cursor: grab; border-bottom: 1px solid var(--line); touch-action: none;
+  }
+  .win-header:active { cursor: grabbing; }
+  .traffic { width: 16px; height: 16px; border-radius: 50%; flex: none; position: relative; }
+  .t-red { background: #ff5f57; cursor: pointer; }
+  .t-red::after {
+    content: "×"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; line-height: 1; color: #7a1410; font-weight: 700;
+  }
+  .t-yellow { background: #febc2e; }
+  .t-green { background: #28c840; }
+  .win-title {
+    flex: 1; min-width: 0; text-align: left; font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .win-body {
+    flex: 1; min-height: 0; padding: 20px; font-size: 14px; line-height: 1.6; overflow-y: auto;
+    touch-action: pan-y; -webkit-overflow-scrolling: touch;
+  }
+  .win-body h2 { font-size: 17px; margin: 0 0 10px; }
+  .win-body p { color: #3a3a3c; margin: 0 0 12px; }
+  .win-body .soft { color: var(--ink-soft); font-size: 12.5px; }
+
+  #win-about .win-body { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: white; }
+
+  #win-aventos .win-body { background: #17171b; color: #eee; }
+  #win-aventos .win-body p { color: #b8b8bc; }
+  .video-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .video-thumb { aspect-ratio: 16/9; background: #0d0d10; border: 1px solid #2b2b30; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ff6b9d; font-size: 12px; }
+
+  /* tabbed apps */
+  .win-tabs { flex: none; display: flex; background: var(--win-header); border-bottom: 1px solid var(--line); }
+  .win-tab {
+    flex: 1; text-align: center; padding: 10px 6px; font-size: 12px; font-weight: 600; color: var(--ink-soft);
+    cursor: pointer; border-bottom: 2px solid transparent; touch-action: manipulation; user-select: none;
+  }
+  .win-tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  #win-aventos .win-tabs { background: #0f0f13; border-bottom-color: #2b2b30; }
+  #win-aventos .win-tab { color: #8b8b90; }
+  #win-aventos .win-tab.active { color: #fff; border-bottom-color: #ff6b9d; }
+  #win-geo .win-tab.active { border-bottom-color: #0891b2; }
+  #win-pink .win-tab.active { border-bottom-color: #a21caf; }
+
+  .stat-chip-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .stat-chip { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; text-align: center; min-width: 96px; flex: 1; }
+  .stat-chip .num { font-weight: 700; font-size: 15px; color: var(--ink); }
+  .stat-chip .lbl { font-size: 10.5px; color: var(--ink-soft); margin-top: 2px; }
+  #win-aventos .stat-chip { background: rgba(255,255,255,0.06); border-color: #2b2b30; }
+  #win-aventos .stat-chip .num { color: #fff; }
+  #win-aventos .stat-chip .lbl { color: #b8b8bc; }
+  .tab-link { display: inline-block; margin-top: 14px; font-size: 12.5px; font-weight: 600; color: var(--accent); text-decoration: none; }
+  .tab-link:hover { text-decoration: underline; }
+
+  .file-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); touch-action: pan-y; }
+  .file-row:last-child { border-bottom: none; }
+  .file-icon { width: 34px; height: 34px; border-radius: 7px; background: linear-gradient(135deg, #ffd166, #f77f00); flex: none; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:700; }
+  .file-icon.fun { background: linear-gradient(135deg, #7ee787, #1f9d55); }
+  .file-name { font-size: 13.5px; font-weight: 600; }
+  .file-desc { font-size: 12px; color: var(--ink-soft); }
+  .group-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); margin: 14px 0 4px; }
+  .group-label:first-child { margin-top: 0; }
+
+  #win-experience .win-body { background: #3a3a3c; padding: 24px; }
+  .pdf-page { background: white; padding: 22px; border-radius: 2px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
+  .pdf-page:last-child { margin-bottom: 0; }
+  .pdf-role { font-weight: 700; font-size: 14px; }
+  .pdf-meta { color: var(--ink-soft); font-size: 11.5px; margin: 2px 0 8px; }
+  .pdf-summary { font-size: 12.5px; color: #3a3a3c; }
+
+  .mail-field { display: flex; border-bottom: 1px solid var(--line); padding: 8px 0; font-size: 13px; }
+  .mail-field .label { width: 60px; color: var(--ink-soft); flex: none; }
+  .mail-send {
+    margin-top: 16px; background: var(--accent); color: white; border: none; padding: 11px 18px; border-radius: 6px;
+    font-size: 13px; font-weight: 600; cursor: pointer; display: inline-block; text-decoration: none;
+  }
+
+  /* resize handle */
+  .resize-handle { position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; cursor: nwse-resize; z-index: 3; touch-action: none; }
+  .resize-handle::after {
+    content: ""; position: absolute; right: 4px; bottom: 4px; width: 11px; height: 11px;
+    background-image: repeating-linear-gradient(135deg, var(--ink-soft) 0 1.5px, transparent 1.5px 4px);
+    opacity: 0.55;
+  }
+
+  /* dock */
+  .dock {
+    position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 100;
+    display: flex; gap: 10px; padding: 8px 12px; border-radius: 18px;
+    background: var(--dock-bg); backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    max-width: 94vw;
+  }
+  .dock-item {
+    width: 46px; height: 46px; border-radius: 11px; display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 700; cursor: pointer; transition: transform .12s; position: relative;
+    flex: none; touch-action: manipulation;
+  }
+  .dock-item:hover { transform: translateY(-6px) scale(1.06); }
+  .dock-item.running::after {
+    content: ""; position: absolute; bottom: -8px; width: 4px; height: 4px; border-radius: 50%; background: white;
+  }
+  .dock-item::before {
+    content: attr(data-tooltip); position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%) translateY(4px);
+    background: rgba(20,20,24,0.95); color: white; font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 6px;
+    white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s;
+  }
+  .dock-item:hover::before { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .welcome-hint {
+    position: fixed; left: 16px; bottom: 90px; z-index: 4; color: rgba(255,255,255,0.75); font-size: 13px; max-width: 260px;
+  }
+
+  /* boot sequence (retro / playful chime) */
+  .boot-screen {
+    position: fixed; inset: 0; z-index: 500; background: #000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px;
+    cursor: pointer; opacity: 1; transition: opacity 0.5s ease;
+  }
+  .boot-screen.hidden { opacity: 0; pointer-events: none; }
+  .boot-logo {
+    font-size: 60px; color: #fff; transform: scale(0.2) rotate(-8deg); opacity: 0;
+    animation: retroBounce 0.9s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes retroBounce {
+    0% { transform: scale(0.2) rotate(-8deg); opacity: 0; }
+    55% { transform: scale(1.18) rotate(5deg); opacity: 1; }
+    75% { transform: scale(0.93) rotate(-2deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .boot-wordmark {
+    font-size: 17px; font-weight: 700; letter-spacing: 0.06em; color: #fff; opacity: 0;
+    animation: retroFadeUp .5s ease .55s forwards;
+  }
+  @keyframes retroFadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .boot-caption {
+    color: rgba(255,255,255,0.6); font-size: 13px; text-align: center; max-width: 280px;
+    min-height: 16px; opacity: 0; animation: retroFadeUp .5s ease 1.05s forwards;
+  }
+
+  /* desktop chrome entrance (revealed as the boot screen fades) */
+  .menubar { transition: transform .5s cubic-bezier(.3,0,.15,1); }
+  .menubar.pre-boot { transform: translateY(-100%); }
+  .dock { transition: transform .5s cubic-bezier(.3,0,.15,1); }
+  .dock.pre-boot { transform: translateX(-50%) translateY(140%); }
+  .desktop-icons { transition: opacity .6s ease; }
+  .desktop-icons.pre-boot { opacity: 0; }
+
+  @media (max-width: 700px) {
+    .menubar-item { display: none; }
+    .desktop-icons { top: 34px; right: 6px; gap: 5px; }
+    .icon-list { gap: 12px; }
+    .icon { width: 62px; padding: 4px; }
+    .icon-glyph { width: 42px; height: 42px; font-size: 10px; border-radius: 10px; }
+    .icon-label { font-size: 9.5px; }
+    .window { width: 92vw !important; height: 70vh !important; height: 70dvh !important; }
+    .win-header { height: 44px; }
+    .win-body { padding: 16px; font-size: 13.5px; }
+    .dock { gap: 6px; padding: 6px 8px; bottom: 8px; }
+    .dock-item { width: 40px; height: 40px; font-size: 9.5px; border-radius: 9px; }
+    .welcome-hint { display: none; }
+    .resize-handle { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="boot-screen" id="bootScreen">
+  <div class="boot-logo">◆</div>
+  <div class="boot-wordmark">JimsonOS</div>
+  <p class="boot-caption" id="bootCaption"></p>
+</div>
+
+<div class="menubar pre-boot">
+  <div class="menubar-left">
+    <span class="menubar-logo">◆ JimsonOS</span>
+
+    <div class="menu" data-menu="file">
+      <span class="menubar-item">File</span>
+      <div class="menu-dropdown" id="menu-file">
+        <div class="menu-option" onclick="toggleWindow('contact')">New Message</div>
+        <div class="menu-divider"></div>
+        <div class="menu-option" onclick="closeFocusedWindow()">Close Window <span class="menu-shortcut">Esc</span></div>
+        <div class="menu-divider"></div>
+        <div class="menu-option" onclick="quitPrompt()">Quit JimsonOS <span class="menu-shortcut">⌘Q</span></div>
+      </div>
+    </div>
+
+    <div class="menu" data-menu="edit">
+      <span class="menubar-item">Edit</span>
+      <div class="menu-dropdown" id="menu-edit">
+        <div class="menu-option" onclick="copyEmail()">Copy Email Address</div>
+        <div class="menu-option" onclick="toastMessage('Nothing to select — try an icon instead.')">Select All</div>
+      </div>
+    </div>
+
+    <div class="menu" data-menu="view">
+      <span class="menubar-item">View</span>
+      <div class="menu-dropdown" id="menu-view">
+        <div class="menu-option checked" id="viewIconsOption" onclick="toggleDesktopIcons()">Show Desktop Icons</div>
+        <div class="menu-option" onclick="cycleWallpaper()">Change Wallpaper</div>
+        <div class="menu-option" onclick="toggleFullscreen()">Enter Full Screen</div>
+      </div>
+    </div>
+
+    <div class="menu" data-menu="window">
+      <span class="menubar-item">Window</span>
+      <div class="menu-dropdown" id="menu-window"></div>
+    </div>
+
+    <div class="menu" data-menu="help">
+      <span class="menubar-item">Help</span>
+      <div class="menu-dropdown" id="menu-help">
+        <div class="menu-option" onclick="toggleWindow('about')">About Jimson</div>
+        <div class="menu-option" onclick="showAboutOS()">About JimsonOS</div>
+        <div class="menu-option" onclick="showShortcuts()">Keyboard Shortcuts</div>
+        <div class="menu-divider"></div>
+        <div class="menu-option" onclick="toggleWindow('contact')">Say Hi 👋</div>
+      </div>
+    </div>
+  </div>
+  <div class="menubar-right">
+    <span>San Francisco, CA</span>
+    <span id="clock">--:--</span>
+  </div>
+</div>
+
+<div class="desktop-icons pre-boot" id="desktopIcons">
+<div class="icon-list" id="iconList">
+  <div class="icon" data-key="about" onclick="toggleWindow('about')">
+    <div class="icon-glyph g-about">TXT</div>
+    <div class="icon-label">About_Me.txt</div>
+  </div>
+  <div class="icon" data-key="aventos" onclick="toggleWindow('aventos')">
+    <div class="icon-glyph g-aventos">▶</div>
+    <div class="icon-label">Aventos.app</div>
+  </div>
+  <div class="icon" data-key="geo" onclick="toggleWindow('geo')">
+    <div class="icon-glyph g-geo">GEO</div>
+    <div class="icon-label">ProjectGEO.app</div>
+  </div>
+  <div class="icon" data-key="pink" onclick="toggleWindow('pink')">
+    <div class="icon-glyph g-pink">PI</div>
+    <div class="icon-label">PinkInference.app</div>
+  </div>
+  <div class="icon" data-key="projects" onclick="toggleWindow('projects')">
+    <div class="icon-glyph g-projects">▤</div>
+    <div class="icon-label">Projects</div>
+  </div>
+  <div class="icon" data-key="experience" onclick="toggleWindow('experience')">
+    <div class="icon-glyph g-experience">PDF</div>
+    <div class="icon-label">Experience.pdf</div>
+  </div>
+  <div class="icon" data-key="education" onclick="toggleWindow('education')">
+    <div class="icon-glyph g-education">UM</div>
+    <div class="icon-label">Education.txt</div>
+  </div>
+  <div class="icon" data-key="contact" onclick="toggleWindow('contact')">
+    <div class="icon-glyph g-contact">@</div>
+    <div class="icon-label">Contact.app</div>
+  </div>
+</div>
+<div class="icon-dots" id="iconDots"></div>
+</div>
+
+<p class="welcome-hint">Click an icon to open it. Drag windows by their title bar, resize from the bottom-right corner, or right-click the desktop.</p>
+
+<!-- WINDOWS -->
+<div class="window" id="win-about" style="top:80px; left:120px; z-index:12; height:320px;">
+  <div class="win-header" data-target="win-about">
+    <span class="traffic t-red" onclick="closeWindow('win-about')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">About_Me.txt</span>
+  </div>
+  <div class="win-body">
+    <p class="soft">Jimson Yang — San Francisco, CA</p>
+    <p>I co-founded Aventos, an AI anime studio, after a few years doing a little bit of everything at startups — sales, GTM, frontend engineering, and a stint on the VC side doing due diligence. I build my own backend for fun, ship frontend for work, and I'm currently trying to figure out how to make an AI-generated anime that's actually emotionally powerful and not just fast-paced slop.</p>
+  </div>
+</div>
+
+<div class="window" id="win-aventos" style="top:110px; left:340px; z-index:11; height:480px;">
+  <div class="win-header" data-target="win-aventos">
+    <span class="traffic t-red" onclick="closeWindow('win-aventos')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">Aventos.app</span>
+  </div>
+  <div class="win-tabs">
+    <div class="win-tab active" data-tab="overview" onclick="switchTab('win-aventos','overview')">Overview</div>
+    <div class="win-tab" data-tab="videos" onclick="switchTab('win-aventos','videos')">Videos</div>
+    <div class="win-tab" data-tab="platform" onclick="switchTab('win-aventos','platform')">Platform</div>
+  </div>
+  <div class="win-body">
+    <div class="tab-panel active" data-panel="overview">
+      <h2 style="color:white;">Aventos</h2>
+      <p>Aventos is an AI anime studio — short-form, AI-generated anime built end to end, from concept and screenwriting to voice, animation, and post. The bet: anime-style storytelling doesn't just work as entertainment, it works as a marketing channel for B2B SaaS companies who all sound and look the same.</p>
+      <div class="stat-chip-row">
+        <div class="stat-chip"><div class="num">70K+</div><div class="lbl">trailer views</div></div>
+        <div class="stat-chip"><div class="num">98.5M</div><div class="lbl">views via publisher deal</div></div>
+        <div class="stat-chip"><div class="num">BlueBox.tv</div><div class="lbl">distribution partner</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" data-panel="videos">
+      <h2 style="color:white;">Videos</h2>
+      <div class="video-row">
+        <div class="video-thumb">▶ Trailer</div>
+        <div class="video-thumb">▶ Bill split</div>
+      </div>
+    </div>
+    <div class="tab-panel" data-panel="platform">
+      <h2 style="color:white;">Platform</h2>
+      <p>We turned Aventos's internal AI-video tooling — script-to-render pipeline, batch generation, asset management — into a creative-suite platform for other studios. The first paying customer was our own production team, buying generation credits to prove it out before opening it up further.</p>
+      <p>We also landed a publisher deal for "My Cat Is a Vegetarian" and a distribution deal with BlueBox.tv to get the content out further.</p>
+      <div class="stat-chip-row">
+        <div class="stat-chip"><div class="num">$10K</div><div class="lbl">first platform revenue</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="window" id="win-geo" style="top:140px; left:580px; z-index:10; width:500px; height:380px;">
+  <div class="win-header" data-target="win-geo">
+    <span class="traffic t-red" onclick="closeWindow('win-geo')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">ProjectGEO.app</span>
+  </div>
+  <div class="win-tabs">
+    <div class="win-tab active" data-tab="overview" onclick="switchTab('win-geo','overview')">Overview</div>
+    <div class="win-tab" data-tab="stack" onclick="switchTab('win-geo','stack')">Stack</div>
+    <div class="win-tab" data-tab="traction" onclick="switchTab('win-geo','traction')">Traction</div>
+  </div>
+  <div class="win-body">
+    <div class="tab-panel active" data-panel="overview">
+      <h2>Project GEO</h2>
+      <p>An AEO (answer-engine optimization) tool — it tracks how often and how well a brand shows up when people ask ChatGPT, Claude, and other AI assistants about brand discoverability. Built for teams who want to know if they exist in the AI-answer layer, not just search.</p>
+    </div>
+    <div class="tab-panel" data-panel="stack">
+      <h2>Stack</h2>
+      <p>Solo build, top to bottom — the crawling/tracking pipeline that watches what AI answer engines cite, plus the product and dashboard on top. No cofounding engineer; I wrote the stack myself.</p>
+    </div>
+    <div class="tab-panel" data-panel="traction">
+      <h2>Traction</h2>
+      <p>Took it from 0 to 1 — first paying B2B SaaS customers, sales run solo alongside the build.</p>
+      <a class="tab-link" href="https://github.com/umich2021/tracking_LLMs_bots" target="_blank" rel="noreferrer">View the code →</a>
+    </div>
+  </div>
+</div>
+
+<div class="window" id="win-pink" style="top:170px; left:240px; z-index:9; width:500px; height:400px;">
+  <div class="win-header" data-target="win-pink">
+    <span class="traffic t-red" onclick="closeWindow('win-pink')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">PinkInference.app</span>
+  </div>
+  <div class="win-tabs">
+    <div class="win-tab active" data-tab="overview" onclick="switchTab('win-pink','overview')">Overview</div>
+    <div class="win-tab" data-tab="bets" onclick="switchTab('win-pink','bets')">Bets</div>
+    <div class="win-tab" data-tab="funding" onclick="switchTab('win-pink','funding')">Funding</div>
+  </div>
+  <div class="win-body">
+    <div class="tab-panel active" data-panel="overview">
+      <h2>Pink Inference</h2>
+      <p>A deep-tech venture studio. I was the business-side co-founder — GTM, fundraising, and figuring out how to sell things nobody else is building yet.</p>
+    </div>
+    <div class="tab-panel" data-panel="bets">
+      <h2>Bets</h2>
+      <p>The portfolio ran wide on purpose — everything from wetware / biological computing to building data centers on oil-and-gas infrastructure. Deep tech, long time horizons, not built for quick revenue.</p>
+    </div>
+    <div class="tab-panel" data-panel="funding">
+      <h2>Funding</h2>
+      <p>Raised a $100K pre-seed round from 1517 Fund.</p>
+      <div class="stat-chip-row">
+        <div class="stat-chip"><div class="num">$100K</div><div class="lbl">pre-seed · 1517 Fund</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="window" id="win-projects" style="top:200px; left:420px; z-index:8; width:580px; height:440px;">
+  <div class="win-header" data-target="win-projects">
+    <span class="traffic t-red" onclick="closeWindow('win-projects')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">Projects</span>
+  </div>
+  <div class="win-tabs">
+    <div class="win-tab active" data-tab="work" onclick="switchTab('win-projects','work')">For Work</div>
+    <div class="win-tab" data-tab="fun" onclick="switchTab('win-projects','fun')">For Fun</div>
+  </div>
+  <div class="win-body">
+    <div class="tab-panel active" data-panel="work">
+      <a class="file-row" href="https://github.com/umich2021/InternalToolsSeedance" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+        <div class="file-icon">FA</div>
+        <div><div class="file-name">Seedance Internal Tool</div><div class="file-desc">Internal FastAPI + React tool for generating and archiving AI video via BytePlus Seedance.</div></div>
+      </a>
+      <a class="file-row" href="https://github.com/umich2021/manhwa-reader" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+        <div class="file-icon">MR</div>
+        <div><div class="file-name">Manhwa Reader</div><div class="file-desc">A reader built to make sense of messy manhwa file collections.</div></div>
+      </a>
+      <a class="file-row" href="https://github.com/umich2021/tableau_website" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+        <div class="file-icon">TB</div>
+        <div><div class="file-name">Tableau Client Site</div><div class="file-desc">A client website build.</div></div>
+      </a>
+    </div>
+    <div class="tab-panel" data-panel="fun">
+      <a class="file-row" href="https://github.com/umich2021/jetlag_SF" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+        <div class="file-icon fun">JL</div>
+        <div><div class="file-name">Jet Lag: SF</div><div class="file-desc">A mobile app for playing Jet Lag: The Game across SF neighborhoods.</div></div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="window" id="win-experience" style="top:100px; left:520px; z-index:7; height:500px;">
+  <div class="win-header" data-target="win-experience">
+    <span class="traffic t-red" onclick="closeWindow('win-experience')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">Experience.pdf</span>
+  </div>
+  <div class="win-body">
+    <div class="pdf-page">
+      <div class="pdf-role">Co-Founder — Aventos</div>
+      <div class="pdf-meta">May 2025 – Present · San Francisco, CA</div>
+      <div class="pdf-summary">AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS. Landed a publisher deal that's driven 98.5M views, a distribution deal with BlueBox.tv, and turned internal tooling into a platform with its first $10K in revenue.</div>
+    </div>
+    <div class="pdf-page">
+      <div class="pdf-role">Founder — Project GEO</div>
+      <div class="pdf-meta">2024 – 2025</div>
+      <div class="pdf-summary">AEO/LLM citation tracker — tracks how well a brand shows up when people ask ChatGPT or Claude AI questions about brand discoverability. Built the full tech stack solo and took it 0 to 1 in B2B SaaS sales.</div>
+    </div>
+    <div class="pdf-page">
+      <div class="pdf-role">Co-Founder, Business — Pink Inference</div>
+      <div class="pdf-meta">2023 – 2024</div>
+      <div class="pdf-summary">Business side of a deep-tech venture studio spanning wetware/biological computing to oil-and-gas-powered data centers. Raised a $100K pre-seed round from 1517 Fund.</div>
+    </div>
+    <div class="pdf-page">
+      <div class="pdf-role">Intern — CitySide Ventures</div>
+      <div class="pdf-meta">Mar 2023 – Jul 2024</div>
+      <div class="pdf-summary">Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors.</div>
+    </div>
+    <div class="pdf-page">
+      <div class="pdf-role">Summer Intern — Arboretum Ventures</div>
+      <div class="pdf-meta">Apr 2023 – Jul 2023</div>
+      <div class="pdf-summary">Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand.</div>
+    </div>
+  </div>
+</div>
+
+<div class="window" id="win-education" style="top:220px; left:340px; z-index:6; width:380px; height:190px;">
+  <div class="win-header" data-target="win-education">
+    <span class="traffic t-red" onclick="closeWindow('win-education')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">Education.txt</span>
+  </div>
+  <div class="win-body">
+    <h2>University of Michigan</h2>
+    <p class="soft">Stephen M. Ross School of Business</p>
+    <p>BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
+  </div>
+</div>
+
+<div class="window" id="win-contact" style="top:150px; left:260px; z-index:5; width:480px; height:300px;">
+  <div class="win-header" data-target="win-contact">
+    <span class="traffic t-red" onclick="closeWindow('win-contact')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">New Message</span>
+  </div>
+  <div class="win-body">
+    <div class="mail-field"><span class="label">To:</span><span>jimsonyangbusiness@gmail.com</span></div>
+    <div class="mail-field"><span class="label">Subject:</span><span>Let's talk</span></div>
+    <p class="soft" style="margin-top:14px;">Hi Jimson — I came across your site and wanted to reach out about...</p>
+    <a class="mail-send" href="mailto:jimsonyangbusiness@gmail.com?subject=Let%27s%20talk">Send</a>
+  </div>
+</div>
+
+<div class="dock pre-boot" id="dock">
+  <div class="dock-item g-about" data-tooltip="About_Me.txt" onclick="toggleWindow('about')">TXT</div>
+  <div class="dock-item g-aventos" data-tooltip="Aventos.app" onclick="toggleWindow('aventos')">▶</div>
+  <div class="dock-item g-geo" data-tooltip="ProjectGEO.app" onclick="toggleWindow('geo')">GEO</div>
+  <div class="dock-item g-pink" data-tooltip="PinkInference.app" onclick="toggleWindow('pink')">PI</div>
+  <div class="dock-item g-projects" data-tooltip="Projects" onclick="toggleWindow('projects')">▤</div>
+  <div class="dock-item g-experience" data-tooltip="Experience.pdf" onclick="toggleWindow('experience')">PDF</div>
+  <div class="dock-item g-education" data-tooltip="Education.txt" onclick="toggleWindow('education')">UM</div>
+  <div class="dock-item g-contact" data-tooltip="Contact.app" onclick="toggleWindow('contact')">@</div>
+</div>
+
+<!-- right-click context menu (desktop + icons) -->
+<div class="context-menu" id="contextMenu">
+  <div class="menu-option" id="ctxOpen">Open</div>
+  <div class="menu-option" id="ctxInfo">Get Info</div>
+  <div class="menu-divider" id="ctxDivider1"></div>
+  <div class="menu-option" id="ctxNewMessage">New Message</div>
+  <div class="menu-option" id="ctxWallpaper">Change Wallpaper</div>
+  <div class="menu-option" id="ctxIcons">Toggle Desktop Icons</div>
+  <div class="menu-divider" id="ctxDivider2"></div>
+  <div class="menu-option" id="ctxAbout">About JimsonOS</div>
+</div>
+
+<!-- generic modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-panel">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modalTitle"></h3>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let zTop = 20;
+
+  const apps = [
+    { key: "about", label: "About_Me.txt" },
+    { key: "aventos", label: "Aventos.app" },
+    { key: "geo", label: "ProjectGEO.app" },
+    { key: "pink", label: "PinkInference.app" },
+    { key: "projects", label: "Projects" },
+    { key: "experience", label: "Experience.pdf" },
+    { key: "education", label: "Education.txt" },
+    { key: "contact", label: "Contact.app" }
+  ];
+
+  const appMeta = {
+    about: { kind: "Plain Text", size: "2 KB", modified: "Recently" },
+    aventos: { kind: "Application", size: "98.5M views", modified: "2025" },
+    geo: { kind: "Application", size: "0 → 1", modified: "2024–2025" },
+    pink: { kind: "Application", size: "$100K raised", modified: "2023–2024" },
+    projects: { kind: "Folder", size: "4 items", modified: "Ongoing" },
+    experience: { kind: "PDF Document", size: "5 pages", modified: "Updated regularly" },
+    education: { kind: "Plain Text", size: "3.89 GPA", modified: "2021–2025" },
+    contact: { kind: "Application", size: "1 inbox", modified: "Always open" }
+  };
+
+  function clampWindow(win) {
+    const rect = win.getBoundingClientRect();
+    const maxLeft = Math.max(4, window.innerWidth - rect.width - 4);
+    const maxTop = Math.max(32, window.innerHeight - 60);
+    let left = parseFloat(win.style.left) || 0;
+    let top = parseFloat(win.style.top) || 32;
+    left = Math.min(Math.max(4, left), maxLeft);
+    top = Math.min(Math.max(28, top), maxTop);
+    win.style.left = left + 'px';
+    win.style.top = top + 'px';
+  }
+
+  function openWindow(name) {
+    const win = document.getElementById('win-' + name);
+    win.classList.add('open');
+    focusWindow(win);
+    clampWindow(win);
+  }
+  function closeWindow(id) {
+    document.getElementById(id).classList.remove('open');
+    if (window.event) window.event.stopPropagation();
+  }
+  function toggleWindow(name) {
+    const win = document.getElementById('win-' + name);
+    if (win.classList.contains('open')) {
+      win.classList.remove('open');
+    } else {
+      openWindow(name);
+    }
+  }
+  function closeFocusedWindow() {
+    const open = Array.from(document.querySelectorAll('.window.open'));
+    if (!open.length) return;
+    open.sort((a, b) => (parseInt(b.style.zIndex) || 0) - (parseInt(a.style.zIndex) || 0));
+    open[0].classList.remove('open');
+  }
+  function switchTab(winId, tabKey) {
+    const win = document.getElementById(winId);
+    win.querySelectorAll('.win-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabKey));
+    win.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === tabKey));
+  }
+
+  function focusWindow(win) {
+    zTop += 1;
+    win.style.zIndex = zTop;
+  }
+  document.querySelectorAll('.window').forEach(win => {
+    win.addEventListener('mousedown', () => focusWindow(win));
+    win.addEventListener('touchstart', () => focusWindow(win), { passive: true });
+  });
+
+  window.addEventListener('resize', () => {
+    document.querySelectorAll('.window.open').forEach(clampWindow);
+  });
+
+  function getPoint(e) {
+    if (e.touches && e.touches.length) return e.touches[0];
+    if (e.changedTouches && e.changedTouches.length) return e.changedTouches[0];
+    return e;
+  }
+
+  /* ---------- drag ---------- */
+  let dragState = null;
+  function startDrag(e, id) {
+    const win = document.getElementById(id);
+    focusWindow(win);
+    const rect = win.getBoundingClientRect();
+    const p = getPoint(e);
+    dragState = { win, offsetX: p.clientX - rect.left, offsetY: p.clientY - rect.top };
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchmove', onDrag, { passive: false });
+    document.addEventListener('touchend', stopDrag);
+    document.addEventListener('touchcancel', stopDrag);
+    e.preventDefault();
+  }
+  function onDrag(e) {
+    if (!dragState) return;
+    const p = getPoint(e);
+    const rect = dragState.win.getBoundingClientRect();
+    let left = p.clientX - dragState.offsetX;
+    let top = p.clientY - dragState.offsetY;
+    left = Math.min(Math.max(4, left), Math.max(4, window.innerWidth - rect.width - 4));
+    top = Math.min(Math.max(28, top), Math.max(28, window.innerHeight - 40));
+    dragState.win.style.left = left + 'px';
+    dragState.win.style.top = top + 'px';
+    e.preventDefault();
+  }
+  function stopDrag() {
+    dragState = null;
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+    document.removeEventListener('touchmove', onDrag);
+    document.removeEventListener('touchend', stopDrag);
+    document.removeEventListener('touchcancel', stopDrag);
+  }
+  document.querySelectorAll('.win-header').forEach(header => {
+    const id = header.dataset.target;
+    const maybeDrag = (e) => { if (!e.target.closest('.traffic')) startDrag(e, id); };
+    header.addEventListener('mousedown', maybeDrag);
+    header.addEventListener('touchstart', maybeDrag, { passive: false });
+  });
+
+  /* ---------- resize ---------- */
+  let resizeState = null;
+  function startResize(e, id) {
+    const win = document.getElementById(id);
+    focusWindow(win);
+    const rect = win.getBoundingClientRect();
+    const p = getPoint(e);
+    resizeState = { win, startX: p.clientX, startY: p.clientY, startW: rect.width, startH: rect.height, left: rect.left, top: rect.top };
+    document.addEventListener('mousemove', onResize);
+    document.addEventListener('mouseup', stopResize);
+    document.addEventListener('touchmove', onResize, { passive: false });
+    document.addEventListener('touchend', stopResize);
+    document.addEventListener('touchcancel', stopResize);
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  function onResize(e) {
+    if (!resizeState) return;
+    const p = getPoint(e);
+    const dx = p.clientX - resizeState.startX;
+    const dy = p.clientY - resizeState.startY;
+    const maxW = Math.min(window.innerWidth - resizeState.left - 8, window.innerWidth * 0.92);
+    const maxH = window.innerHeight - resizeState.top - 8;
+    const w = Math.min(Math.max(280, resizeState.startW + dx), maxW);
+    const h = Math.min(Math.max(160, resizeState.startH + dy), maxH);
+    resizeState.win.style.width = w + 'px';
+    resizeState.win.style.height = h + 'px';
+    e.preventDefault();
+  }
+  function stopResize() {
+    resizeState = null;
+    document.removeEventListener('mousemove', onResize);
+    document.removeEventListener('mouseup', stopResize);
+    document.removeEventListener('touchmove', onResize);
+    document.removeEventListener('touchend', stopResize);
+    document.removeEventListener('touchcancel', stopResize);
+  }
+  document.querySelectorAll('.window').forEach(win => {
+    const handle = document.createElement('div');
+    handle.className = 'resize-handle';
+    win.appendChild(handle);
+    handle.addEventListener('mousedown', (e) => startResize(e, win.id));
+    handle.addEventListener('touchstart', (e) => startResize(e, win.id), { passive: false });
+  });
+
+  /* ---------- menu bar dropdowns ---------- */
+  function closeAllMenus() {
+    document.querySelectorAll('.menu.open').forEach(m => m.classList.remove('open'));
+  }
+  function openMenu(menu) {
+    if (menu.dataset.menu === 'window') buildWindowMenu();
+    menu.classList.add('open');
+  }
+  function toggleMenu(menu, e) {
+    if (e) e.stopPropagation();
+    hideContextMenu();
+    const wasOpen = menu.classList.contains('open');
+    closeAllMenus();
+    if (!wasOpen) openMenu(menu);
+  }
+  document.querySelectorAll('.menu').forEach(menu => {
+    const item = menu.querySelector('.menubar-item');
+    item.addEventListener('click', (e) => toggleMenu(menu, e));
+    item.addEventListener('mouseenter', () => {
+      if (document.querySelector('.menu.open') && !menu.classList.contains('open')) {
+        closeAllMenus();
+        openMenu(menu);
+      }
+    });
+  });
+  document.addEventListener('click', closeAllMenus);
+
+  function buildWindowMenu() {
+    const rows = apps.map(a => {
+      const isOpen = document.getElementById('win-' + a.key).classList.contains('open');
+      return `<div class="menu-option${isOpen ? ' checked' : ''}" onclick="toggleWindow('${a.key}')">${a.label}</div>`;
+    }).join('');
+    document.getElementById('menu-window').innerHTML = rows + `
+      <div class="menu-divider"></div>
+      <div class="menu-option" onclick="minimizeAll()">Minimize All</div>
+      <div class="menu-option" onclick="bringAllToFront()">Bring All to Front</div>
+    `;
+  }
+  function minimizeAll() {
+    document.querySelectorAll('.window.open').forEach(w => w.classList.remove('open'));
+  }
+  function bringAllToFront() {
+    apps.forEach(a => {
+      const win = document.getElementById('win-' + a.key);
+      win.classList.add('open');
+      clampWindow(win);
+      focusWindow(win);
+    });
+  }
+
+  /* ---------- File / Edit / View actions ---------- */
+  function quitPrompt() {
+    openModal("Quit JimsonOS?", `
+      <p>You can't actually quit this one — but you can reach the person behind it.</p>
+      <div class="modal-actions">
+        <a class="modal-btn primary" href="mailto:jimsonyangbusiness@gmail.com">Email me</a>
+        <button class="modal-btn" onclick="closeModal()">Cancel</button>
+      </div>
+    `);
+  }
+  function copyEmail() {
+    const email = "jimsonyangbusiness@gmail.com";
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(email).then(
+        () => toastMessage("Copied " + email),
+        () => toastMessage(email)
+      );
+    } else {
+      toastMessage(email);
+    }
+  }
+  function toggleDesktopIcons() {
+    const icons = document.getElementById('desktopIcons');
+    const willShow = icons.style.display === 'none';
+    icons.style.display = willShow ? 'flex' : 'none';
+    document.getElementById('viewIconsOption').classList.toggle('checked', willShow);
+  }
+
+  /* ---------- icon-rail snap scroll + dot indicator ---------- */
+  function setupIconDots() {
+    const list = document.getElementById('iconList');
+    const dotsWrap = document.getElementById('iconDots');
+    const icons = Array.from(list.querySelectorAll('.icon'));
+
+    icons.forEach(() => {
+      const dot = document.createElement('div');
+      dot.className = 'icon-dot';
+      dotsWrap.appendChild(dot);
+    });
+    const dots = Array.from(dotsWrap.children);
+
+    function updateVisibility() {
+      dotsWrap.classList.toggle('visible', list.scrollHeight > list.clientHeight + 2);
+    }
+
+    function updateActive() {
+      if (!dots.length) return;
+      const center = list.getBoundingClientRect().top + list.clientHeight / 2;
+      let closest = 0;
+      let minDist = Infinity;
+      icons.forEach((icon, i) => {
+        const r = icon.getBoundingClientRect();
+        const dist = Math.abs((r.top + r.height / 2) - center);
+        if (dist < minDist) { minDist = dist; closest = i; }
+      });
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === closest));
+    }
+
+    list.addEventListener('scroll', updateActive, { passive: true });
+    window.addEventListener('resize', () => { updateVisibility(); updateActive(); });
+    updateVisibility();
+    updateActive();
+  }
+  const wallpapers = [
+    "radial-gradient(1200px 800px at 80% 10%, #6a5acd33, transparent 60%), radial-gradient(1000px 700px at 10% 90%, #ff6b9733, transparent 60%), linear-gradient(160deg, #2b2350 0%, #1a1330 45%, #0d0a1a 100%)",
+    "radial-gradient(1200px 800px at 20% 15%, #0891b233, transparent 60%), radial-gradient(1000px 700px at 85% 85%, #f472b633, transparent 60%), linear-gradient(160deg, #082032 0%, #0b3142 45%, #041016 100%)",
+    "radial-gradient(1200px 800px at 75% 20%, #f77f0033, transparent 60%), radial-gradient(1000px 700px at 15% 85%, #7ee78733, transparent 60%), linear-gradient(160deg, #201a10 0%, #14100a 45%, #0a0805 100%)"
+  ];
+  let wallpaperIdx = 0;
+  function cycleWallpaper() {
+    wallpaperIdx = (wallpaperIdx + 1) % wallpapers.length;
+    document.body.style.background = wallpapers[wallpaperIdx];
+    toastMessage("Wallpaper changed");
+  }
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      (document.documentElement.requestFullscreen ? document.documentElement.requestFullscreen() : Promise.reject())
+        .catch(() => toastMessage("Fullscreen blocked by the browser"));
+    } else {
+      document.exitFullscreen && document.exitFullscreen();
+    }
+  }
+
+  /* ---------- Help ---------- */
+  function showAboutOS() {
+    openModal("About JimsonOS", `
+      <p>JimsonOS v1.0 — a desktop metaphor for a portfolio, built by hand with plain HTML, CSS, and JS. No frameworks were harmed.</p>
+      <p class="soft">Every "app" here is real content — click around.</p>
+    `);
+  }
+  function showShortcuts() {
+    openModal("Keyboard Shortcuts", `
+      <div class="shortcut-row"><span>Close focused window</span><span class="kbd">Esc</span></div>
+      <div class="shortcut-row"><span>Open right-click menu</span><span class="kbd">Right-click desktop</span></div>
+      <div class="shortcut-row"><span>Drag a window</span><span class="kbd">Title bar</span></div>
+      <div class="shortcut-row"><span>Resize a window</span><span class="kbd">Bottom-right corner</span></div>
+    `);
+  }
+
+  /* ---------- toast ---------- */
+  let toastTimer = null;
+  function toastMessage(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  /* ---------- generic modal ---------- */
+  function openModal(title, bodyHtml) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').innerHTML = bodyHtml;
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modalOverlay') closeModal();
+  });
+
+  function showGetInfo(key) {
+    const meta = appMeta[key];
+    const app = apps.find(a => a.key === key);
+    if (!meta || !app) return;
+    openModal("Get Info", `
+      <p style="font-weight:700; color:var(--ink); margin-bottom:14px;">${app.label}</p>
+      <div class="shortcut-row"><span>Kind</span><span class="kbd">${meta.kind}</span></div>
+      <div class="shortcut-row"><span>Size</span><span class="kbd">${meta.size}</span></div>
+      <div class="shortcut-row"><span>Modified</span><span class="kbd">${meta.modified}</span></div>
+    `);
+  }
+
+  /* ---------- right-click context menu ---------- */
+  const contextMenu = document.getElementById('contextMenu');
+  let ctxTargetKey = null;
+
+  function showContextMenu(x, y, mode, key) {
+    ctxTargetKey = key || null;
+    const isIcon = mode === 'icon';
+    document.getElementById('ctxOpen').classList.toggle('hidden', !isIcon);
+    document.getElementById('ctxInfo').classList.toggle('hidden', !isIcon);
+    document.getElementById('ctxDivider1').classList.toggle('hidden', !isIcon);
+    document.getElementById('ctxNewMessage').classList.toggle('hidden', isIcon);
+    document.getElementById('ctxWallpaper').classList.toggle('hidden', isIcon);
+    document.getElementById('ctxIcons').classList.toggle('hidden', isIcon);
+    document.getElementById('ctxDivider2').classList.toggle('hidden', isIcon);
+
+    contextMenu.classList.add('open');
+    contextMenu.style.left = '0px';
+    contextMenu.style.top = '0px';
+    const rect = contextMenu.getBoundingClientRect();
+    const left = Math.min(x, window.innerWidth - rect.width - 8);
+    const top = Math.min(y, window.innerHeight - rect.height - 8);
+    contextMenu.style.left = Math.max(4, left) + 'px';
+    contextMenu.style.top = Math.max(4, top) + 'px';
+  }
+  function hideContextMenu() {
+    contextMenu.classList.remove('open');
+    ctxTargetKey = null;
+  }
+  document.getElementById('ctxOpen').addEventListener('click', () => { if (ctxTargetKey) openWindow(ctxTargetKey); });
+  document.getElementById('ctxInfo').addEventListener('click', () => { if (ctxTargetKey) showGetInfo(ctxTargetKey); });
+  document.getElementById('ctxNewMessage').addEventListener('click', () => toggleWindow('contact'));
+  document.getElementById('ctxWallpaper').addEventListener('click', cycleWallpaper);
+  document.getElementById('ctxIcons').addEventListener('click', toggleDesktopIcons);
+  document.getElementById('ctxAbout').addEventListener('click', showAboutOS);
+
+  document.addEventListener('contextmenu', (e) => {
+    const iconEl = e.target.closest('.icon');
+    if (iconEl) {
+      e.preventDefault();
+      closeAllMenus();
+      showContextMenu(e.clientX, e.clientY, 'icon', iconEl.dataset.key);
+      return;
+    }
+    if (e.target.closest('.window') || e.target.closest('.dock') || e.target.closest('.menubar') || e.target.closest('.modal-panel')) {
+      return;
+    }
+    e.preventDefault();
+    closeAllMenus();
+    showContextMenu(e.clientX, e.clientY, 'desktop');
+  });
+  document.addEventListener('click', hideContextMenu);
+
+  /* ---------- keyboard ---------- */
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('modalOverlay').classList.contains('open')) { closeModal(); return; }
+    if (contextMenu.classList.contains('open')) { hideContextMenu(); return; }
+    if (document.querySelector('.menu.open')) { closeAllMenus(); return; }
+    closeFocusedWindow();
+  });
+
+  /* ---------- clock ---------- */
+  function tick() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  tick();
+  setInterval(tick, 1000 * 30);
+
+  /* ---------- boot sequence (retro / playful chime) ---------- */
+  function runBootSequence() {
+    const boot = document.getElementById('bootScreen');
+    const caption = document.getElementById('bootCaption');
+    const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const messages = [
+      'Starting JimsonOS…',
+      'Booting frontend + backend…',
+      'Warming up the anime render pipeline…',
+      'Loading GTM instincts…'
+    ];
+
+    let finished = false;
+    let startTimer = null;
+    let msgTimer = null;
+    let autoTimer = null;
+
+    function finish() {
+      if (finished) return;
+      finished = true;
+      clearTimeout(startTimer);
+      clearInterval(msgTimer);
+      clearTimeout(autoTimer);
+      boot.classList.add('hidden');
+      document.querySelector('.menubar').classList.remove('pre-boot');
+      document.querySelector('.dock').classList.remove('pre-boot');
+      document.getElementById('desktopIcons').classList.remove('pre-boot');
+      setTimeout(() => {
+        boot.remove();
+        openWindow('about');
+      }, reducedMotion ? 0 : 500);
+    }
+
+    if (reducedMotion) {
+      finish();
+      return;
+    }
+
+    let i = 0;
+    startTimer = setTimeout(() => {
+      caption.textContent = messages[0];
+      msgTimer = setInterval(() => {
+        i = (i + 1) % messages.length;
+        caption.textContent = messages[i];
+      }, 550);
+    }, 1050);
+
+    autoTimer = setTimeout(finish, 3000);
+    boot.addEventListener('click', finish);
+    window.addEventListener('keydown', function skipOnce() {
+      finish();
+      window.removeEventListener('keydown', skipOnce);
+    });
+  }
+  runBootSequence();
+  setupIconDots();
+</script>
+
+</body>
 </html>
