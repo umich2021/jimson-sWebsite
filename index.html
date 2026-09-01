@@ -187,7 +187,10 @@
   .win-body p { color: #3a3a3c; margin: 0 0 12px; }
   .win-body .soft { color: var(--ink-soft); font-size: 12.5px; }
 
-  #win-about .win-body { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: white; }
+  #win-about .win-body { background: white; }
+  .resume-entry { padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--line); }
+  .resume-entry:last-child { padding-bottom: 0; margin-bottom: 0; border-bottom: none; }
+  .resume-hint { margin: -4px 0 14px; }
 
   #win-aventos .win-body { background: #17171b; color: #eee; }
   #win-aventos .win-body p { color: #b8b8bc; }
@@ -224,6 +227,10 @@
   .file-row:last-child { border-bottom: none; }
   .file-icon { width: 34px; height: 34px; border-radius: 7px; background: linear-gradient(135deg, #ffd166, #f77f00); flex: none; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:700; }
   .file-icon.fun { background: linear-gradient(135deg, #7ee787, #1f9d55); }
+  .file-icon.g-aventos { background: linear-gradient(135deg, #ff6b9d, #b83280); }
+  .file-icon.g-geo { background: linear-gradient(135deg, #5eead4, #0891b2); }
+  .file-icon.g-pink { background: linear-gradient(135deg, #f0abfc, #a21caf); }
+  .file-icon.g-projects { background: linear-gradient(135deg, #ffd166, #f77f00); }
   .file-name { font-size: 13.5px; font-weight: 600; }
   .file-desc { font-size: 12px; color: var(--ink-soft); }
   .group-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); margin: 14px 0 4px; }
@@ -323,6 +330,7 @@
     .window { width: 92vw !important; height: 70vh !important; height: 70dvh !important; }
     .win-header { height: 44px; }
     .win-body { padding: 16px; font-size: 13.5px; }
+    .win-tab { min-width: 0; font-size: 10.5px; padding: 8px 3px; white-space: normal; overflow-wrap: break-word; }
     .dock { gap: 6px; padding: 6px 8px; bottom: 8px; }
     .dock-item { width: 40px; height: 40px; font-size: 9.5px; border-radius: 9px; }
     .welcome-hint { display: none; }
@@ -433,14 +441,95 @@
 <p class="welcome-hint">Click an icon to open it. Drag windows by their title bar, resize from the bottom-right corner, or right-click the desktop.</p>
 
 <!-- WINDOWS -->
-<div class="window" id="win-about" style="top:80px; left:120px; z-index:12; height:320px;">
+<div class="window" id="win-about" style="top:56px; left:80px; z-index:12; width:660px; height:600px;">
   <div class="win-header" data-target="win-about">
     <span class="traffic t-red" onclick="closeWindow('win-about')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span class="win-title">About_Me.txt</span>
   </div>
+  <div class="win-tabs">
+    <div class="win-tab active" data-tab="overview" onclick="switchTab('win-about','overview')">Overview</div>
+    <div class="win-tab" data-tab="experience" onclick="switchTab('win-about','experience')">Experience</div>
+    <div class="win-tab" data-tab="projects" onclick="switchTab('win-about','projects')">Projects</div>
+    <div class="win-tab" data-tab="education" onclick="switchTab('win-about','education')">Education</div>
+    <div class="win-tab" data-tab="contact" onclick="switchTab('win-about','contact')">Contact</div>
+  </div>
   <div class="win-body">
-    <p class="soft">Jimson Yang — San Francisco, CA</p>
-    <p>I co-founded Aventos, an AI anime studio, after a few years doing a little bit of everything at startups — sales, GTM, frontend engineering, and a stint on the VC side doing due diligence. I build my own backend for fun, ship frontend for work, and I'm currently trying to figure out how to make an AI-generated anime that's actually emotionally powerful and not just fast-paced slop.</p>
+    <div class="tab-panel active" data-panel="overview">
+      <h2 style="margin-bottom:2px;">Jimson Yang</h2>
+      <p class="soft" style="margin-bottom:14px;">San Francisco, CA · jimsonyangbusiness@gmail.com</p>
+      <p>I co-founded Aventos, an AI anime studio, after a few years doing a little bit of everything at startups — sales, GTM, frontend engineering, and a stint on the VC side doing due diligence. I build my own backend for fun, ship frontend for work, and I'm currently trying to figure out how to make an AI-generated anime that's actually emotionally powerful and not just fast-paced slop.</p>
+      <div class="stat-chip-row">
+        <div class="stat-chip"><div class="num">Aventos</div><div class="lbl">co-founder · present</div></div>
+        <div class="stat-chip"><div class="num">98.5M</div><div class="lbl">views via publisher deal</div></div>
+        <div class="stat-chip"><div class="num">$100K</div><div class="lbl">pre-seed raised</div></div>
+        <div class="stat-chip"><div class="num">3.89</div><div class="lbl">GPA · UMich</div></div>
+      </div>
+      <div class="group-label" style="margin-top:20px;">Elsewhere</div>
+      <a class="tab-link" href="https://github.com/umich2021" target="_blank" rel="noreferrer" style="margin-right:18px;">GitHub →</a>
+      <a class="tab-link" href="https://www.youtube.com/channel/UCfzG7qaPV5p_QE1sr1mcXaA" target="_blank" rel="noreferrer">YouTube →</a>
+    </div>
+    <div class="tab-panel" data-panel="experience">
+      <div class="resume-entry">
+        <div class="pdf-role">Co-Founder — Aventos</div>
+        <div class="pdf-meta">May 2025 – Present · San Francisco, CA</div>
+        <div class="pdf-summary">AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS. Landed a publisher deal that's driven 98.5M views, a distribution deal with BlueBox.tv, and turned internal tooling into a platform with its first $10K in revenue.</div>
+      </div>
+      <div class="resume-entry">
+        <div class="pdf-role">Founder — Project GEO</div>
+        <div class="pdf-meta">2024 – 2025</div>
+        <div class="pdf-summary">AEO/LLM citation tracker — tracks how well a brand shows up when people ask ChatGPT or Claude AI questions about brand discoverability. Built the full tech stack solo and took it 0 to 1 in B2B SaaS sales.</div>
+      </div>
+      <div class="resume-entry">
+        <div class="pdf-role">Co-Founder, Business — Pink Inference</div>
+        <div class="pdf-meta">2023 – 2024</div>
+        <div class="pdf-summary">Business side of a deep-tech venture studio spanning wetware/biological computing to oil-and-gas-powered data centers. Raised a $100K pre-seed round from 1517 Fund.</div>
+      </div>
+      <div class="resume-entry">
+        <div class="pdf-role">Intern — CitySide Ventures</div>
+        <div class="pdf-meta">Mar 2023 – Jul 2024</div>
+        <div class="pdf-summary">Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors.</div>
+      </div>
+      <div class="resume-entry">
+        <div class="pdf-role">Summer Intern — Arboretum Ventures</div>
+        <div class="pdf-meta">Apr 2023 – Jul 2023</div>
+        <div class="pdf-summary">Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand.</div>
+      </div>
+      <a class="tab-link" href="#" onclick="toggleWindow('experience'); return false;">Open Experience.pdf →</a>
+    </div>
+    <div class="tab-panel" data-panel="projects">
+      <div class="group-label">Companies &amp; products</div>
+      <p class="soft resume-hint">Tap any row to open it and see more.</p>
+      <div class="file-row" style="cursor:pointer;" onclick="toggleWindow('aventos')">
+        <div class="file-icon g-aventos">▶</div>
+        <div><div class="file-name">Aventos.app</div><div class="file-desc">AI anime studio — 98.5M views via publisher deal, BlueBox.tv distribution.</div></div>
+      </div>
+      <div class="file-row" style="cursor:pointer;" onclick="toggleWindow('geo')">
+        <div class="file-icon g-geo">GEO</div>
+        <div><div class="file-name">ProjectGEO.app</div><div class="file-desc">AEO/LLM citation tracker, solo-built, 0 → 1 in B2B SaaS sales.</div></div>
+      </div>
+      <div class="file-row" style="cursor:pointer;" onclick="toggleWindow('pink')">
+        <div class="file-icon g-pink">PI</div>
+        <div><div class="file-name">PinkInference.app</div><div class="file-desc">Deep-tech venture studio — $100K pre-seed from 1517 Fund.</div></div>
+      </div>
+      <div class="group-label" style="margin-top:16px;">Side projects</div>
+      <div class="file-row" style="cursor:pointer;" onclick="toggleWindow('projects')">
+        <div class="file-icon g-projects">▤</div>
+        <div><div class="file-name">Projects folder</div><div class="file-desc">Seedance internal tool, Manhwa Reader, Tableau site, Jet Lag: SF.</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" data-panel="education">
+      <div class="group-label">Education</div>
+      <div class="pdf-role">University of Michigan</div>
+      <p class="soft" style="margin:2px 0 8px;">Stephen M. Ross School of Business</p>
+      <p>BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
+    </div>
+    <div class="tab-panel" data-panel="contact">
+      <div class="group-label">Get in touch</div>
+      <div class="mail-field"><span class="label">Email</span><span>jimsonyangbusiness@gmail.com</span></div>
+      <div class="mail-field"><span class="label">GitHub</span><a class="tab-link" style="margin-top:0;" href="https://github.com/umich2021" target="_blank" rel="noreferrer">github.com/umich2021 →</a></div>
+      <div class="mail-field"><span class="label">YouTube</span><a class="tab-link" style="margin-top:0;" href="https://www.youtube.com/channel/UCfzG7qaPV5p_QE1sr1mcXaA" target="_blank" rel="noreferrer">Aventos channel →</a></div>
+      <a class="mail-send" href="mailto:jimsonyangbusiness@gmail.com?subject=Let%27s%20talk" style="margin-top:18px;">Send an email</a>
+    </div>
   </div>
 </div>
 
@@ -679,7 +768,7 @@
   ];
 
   const appMeta = {
-    about: { kind: "Plain Text", size: "2 KB", modified: "Recently" },
+    about: { kind: "Resume", size: "5 tabs", modified: "Recently" },
     aventos: { kind: "Application", size: "98.5M views", modified: "2025" },
     geo: { kind: "Application", size: "0 → 1", modified: "2024–2025" },
     pink: { kind: "Application", size: "$100K raised", modified: "2023–2024" },

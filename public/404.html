@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Page not found — Jimson Yang</title>
+<style>
+  :root {
+    --win-bg: #f4f4f6;
+    --line: #d3d3d9;
+    --ink: #1c1c1e;
+    --ink-soft: #6b6b70;
+    --accent: #4c8bf5;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(1200px 800px at 80% 10%, #6a5acd33, transparent 60%),
+      radial-gradient(1000px 700px at 10% 90%, #ff6b9733, transparent 60%),
+      linear-gradient(160deg, #2b2350 0%, #1a1330 45%, #0d0a1a 100%);
+  }
+
+  .alert {
+    width: 100%;
+    max-width: 380px;
+    background: var(--win-bg);
+    border-radius: 12px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.08);
+    padding: 24px;
+    color: var(--ink);
+    animation: pop .18s ease-out;
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .alert-top { display: flex; gap: 14px; align-items: flex-start; }
+
+  .alert-icon {
+    flex: none;
+    width: 56px; height: 56px;
+    border-radius: 13px;
+    background: linear-gradient(160deg, #ffcc4d, #f77f00);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.4);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .alert-icon svg { width: 28px; height: 28px; }
+
+  .alert-body h1 {
+    margin: 0 0 6px;
+    font-size: 15.5px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .alert-body p {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .alert-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .alert-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    text-decoration: none;
+    display: inline-block;
+  }
+  .alert-btn.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .alert-btn:hover { filter: brightness(0.97); }
+</style>
+</head>
+<body>
+  <div class="alert" role="alertdialog" aria-labelledby="alert-title">
+    <div class="alert-top">
+      <div class="alert-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 3.5 22 20H2L12 3.5Z" fill="#fff" fill-opacity="0.95"/>
+          <rect x="11.1" y="9" width="1.8" height="6" rx="0.9" fill="#c9660a"/>
+          <rect x="11.1" y="16.2" width="1.8" height="1.8" rx="0.9" fill="#c9660a"/>
+        </svg>
+      </div>
+      <div class="alert-body">
+        <h1 id="alert-title">This page can&rsquo;t be found.</h1>
+        <p>The item you&rsquo;re looking for doesn&rsquo;t exist, or it may have been moved.</p>
+      </div>
+    </div>
+    <div class="alert-actions">
+      <a class="alert-btn primary" href="/">Go Home</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Jimson Yang — Projects</title>
+<meta name="description" content="Small personal projects and tools, self-hosted by Jimson Yang." />
+<style>
+  :root {
+    --menubar: rgba(30,30, 34, 0.55);
+    --dock-bg: rgba(255,255,255,0.12);
+    --win-bg: #f4f4f6;
+    --win-header: #e4e4e8;
+    --line: #d3d3d9;
+    --ink: #1c1c1e;
+    --ink-soft: #6b6b70;
+    --accent: #4c8bf5;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    height: 100dvh;
+    position: relative;
+    color: var(--ink);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  a { color: inherit; }
+
+  body.wp-midnight {
+    background:
+      radial-gradient(1200px 800px at 80% 10%, #3b82f633, transparent 60%),
+      radial-gradient(1000px 700px at 10% 90%, #6366f133, transparent 60%),
+      linear-gradient(160deg, #10192e 0%, #0b1224 45%, #05070f 100%);
+  }
+  body.wp-amber {
+    background:
+      radial-gradient(1200px 800px at 80% 10%, #f77f0033, transparent 60%),
+      radial-gradient(1000px 700px at 10% 90%, #ffb02e22, transparent 60%),
+      linear-gradient(160deg, #241c14 0%, #17130e 45%, #0d0a07 100%);
+  }
+  body.wp-slate {
+    background:
+      radial-gradient(1200px 800px at 80% 10%, #64748b33, transparent 60%),
+      radial-gradient(1000px 700px at 10% 90%, #94a3b822, transparent 60%),
+      linear-gradient(160deg, #1e2530 0%, #151a22 45%, #0a0d12 100%);
+  }
+
+  .context-menu {
+    position: fixed; min-width: 220px; background: rgba(28,28,32,0.98);
+    backdrop-filter: blur(16px); border-radius: 8px; box-shadow: 0 14px 34px rgba(0,0,0,0.5); padding: 6px;
+    display: none; z-index: 400; border: 1px solid rgba(255,255,255,0.08);
+  }
+  .context-menu.open { display: block; }
+
+  .menubar {
+    position: fixed; top: 0; left: 0; right: 0; height: 28px; z-index: 100;
+    background: var(--menubar); backdrop-filter: blur(14px);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 14px; font-size: 13px; color: #fff;
+    transition: transform .5s cubic-bezier(.3,0,.15,1);
+  }
+  .menubar.pre-boot { transform: translateY(-100%); }
+  .menubar-left { display: flex; align-items: center; gap: 6px; overflow: visible; }
+  .menubar-logo { font-weight: 700; white-space: nowrap; margin-right: 12px; }
+  .menu { position: relative; }
+  .menubar-item {
+    opacity: 0.85; white-space: nowrap; cursor: pointer; padding: 4px 7px; border-radius: 5px;
+    touch-action: manipulation;
+  }
+  .menubar-item:hover { opacity: 1; background: rgba(255,255,255,0.12); }
+  .menu.open .menubar-item { opacity: 1; background: rgba(255,255,255,0.18); }
+  .menubar-right { display: flex; align-items: center; gap: 14px; opacity: 0.9; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .menu-dropdown {
+    position: absolute; top: 26px; left: 0; min-width: 220px; background: rgba(28,28,32,0.98);
+    backdrop-filter: blur(16px); border-radius: 8px; box-shadow: 0 14px 34px rgba(0,0,0,0.5); padding: 6px;
+    display: none; z-index: 200; border: 1px solid rgba(255,255,255,0.08);
+  }
+  .menu.open .menu-dropdown { display: block; }
+  .menu-option {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 8px 10px; border-radius: 5px;
+    font-size: 13px; color: #eee; cursor: pointer; white-space: nowrap; touch-action: manipulation;
+  }
+  .menu-option:hover { background: var(--accent); color: white; }
+  .menu-option.checked::before { content: "✓"; margin-right: 8px; opacity: 0.8; }
+  .menu-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 5px 4px; }
+
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 300; background: rgba(10,10,14,0.55); backdrop-filter: blur(3px);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-panel {
+    position: relative; width: 100%; max-width: 380px; background: var(--win-bg); border-radius: 12px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5); padding: 24px; font-size: 14px; line-height: 1.6; color: var(--ink);
+  }
+  .modal-panel h3 { margin: 0 0 12px; font-size: 16px; }
+  .modal-panel p { margin: 0 0 10px; color: #3a3a3c; }
+  .modal-close {
+    position: absolute; top: 12px; right: 12px; width: 26px; height: 26px; border-radius: 50%; border: none;
+    background: rgba(0,0,0,0.06); color: var(--ink-soft); cursor: pointer; font-size: 12px; touch-action: manipulation;
+  }
+  .modal-close:hover { background: rgba(0,0,0,0.12); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .modal-btn {
+    padding: 9px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--line);
+    background: #fff; color: var(--ink); text-decoration: none; display: inline-block; touch-action: manipulation;
+  }
+  .modal-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .desktop-icons {
+    position: fixed; top: 44px; right: 12px; z-index: 5;
+    display: flex; flex-direction: column; gap: 18px; align-items: center;
+    transition: opacity .6s ease;
+  }
+  .desktop-icons.pre-boot { opacity: 0; }
+  .icon {
+    width: 84px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    cursor: pointer; padding: 6px; border-radius: 8px; touch-action: manipulation;
+  }
+  .icon:hover { background: rgba(255,255,255,0.12); }
+  .icon-glyph {
+    width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: white; box-shadow: 0 6px 16px rgba(0,0,0,0.35); flex: none;
+  }
+  .icon-label { font-size: 12px; color: white; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+
+  .g-about { background: linear-gradient(135deg, #5ac8fa, #007aff); }
+  .g-directory { background: linear-gradient(135deg, #ffd166, #f77f00); }
+  .g-soundboard { background: linear-gradient(135deg, #b794f6, #6c4ce0); }
+  .g-storage { background: linear-gradient(135deg, #5eead4, #0891b2); }
+  .g-contact { background: linear-gradient(135deg, #ff8a65, #d84315); }
+
+  .window {
+    position: absolute; width: 520px; max-width: 92vw; min-width: 280px; min-height: 160px;
+    background: var(--win-bg); border-radius: 10px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,0,0,0.08);
+    display: none; flex-direction: column; overflow: hidden; touch-action: none;
+  }
+  .window.open { display: flex; }
+  .win-header {
+    flex: none; height: 40px; background: var(--win-header); display: flex; flex-direction: row-reverse; align-items: center;
+    gap: 8px; padding: 0 12px; cursor: grab; border-bottom: 1px solid var(--line); touch-action: none;
+  }
+  .win-header:active { cursor: grabbing; }
+  .traffic { width: 16px; height: 16px; border-radius: 50%; flex: none; position: relative; }
+  .t-red { background: #ff5f57; cursor: pointer; }
+  .t-red::after {
+    content: "×"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; line-height: 1; color: #7a1410; font-weight: 700;
+  }
+  .t-yellow { background: #febc2e; }
+  .t-green { background: #28c840; }
+  .win-title {
+    flex: 1; min-width: 0; text-align: left; font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .win-body {
+    flex: 1; min-height: 0; padding: 20px; font-size: 14px; line-height: 1.6; overflow-y: auto;
+    touch-action: pan-y; -webkit-overflow-scrolling: touch;
+  }
+  .win-body h2 { font-size: 17px; margin: 0 0 10px; }
+  .win-body p { color: #3a3a3c; margin: 0 0 12px; }
+  .win-body .soft { color: var(--ink-soft); font-size: 12.5px; }
+
+  .file-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); touch-action: pan-y; }
+  .file-row:last-child { border-bottom: none; }
+  .file-icon { width: 34px; height: 34px; border-radius: 7px; flex: none; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:700; }
+  .file-name { font-size: 13.5px; font-weight: 600; }
+  .file-desc { font-size: 12px; color: var(--ink-soft); }
+  .group-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); margin: 14px 0 4px; }
+  .group-label:first-child { margin-top: 0; }
+  .empty-state { text-align: center; padding: 30px 10px; color: var(--ink-soft); font-size: 13px; }
+
+  .mail-field { display: flex; border-bottom: 1px solid var(--line); padding: 8px 0; font-size: 13px; }
+  .mail-field .label { width: 60px; color: var(--ink-soft); flex: none; }
+  .mail-send {
+    margin-top: 16px; background: var(--accent); color: white; border: none; padding: 11px 18px; border-radius: 6px;
+    font-size: 13px; font-weight: 600; cursor: pointer; display: inline-block; text-decoration: none;
+  }
+  .code-block {
+    background: #1c1c1e; color: #7ee787; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px;
+    padding: 10px 12px; border-radius: 6px; margin: 10px 0; overflow-x: auto; white-space: pre;
+  }
+
+  .resize-handle { position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; cursor: nwse-resize; z-index: 3; touch-action: none; }
+  .resize-handle::after {
+    content: ""; position: absolute; right: 4px; bottom: 4px; width: 11px; height: 11px;
+    background-image: repeating-linear-gradient(135deg, var(--ink-soft) 0 1.5px, transparent 1.5px 4px);
+    opacity: 0.55;
+  }
+
+  .dock {
+    position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 100;
+    display: flex; gap: 10px; padding: 8px 12px; border-radius: 18px;
+    background: var(--dock-bg); backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    max-width: 94vw;
+    transition: transform .5s cubic-bezier(.3,0,.15,1);
+  }
+  .dock.pre-boot { transform: translateX(-50%) translateY(140%); }
+  .dock-item {
+    width: 46px; height: 46px; border-radius: 11px; display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 700; cursor: pointer; transition: transform .12s; position: relative;
+    flex: none; touch-action: manipulation;
+  }
+  .dock-item:hover { transform: translateY(-6px) scale(1.06); }
+  .dock-item::before {
+    content: attr(data-tooltip); position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%) translateY(4px);
+    background: rgba(20,20,24,0.95); color: white; font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 6px;
+    white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s;
+  }
+  .dock-item:hover::before { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .welcome-hint {
+    position: fixed; left: 16px; bottom: 90px; z-index: 4; color: rgba(255,255,255,0.75); font-size: 13px; max-width: 260px;
+  }
+
+  .boot-screen {
+    position: fixed; inset: 0; z-index: 500; background: #000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px;
+    cursor: pointer; opacity: 1; transition: opacity 0.5s ease;
+  }
+  .boot-screen.hidden { opacity: 0; pointer-events: none; }
+  .boot-logo {
+    font-size: 60px; color: #fff; transform: scale(0.2) rotate(-8deg); opacity: 0;
+    animation: retroBounce 0.9s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes retroBounce {
+    0% { transform: scale(0.2) rotate(-8deg); opacity: 0; }
+    55% { transform: scale(1.18) rotate(5deg); opacity: 1; }
+    75% { transform: scale(0.93) rotate(-2deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .boot-wordmark {
+    font-size: 17px; font-weight: 700; letter-spacing: 0.06em; color: #fff; opacity: 0;
+    animation: retroFadeUp .5s ease .55s forwards;
+  }
+  @keyframes retroFadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .boot-caption {
+    color: rgba(255,255,255,0.6); font-size: 13px; text-align: center; max-width: 280px;
+    min-height: 16px; opacity: 0; animation: retroFadeUp .5s ease 1.05s forwards;
+  }
+
+  @media (max-width: 700px) {
+    .menubar-item { display: none; }
+    .desktop-icons { top: 34px; right: 6px; gap: 12px; }
+    .icon { width: 62px; padding: 4px; }
+    .icon-glyph { width: 42px; height: 42px; font-size: 10px; border-radius: 10px; }
+    .icon-label { font-size: 9.5px; }
+    .window { width: 92vw !important; height: 70vh !important; height: 70dvh !important; }
+    .win-header { height: 44px; }
+    .win-body { padding: 16px; font-size: 13.5px; }
+    .dock { gap: 6px; padding: 6px 8px; bottom: 8px; }
+    .dock-item { width: 40px; height: 40px; font-size: 9.5px; border-radius: 9px; }
+    .welcome-hint { display: none; }
+    .resize-handle { display: none; }
+  }
+</style>
+</head>
+<body class="wp-midnight">
+
+<div class="boot-screen" id="bootScreen">
+  <div class="boot-logo">▤</div>
+  <div class="boot-wordmark">PROJECTS</div>
+  <p class="boot-caption" id="bootCaption"></p>
+</div>
+
+<div class="menubar pre-boot">
+  <div class="menubar-left">
+    <span class="menubar-logo">▤ Projects</span>
+    <div class="menu" data-menu="file">
+      <span class="menubar-item">File</span>
+      <div class="menu-dropdown" id="menu-file">
+        <div class="menu-option" onclick="toggleWindow('contact')">New Message</div>
+        <div class="menu-divider"></div>
+        <div class="menu-option" onclick="closeFocusedWindow()">Close Window</div>
+      </div>
+    </div>
+    <div class="menu" data-menu="window">
+      <span class="menubar-item">Window</span>
+      <div class="menu-dropdown" id="menu-window"></div>
+    </div>
+    <div class="menu" data-menu="help">
+      <span class="menubar-item">Help</span>
+      <div class="menu-dropdown" id="menu-help">
+        <div class="menu-option" onclick="toggleWindow('about')">About This Page</div>
+        <div class="menu-option" onclick="toggleWindow('contact')">Say Hi 👋</div>
+      </div>
+    </div>
+  </div>
+  <div class="menubar-right">
+    <a href="https://www.jimsonyang.com" style="color:#fff; text-decoration:none; opacity:0.85;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.85">jimsonyang.com ↗</a>
+  </div>
+</div>
+
+<div class="desktop-icons pre-boot" id="desktopIcons">
+  <div class="icon" onclick="toggleWindow('about')">
+    <div class="icon-glyph g-about">TXT</div>
+    <div class="icon-label">About.txt</div>
+  </div>
+  <div class="icon" onclick="toggleWindow('directory')">
+    <div class="icon-glyph g-directory">▤</div>
+    <div class="icon-label">Directory</div>
+  </div>
+  <div class="icon" onclick="toggleWindow('soundboard')">
+    <div class="icon-glyph g-soundboard">SB</div>
+    <div class="icon-label">Soundboard.app</div>
+  </div>
+  <div class="icon" onclick="toggleWindow('storage')">
+    <div class="icon-glyph g-storage">B2</div>
+    <div class="icon-label">Storage.txt</div>
+  </div>
+  <div class="icon" onclick="toggleWindow('contact')">
+    <div class="icon-glyph g-contact">@</div>
+    <div class="icon-label">Contact.app</div>
+  </div>
+</div>
+
+<p class="welcome-hint">Click an icon to open it. Drag windows by their title bar, resize from the bottom-right corner.</p>
+
+<div class="window open" id="win-about" style="top:70px; left:100px; z-index:12; width:480px; height:280px;">
+  <div class="win-header" data-target="win-about">
+    <span class="traffic t-red" onclick="closeWindow('win-about')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">About.txt</span>
+  </div>
+  <div class="win-body">
+    <h2>Projects</h2>
+    <p>This is where I host small personal projects and tools — the kind of thing that doesn't belong on my main site, either because it's half-finished, purely for me, or just not meant for a public audience.</p>
+    <p class="soft">Each project lives at its own subdomain, e.g. <code>example.projects.jimsonyang.com</code>.</p>
+  </div>
+</div>
+
+<div class="window" id="win-directory" style="top:120px; left:260px; z-index:11; width:520px; height:360px;">
+  <div class="win-header" data-target="win-directory">
+    <span class="traffic t-red" onclick="closeWindow('win-directory')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">Directory</span>
+  </div>
+  <div class="win-body">
+    <div class="group-label">Live projects</div>
+    <div class="file-row" style="cursor:pointer;" onclick="window.open('https://soundboard.projects.jimsonyang.com','_blank')">
+      <div class="file-icon" style="background: linear-gradient(135deg, #b794f6, #6c4ce0);">SB</div>
+      <div>
+        <div class="file-name">Soundboard</div>
+        <div class="file-desc">Drop meme sound effects into any call — soundboard.projects.jimsonyang.com ↗</div>
+      </div>
+    </div>
+    <div class="file-row" style="cursor:pointer;" onclick="window.open('https://storage.projects.jimsonyang.com','_blank')">
+      <div class="file-icon" style="background: linear-gradient(135deg, #5eead4, #0891b2);">B2</div>
+      <div>
+        <div class="file-name">Storage</div>
+        <div class="file-desc">Moving my files off Google &amp; Dropbox onto Backblaze B2 — storage.projects.jimsonyang.com ↗</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="window" id="win-soundboard" style="top:150px; left:180px; z-index:10; width:460px; height:340px;">
+  <div class="win-header" data-target="win-soundboard">
+    <span class="traffic t-red" onclick="closeWindow('win-soundboard')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">Soundboard.app</span>
+  </div>
+  <div class="win-body">
+    <h2>SoundBoard Caller</h2>
+    <p>A soundboard for phone calls — tap a tile to drop a meme sound effect into whatever call you're on. Originally an Android app, now also a web version.</p>
+    <p class="soft">Favorites, a quiet/loud toggle, and an optional "bot mode" that injects sounds into a live conference call via a Twilio number.</p>
+    <a class="mail-send" href="https://soundboard.projects.jimsonyang.com" target="_blank" rel="noopener">Open Soundboard ↗</a>
+  </div>
+</div>
+
+<div class="window" id="win-storage" style="top:140px; left:220px; z-index:8; width:460px; height:340px;">
+  <div class="win-header" data-target="win-storage">
+    <span class="traffic t-red" onclick="closeWindow('win-storage')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">Storage.txt</span>
+  </div>
+  <div class="win-body">
+    <h2>Twenty Gigabytes, Thirteen Cents</h2>
+    <p>A small CLI that syncs a couple of folders to Backblaze B2, encrypted, so I could stop paying for Google and Dropbox storage I barely used.</p>
+    <p class="soft">A write-up on why I built it, the two-tier sync model, the cost math, and how it's put together.</p>
+    <a class="mail-send" href="https://storage.projects.jimsonyang.com" target="_blank" rel="noopener">Read the write-up ↗</a>
+  </div>
+</div>
+
+<div class="window" id="win-contact" style="top:180px; left:340px; z-index:9; width:480px; height:280px;">
+  <div class="win-header" data-target="win-contact">
+    <span class="traffic t-red" onclick="closeWindow('win-contact')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
+    <span class="win-title">New Message</span>
+  </div>
+  <div class="win-body">
+    <div class="mail-field"><span class="label">To:</span><span>jimsonyangbusiness@gmail.com</span></div>
+    <div class="mail-field"><span class="label">Subject:</span><span>Hey, about your projects page</span></div>
+    <a class="mail-send" href="mailto:jimsonyangbusiness@gmail.com?subject=Hey%2C%20about%20your%20projects%20page">Send</a>
+  </div>
+</div>
+
+<div class="dock pre-boot" id="dock">
+  <div class="dock-item g-about" data-tooltip="About.txt" onclick="toggleWindow('about')">TXT</div>
+  <div class="dock-item g-directory" data-tooltip="Directory" onclick="toggleWindow('directory')">▤</div>
+  <div class="dock-item g-soundboard" data-tooltip="Soundboard.app" onclick="toggleWindow('soundboard')">SB</div>
+  <div class="dock-item g-storage" data-tooltip="Storage.txt" onclick="toggleWindow('storage')">B2</div>
+  <div class="dock-item g-contact" data-tooltip="Contact.app" onclick="toggleWindow('contact')">@</div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-panel">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modalTitle"></h3>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div class="context-menu" id="contextMenu">
+  <div class="menu-option" onclick="cycleWallpaper()">Change Wallpaper</div>
+  <div class="menu-divider"></div>
+  <div class="menu-option" onclick="toggleWindow('about')">About This Page</div>
+  <div class="menu-option" onclick="toggleWindow('directory')">Open Directory</div>
+  <div class="menu-option" onclick="toggleWindow('soundboard')">Open Soundboard.app</div>
+  <div class="menu-option" onclick="toggleWindow('storage')">Open Storage.txt</div>
+  <div class="menu-divider"></div>
+  <div class="menu-option" onclick="location.reload()">Refresh</div>
+</div>
+
+<script>
+  let zTop = 20;
+  const apps = [
+    { key: "about", label: "About.txt" },
+    { key: "directory", label: "Directory" },
+    { key: "soundboard", label: "Soundboard.app" },
+    { key: "storage", label: "Storage.txt" },
+    { key: "contact", label: "Contact.app" }
+  ];
+
+  function clampWindow(win) {
+    const rect = win.getBoundingClientRect();
+    const maxLeft = Math.max(4, window.innerWidth - rect.width - 4);
+    const maxTop = Math.max(32, window.innerHeight - 60);
+    let left = parseFloat(win.style.left) || 0;
+    let top = parseFloat(win.style.top) || 32;
+    left = Math.min(Math.max(4, left), maxLeft);
+    top = Math.min(Math.max(28, top), maxTop);
+    win.style.left = left + 'px';
+    win.style.top = top + 'px';
+  }
+  function openWindow(name) {
+    const win = document.getElementById('win-' + name);
+    win.classList.add('open');
+    focusWindow(win);
+    clampWindow(win);
+  }
+  function closeWindow(id) {
+    document.getElementById(id).classList.remove('open');
+    if (window.event) window.event.stopPropagation();
+  }
+  function toggleWindow(name) {
+    const win = document.getElementById('win-' + name);
+    if (win.classList.contains('open')) win.classList.remove('open');
+    else openWindow(name);
+  }
+  function closeFocusedWindow() {
+    const open = Array.from(document.querySelectorAll('.window.open'));
+    if (!open.length) return;
+    open.sort((a, b) => (parseInt(b.style.zIndex) || 0) - (parseInt(a.style.zIndex) || 0));
+    open[0].classList.remove('open');
+  }
+  function focusWindow(win) {
+    zTop += 1;
+    win.style.zIndex = zTop;
+  }
+  document.querySelectorAll('.window').forEach(win => {
+    win.addEventListener('mousedown', () => focusWindow(win));
+    win.addEventListener('touchstart', () => focusWindow(win), { passive: true });
+  });
+  window.addEventListener('resize', () => {
+    document.querySelectorAll('.window.open').forEach(clampWindow);
+  });
+
+  function getPoint(e) {
+    if (e.touches && e.touches.length) return e.touches[0];
+    if (e.changedTouches && e.changedTouches.length) return e.changedTouches[0];
+    return e;
+  }
+
+  let dragState = null;
+  function startDrag(e, id) {
+    const win = document.getElementById(id);
+    focusWindow(win);
+    const rect = win.getBoundingClientRect();
+    const p = getPoint(e);
+    dragState = { win, offsetX: p.clientX - rect.left, offsetY: p.clientY - rect.top };
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchmove', onDrag, { passive: false });
+    document.addEventListener('touchend', stopDrag);
+    document.addEventListener('touchcancel', stopDrag);
+    e.preventDefault();
+  }
+  function onDrag(e) {
+    if (!dragState) return;
+    const p = getPoint(e);
+    const rect = dragState.win.getBoundingClientRect();
+    let left = p.clientX - dragState.offsetX;
+    let top = p.clientY - dragState.offsetY;
+    left = Math.min(Math.max(4, left), Math.max(4, window.innerWidth - rect.width - 4));
+    top = Math.min(Math.max(28, top), Math.max(28, window.innerHeight - 40));
+    dragState.win.style.left = left + 'px';
+    dragState.win.style.top = top + 'px';
+    e.preventDefault();
+  }
+  function stopDrag() {
+    dragState = null;
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+    document.removeEventListener('touchmove', onDrag);
+    document.removeEventListener('touchend', stopDrag);
+    document.removeEventListener('touchcancel', stopDrag);
+  }
+  document.querySelectorAll('.win-header').forEach(header => {
+    const id = header.dataset.target;
+    const maybeDrag = (e) => { if (!e.target.closest('.traffic')) startDrag(e, id); };
+    header.addEventListener('mousedown', maybeDrag);
+    header.addEventListener('touchstart', maybeDrag, { passive: false });
+  });
+
+  let resizeState = null;
+  function startResize(e, id) {
+    const win = document.getElementById(id);
+    focusWindow(win);
+    const rect = win.getBoundingClientRect();
+    const p = getPoint(e);
+    resizeState = { win, startX: p.clientX, startY: p.clientY, startW: rect.width, startH: rect.height, left: rect.left, top: rect.top };
+    document.addEventListener('mousemove', onResize);
+    document.addEventListener('mouseup', stopResize);
+    document.addEventListener('touchmove', onResize, { passive: false });
+    document.addEventListener('touchend', stopResize);
+    document.addEventListener('touchcancel', stopResize);
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  function onResize(e) {
+    if (!resizeState) return;
+    const p = getPoint(e);
+    const dx = p.clientX - resizeState.startX;
+    const dy = p.clientY - resizeState.startY;
+    const maxW = Math.min(window.innerWidth - resizeState.left - 8, window.innerWidth * 0.92);
+    const maxH = window.innerHeight - resizeState.top - 8;
+    const w = Math.min(Math.max(280, resizeState.startW + dx), maxW);
+    const h = Math.min(Math.max(160, resizeState.startH + dy), maxH);
+    resizeState.win.style.width = w + 'px';
+    resizeState.win.style.height = h + 'px';
+    e.preventDefault();
+  }
+  function stopResize() {
+    resizeState = null;
+    document.removeEventListener('mousemove', onResize);
+    document.removeEventListener('mouseup', stopResize);
+    document.removeEventListener('touchmove', onResize);
+    document.removeEventListener('touchend', stopResize);
+    document.removeEventListener('touchcancel', stopResize);
+  }
+  document.querySelectorAll('.window').forEach(win => {
+    const handle = document.createElement('div');
+    handle.className = 'resize-handle';
+    win.appendChild(handle);
+    handle.addEventListener('mousedown', (e) => startResize(e, win.id));
+    handle.addEventListener('touchstart', (e) => startResize(e, win.id), { passive: false });
+  });
+
+  function closeAllMenus() {
+    document.querySelectorAll('.menu.open').forEach(m => m.classList.remove('open'));
+  }
+  function openMenu(menu) {
+    if (menu.dataset.menu === 'window') buildWindowMenu();
+    menu.classList.add('open');
+  }
+  function toggleMenu(menu, e) {
+    if (e) e.stopPropagation();
+    const wasOpen = menu.classList.contains('open');
+    closeAllMenus();
+    if (!wasOpen) openMenu(menu);
+  }
+  document.querySelectorAll('.menu').forEach(menu => {
+    const item = menu.querySelector('.menubar-item');
+    item.addEventListener('click', (e) => toggleMenu(menu, e));
+    item.addEventListener('mouseenter', () => {
+      if (document.querySelector('.menu.open') && !menu.classList.contains('open')) {
+        closeAllMenus();
+        openMenu(menu);
+      }
+    });
+  });
+  document.addEventListener('click', closeAllMenus);
+
+  function buildWindowMenu() {
+    const rows = apps.map(a => {
+      const isOpen = document.getElementById('win-' + a.key).classList.contains('open');
+      return `<div class="menu-option${isOpen ? ' checked' : ''}" onclick="toggleWindow('${a.key}')">${a.label}</div>`;
+    }).join('');
+    document.getElementById('menu-window').innerHTML = rows;
+  }
+
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+  const WALLPAPERS = ['wp-midnight', 'wp-amber', 'wp-slate'];
+  function applyWallpaper(name) {
+    document.body.classList.remove(...WALLPAPERS);
+    document.body.classList.add(name);
+    try { localStorage.setItem('wallpaper', name); } catch {}
+  }
+  function cycleWallpaper() {
+    const current = WALLPAPERS.find(w => document.body.classList.contains(w)) || WALLPAPERS[0];
+    const next = WALLPAPERS[(WALLPAPERS.indexOf(current) + 1) % WALLPAPERS.length];
+    applyWallpaper(next);
+  }
+  (function restoreWallpaper() {
+    try {
+      const saved = localStorage.getItem('wallpaper');
+      if (saved && WALLPAPERS.includes(saved)) applyWallpaper(saved);
+    } catch {}
+  })();
+
+  const contextMenu = document.getElementById('contextMenu');
+  function closeContextMenu() { contextMenu.classList.remove('open'); }
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    closeAllMenus();
+    const menuWidth = 220, menuHeight = 200;
+    const x = Math.min(e.clientX, window.innerWidth - menuWidth - 8);
+    const y = Math.min(e.clientY, window.innerHeight - menuHeight - 8);
+    contextMenu.style.left = x + 'px';
+    contextMenu.style.top = y + 'px';
+    contextMenu.classList.add('open');
+  });
+  document.addEventListener('click', closeContextMenu);
+  document.addEventListener('scroll', closeContextMenu, true);
+
+  function runBootSequence() {
+    const boot = document.getElementById('bootScreen');
+    const caption = document.getElementById('bootCaption');
+    const menubar = document.querySelector('.menubar');
+    const dock = document.getElementById('dock');
+    const icons = document.getElementById('desktopIcons');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let startTimer, msgTimer, autoTimer, finished = false;
+    const messages = ["Mounting projects…", "Almost there…"];
+
+    function finish() {
+      if (finished) return;
+      finished = true;
+      clearTimeout(startTimer);
+      clearInterval(msgTimer);
+      clearTimeout(autoTimer);
+      boot.classList.add('hidden');
+      setTimeout(() => {
+        menubar.classList.remove('pre-boot');
+        dock.classList.remove('pre-boot');
+        icons.classList.remove('pre-boot');
+      }, reducedMotion ? 0 : 200);
+    }
+    if (reducedMotion) { finish(); return; }
+
+    let i = 0;
+    startTimer = setTimeout(() => {
+      caption.textContent = messages[0];
+      msgTimer = setInterval(() => {
+        i = (i + 1) % messages.length;
+        caption.textContent = messages[i];
+      }, 550);
+    }, 900);
+
+    autoTimer = setTimeout(finish, 2200);
+    boot.addEventListener('click', finish);
+    window.addEventListener('keydown', function skipOnce() {
+      finish();
+      window.removeEventListener('keydown', skipOnce);
+    });
+  }
+  runBootSequence();
+</script>
+
+</body>
+</html>
