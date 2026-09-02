@@ -498,7 +498,6 @@
     <div class="menu" data-menu="view">
       <span class="menubar-item">View</span>
       <div class="menu-dropdown" id="menu-view">
-        <div class="menu-option checked" id="viewIconsOption" onclick="toggleDesktopIcons()">Show Desktop Icons</div>
         <div class="menu-option" onclick="cycleWallpaper()">Change Wallpaper</div>
         <div class="menu-option" onclick="toggleFullscreen()">Enter Full Screen</div>
       </div>
@@ -922,7 +921,6 @@
   <div class="menu-divider" id="ctxDivider1"></div>
   <div class="menu-option" id="ctxNewMessage">New Message</div>
   <div class="menu-option" id="ctxWallpaper">Change Wallpaper</div>
-  <div class="menu-option" id="ctxIcons">Toggle Desktop Icons</div>
   <div class="menu-divider" id="ctxDivider2"></div>
   <div class="menu-option" id="ctxAbout">About JimsonOS</div>
 </div>
@@ -1182,13 +1180,6 @@
       toastMessage(email);
     }
   }
-  function toggleDesktopIcons() {
-    const icons = document.getElementById('desktopIcons');
-    const willShow = icons.style.display === 'none';
-    icons.style.display = willShow ? 'flex' : 'none';
-    document.getElementById('viewIconsOption').classList.toggle('checked', willShow);
-  }
-
   /* ---------- icon-rail snap scroll + dot indicator ---------- */
   function setupIconDots() {
     const list = document.getElementById('iconList');
@@ -1308,7 +1299,6 @@
     document.getElementById('ctxDivider1').classList.toggle('hidden', !isIcon);
     document.getElementById('ctxNewMessage').classList.toggle('hidden', isIcon);
     document.getElementById('ctxWallpaper').classList.toggle('hidden', isIcon);
-    document.getElementById('ctxIcons').classList.toggle('hidden', isIcon);
     document.getElementById('ctxDivider2').classList.toggle('hidden', isIcon);
 
     contextMenu.classList.add('open');
@@ -1329,7 +1319,6 @@
   document.getElementById('ctxInfo').addEventListener('click', () => { if (ctxTargetKey) showGetInfo(ctxTargetKey); });
   document.getElementById('ctxNewMessage').addEventListener('click', () => toggleWindow('contact'));
   document.getElementById('ctxWallpaper').addEventListener('click', cycleWallpaper);
-  document.getElementById('ctxIcons').addEventListener('click', toggleDesktopIcons);
   document.getElementById('ctxAbout').addEventListener('click', showAboutOS);
 
   document.addEventListener('contextmenu', (e) => {
