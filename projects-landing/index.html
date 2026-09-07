@@ -126,19 +126,52 @@
   }
   .icon:hover { background: rgba(255,255,255,0.12); }
   .icon-glyph {
-    width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 13px; color: white; box-shadow: 0 6px 16px rgba(0,0,0,0.35); flex: none;
+    width: 52px; height: 52px; border-radius: 13px; display: flex; align-items: center; justify-content: center;
+    color: white; flex: none;
   }
   .icon-label { font-size: 12px; color: white; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
 
-  .g-about { background: linear-gradient(135deg, #5ac8fa, #007aff); }
-  .g-directory { background: linear-gradient(135deg, #ffd166, #f77f00); }
-  .g-soundboard { background: linear-gradient(135deg, #b794f6, #6c4ce0); }
-  .g-storage { background: linear-gradient(135deg, #5eead4, #0891b2); }
-  .g-contact { background: linear-gradient(135deg, #ff8a65, #d84315); }
+  /* Flat Keycaps icon system — matte tile + bevel + white monoline glyph, swappable at runtime
+     (right-click a desktop icon -> Change Icon...). Per-app hue is the CSS var --ic. */
+  .g-about      { --ic: #0072e0; }
+  .g-directory  { --ic: #ef7a00; }
+  .g-soundboard { --ic: #6c4ce0; }
+  .g-storage    { --ic: #0891b2; }
+  .g-contact    { --ic: #d84315; }
+
+  .icon-glyph, .dock-item {
+    background: var(--ic, #444);
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.30),
+      inset 0 -3px 0 rgba(0,0,0,0.20),
+      0 6px 16px rgba(0,0,0,0.32);
+  }
+  .app-g {
+    width: 58%; height: 58%; display: block;
+    fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* icon picker modal (right-click -> Change Icon...) */
+  .icon-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 6px 0 4px; }
+  .ip-cell {
+    border: 1.5px solid transparent; background: #fff; border-radius: 12px; padding: 10px 4px 7px;
+    display: flex; flex-direction: column; align-items: center; gap: 7px; cursor: pointer; touch-action: manipulation;
+  }
+  .ip-cell:hover { border-color: var(--line); }
+  .ip-cell.active { border-color: var(--accent); background: #eef3fe; }
+  .ip-tile {
+    width: 44px; height: 44px; border-radius: 12px; background: var(--ic, #444);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.2);
+  }
+  .ip-name { font-size: 10.5px; color: var(--ink-soft); text-align: center; }
+  .ip-cell.active .ip-name { color: var(--accent); font-weight: 600; }
+  .ip-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; font-size: 12px; color: var(--ink-soft); }
+  .ip-reset { background: none; border: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; padding: 4px; }
+  .modal-panel .soft { color: var(--ink-soft); font-size: 12.5px; }
 
   .window {
-    position: absolute; width: 520px; max-width: 92vw; min-width: 280px; min-height: 160px;
+    position: absolute; width: 800px; max-width: 92vw; min-width: 600px; min-height: 500px;
     background: var(--win-bg); border-radius: 10px;
     box-shadow: 0 30px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,0,0,0.08);
     display: none; flex-direction: column; overflow: hidden; touch-action: none;
@@ -253,7 +286,11 @@
     .icon { width: 62px; padding: 4px; }
     .icon-glyph { width: 42px; height: 42px; font-size: 10px; border-radius: 10px; }
     .icon-label { font-size: 9.5px; }
-    .window { width: 92vw !important; height: 70vh !important; height: 70dvh !important; }
+    .window {
+      width: 92vw !important; max-width: 92vw !important;
+      height: 76vh !important; height: 76dvh !important;
+      min-width: 0 !important; min-height: 0 !important;
+    }
     .win-header { height: 44px; }
     .win-body { padding: 16px; font-size: 13.5px; }
     .dock { gap: 6px; padding: 6px 8px; bottom: 8px; }
@@ -264,6 +301,46 @@
 </style>
 </head>
 <body class="wp-midnight">
+
+<!-- App icon glyphs (Flat Keycaps). renderIcons() points each <use> at the chosen glyph;
+     6 alternates per app feed the runtime switcher. Add one: drop a <symbol> here, list its
+     id in GLYPH_SETS. Monoline, ~2px, no fill/stroke attrs (.app-g sets them). -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="ab-lines" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 9h3M9 12.5h6M9 16h6"/></symbol>
+  <symbol id="ab-term" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M7 10l3 2.5-3 2.5M12.5 15.5h5"/></symbol>
+  <symbol id="ab-bubble" viewBox="0 0 24 24"><path d="M4 5.5h16v10H9.5L5.5 19v-3.5H4z"/><path d="M8 9h8M8 12h5"/></symbol>
+  <symbol id="ab-id" viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="2"/><circle cx="9" cy="10.8" r="2"/><path d="M6.3 15.4c.7-1.5 4.7-1.5 5.4 0"/><path d="M14.5 9.5h3.5M14.5 12.5h2.5"/></symbol>
+  <symbol id="ab-bust" viewBox="0 0 24 24"><circle cx="12" cy="8.4" r="3.3"/><path d="M5.5 19.6c1.1-4.2 11.9-4.2 13 0"/></symbol>
+  <symbol id="ab-photo" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><rect x="8.7" y="10" width="4.2" height="4.2" rx="0.6"/><path d="M8.7 17.5h6.6"/></symbol>
+
+  <symbol id="dir-folder" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h5l2 2h9A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/></symbol>
+  <symbol id="dir-folders" viewBox="0 0 24 24"><path d="M6 9A1.4 1.4 0 0 1 7.4 7.6h3l1.7 1.7h6.5A1.4 1.4 0 0 1 20 10.7v6.9A1.4 1.4 0 0 1 18.6 19H7.4A1.4 1.4 0 0 1 6 17.6z"/><path d="M4 15.6V6.6A1.4 1.4 0 0 1 5.4 5.2h2.9l1.4 1.4"/></symbol>
+  <symbol id="dir-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.2"/><rect x="13" y="4" width="7" height="7" rx="1.2"/><rect x="4" y="13" width="7" height="7" rx="1.2"/><rect x="13" y="13" width="7" height="7" rx="1.2"/></symbol>
+  <symbol id="dir-list" viewBox="0 0 24 24"><rect x="3.5" y="4.8" width="3.2" height="3.2" rx="0.6"/><rect x="3.5" y="10.4" width="3.2" height="3.2" rx="0.6"/><rect x="3.5" y="16" width="3.2" height="3.2" rx="0.6"/><path d="M10 6.4h10M10 12h10M10 17.6h7"/></symbol>
+  <symbol id="dir-tree" viewBox="0 0 24 24"><circle cx="6" cy="5" r="1.7"/><path d="M6 6.7v10.6M6 10h4.5M6 17.3h4.5"/><rect x="11" y="7.7" width="8.5" height="4.6" rx="1"/><rect x="11" y="15" width="8.5" height="4.6" rx="1"/></symbol>
+  <symbol id="dir-cabinet" viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="1.6"/><path d="M5 9.2h14M5 14.5h14"/><path d="M10.3 6.3h3.4M10.3 11.8h3.4M10.3 17.3h3.4"/></symbol>
+
+  <symbol id="sb-pads" viewBox="0 0 24 24"><rect x="3.5" y="6" width="5.4" height="5.4" rx="1.1"/><rect x="9.8" y="6" width="5.4" height="5.4" rx="1.1"/><rect x="16.1" y="6" width="4.4" height="5.4" rx="1.1"/><rect x="3.5" y="12.6" width="5.4" height="5.4" rx="1.1"/><rect x="9.8" y="12.6" width="5.4" height="5.4" rx="1.1"/><rect x="16.1" y="12.6" width="4.4" height="5.4" rx="1.1"/></symbol>
+  <symbol id="sb-wave" viewBox="0 0 24 24"><path d="M2.5 12H5l1.9-5 3 12.5 3-16 2.7 11 1.8-2.5h3.3"/></symbol>
+  <symbol id="sb-bars" viewBox="0 0 24 24"><path d="M5 20v-5.5M9.7 20V9M14.3 20v-8M19 20V6.5"/></symbol>
+  <symbol id="sb-note" viewBox="0 0 24 24"><path d="M9 17.5V6l9-2v9.5"/><ellipse cx="6.4" cy="17.6" rx="2.6" ry="2.2"/><ellipse cx="15.4" cy="15.6" rx="2.6" ry="2.2"/></symbol>
+  <symbol id="sb-speaker" viewBox="0 0 24 24"><path d="M4 9.3h3.3L12 5.3v13.4L7.3 14.7H4z"/><path d="M15.5 9.5a3.6 3.6 0 0 1 0 5M18 7a7 7 0 0 1 0 10"/></symbol>
+  <symbol id="sb-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0"/><path d="M12 17v3.5M8.5 20.5h7"/></symbol>
+
+  <symbol id="st-drive" viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="10" rx="2"/><circle cx="16.6" cy="12" r="1.5"/><path d="M6 12h6.5"/></symbol>
+  <symbol id="st-db" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="2.6"/><path d="M5 6v12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6V6"/><path d="M5 12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6"/></symbol>
+  <symbol id="st-box" viewBox="0 0 24 24"><path d="M4 8h16v10.5A1.5 1.5 0 0 1 18.5 20h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M3 4.5h18V8H3z"/><path d="M10 12h4"/></symbol>
+  <symbol id="st-cloud" viewBox="0 0 24 24"><path d="M7.5 18.5h9.2a4.2 4.2 0 0 0 .6-8.35 5.7 5.7 0 0 0-10.98-1.3A3.95 3.95 0 0 0 7.5 18.5z"/></symbol>
+  <symbol id="st-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10.5" rx="2"/><path d="M8 10V7.2a4 4 0 0 1 8 0V10"/><path d="M12 14.4v2.6"/></symbol>
+  <symbol id="st-sync" viewBox="0 0 24 24"><path d="M5.5 11a6.5 6.5 0 0 1 11-4.2l1.8 1.7"/><path d="M18.5 13a6.5 6.5 0 0 1-11 4.2L5.7 15.5"/><path d="M18.3 4.5v4h-4M5.7 19.5v-4h4"/></symbol>
+
+  <symbol id="ct-env" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M4 7.8l8 5.4 8-5.4"/></symbol>
+  <symbol id="ct-open" viewBox="0 0 24 24"><path d="M3 10l9-5.5L21 10v7a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17z"/><path d="M3 10l9 6 9-6"/></symbol>
+  <symbol id="ct-plane" viewBox="0 0 24 24"><path d="M21 4L3 11l7 3 3 7z"/><path d="M21 4l-11 10"/></symbol>
+  <symbol id="ct-bubble" viewBox="0 0 24 24"><path d="M4 5h16v11H10l-4 3.3V16H4z"/></symbol>
+  <symbol id="ct-at" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.4"/><path d="M15.4 12v2.2a2.5 2.5 0 0 0 5 0V12a8.5 8.5 0 1 0-3.4 6.8"/></symbol>
+  <symbol id="ct-chats" viewBox="0 0 24 24"><path d="M4 5h11v7H9l-3 2.4V12H4z"/><path d="M19 9.5v9l-3-2.5h-4"/></symbol>
+</defs></svg>
 
 <div class="boot-screen" id="bootScreen">
   <div class="boot-logo">▤</div>
@@ -300,24 +377,24 @@
 </div>
 
 <div class="desktop-icons pre-boot" id="desktopIcons">
-  <div class="icon" onclick="toggleWindow('about')">
-    <div class="icon-glyph g-about">TXT</div>
+  <div class="icon" data-key="about" onclick="toggleWindow('about')">
+    <div class="icon-glyph g-about" data-app="about"><svg class="app-g" viewBox="0 0 24 24"><use href="#ab-lines"></use></svg></div>
     <div class="icon-label">About.txt</div>
   </div>
-  <div class="icon" onclick="toggleWindow('directory')">
-    <div class="icon-glyph g-directory">▤</div>
+  <div class="icon" data-key="directory" onclick="toggleWindow('directory')">
+    <div class="icon-glyph g-directory" data-app="directory"><svg class="app-g" viewBox="0 0 24 24"><use href="#dir-folder"></use></svg></div>
     <div class="icon-label">Directory</div>
   </div>
-  <div class="icon" onclick="toggleWindow('soundboard')">
-    <div class="icon-glyph g-soundboard">SB</div>
+  <div class="icon" data-key="soundboard" onclick="toggleWindow('soundboard')">
+    <div class="icon-glyph g-soundboard" data-app="soundboard"><svg class="app-g" viewBox="0 0 24 24"><use href="#sb-pads"></use></svg></div>
     <div class="icon-label">Soundboard.app</div>
   </div>
-  <div class="icon" onclick="toggleWindow('storage')">
-    <div class="icon-glyph g-storage">B2</div>
+  <div class="icon" data-key="storage" onclick="toggleWindow('storage')">
+    <div class="icon-glyph g-storage" data-app="storage"><svg class="app-g" viewBox="0 0 24 24"><use href="#st-drive"></use></svg></div>
     <div class="icon-label">Storage.txt</div>
   </div>
-  <div class="icon" onclick="toggleWindow('contact')">
-    <div class="icon-glyph g-contact">@</div>
+  <div class="icon" data-key="contact" onclick="toggleWindow('contact')">
+    <div class="icon-glyph g-contact" data-app="contact"><svg class="app-g" viewBox="0 0 24 24"><use href="#ct-env"></use></svg></div>
     <div class="icon-label">Contact.app</div>
   </div>
 </div>
@@ -331,8 +408,12 @@
   </div>
   <div class="win-body">
     <h2>Projects</h2>
-    <p>This is where I host small personal projects and tools — the kind of thing that doesn't belong on my main site, either because it's half-finished, purely for me, or just not meant for a public audience.</p>
-    <p class="soft">Each project lives at its own subdomain, e.g. <code>example.projects.jimsonyang.com</code>.</p>
+    <p>The part of my website where I host tools and show off to friends. Not really to show off for work but more so when I build things I don't need to buy a new domain and do configuration.
+      <br><br> Projects can vary from having a site to help my friend gets date to storing my data. <strong>This page also serves so I can see what I've built over time</strong>. Things may not be finished
+      ui wise, but that's okay because to me they are useful.
+      <br><br>
+    </p>
+    <p>P.s. happy to chat more if you're curious on what else I'm building on the site, just go to contacts or help for my email </p>
   </div>
 </div>
 
@@ -347,7 +428,7 @@
       <div class="file-icon" style="background: linear-gradient(135deg, #b794f6, #6c4ce0);">SB</div>
       <div>
         <div class="file-name">Soundboard</div>
-        <div class="file-desc">Drop meme sound effects into any call — soundboard.projects.jimsonyang.com ↗</div>
+        <div class="file-desc">Putting vine booms in every phone call— soundboard.projects.jimsonyang.com ↗</div>
       </div>
     </div>
     <div class="file-row" style="cursor:pointer;" onclick="window.open('https://storage.projects.jimsonyang.com','_blank')">
@@ -367,9 +448,10 @@
   </div>
   <div class="win-body">
     <h2>SoundBoard Caller</h2>
-    <p>A soundboard for phone calls — tap a tile to drop a meme sound effect into whatever call you're on. Originally an Android app, now also a web version.</p>
-    <p class="soft">Favorites, a quiet/loud toggle, and an optional "bot mode" that injects sounds into a live conference call via a Twilio number.</p>
-    <a class="mail-send" href="https://soundboard.projects.jimsonyang.com" target="_blank" rel="noopener">Open Soundboard ↗</a>
+    <p>A soundboard for phone calls. Imagine during a phone call, someone says something funny-don't you wish you have a vineboom? Or someone says something sus-boom among us sound effects. Anyways this was a silly project that anyone can use so sfx can happen during a phone call. </p>
+    <br><br>
+    <p class="soft">Built for andriod, no IOS unfortunately</p>
+    <a class="mail-send" href="https://soundboard.projects.jimsonyang.com" target="_blank" rel="noopener">Open Soundboard web version ↗</a>
   </div>
 </div>
 
@@ -379,10 +461,15 @@
     <span class="win-title">Storage.txt</span>
   </div>
   <div class="win-body">
-    <h2>Twenty Gigabytes, Thirteen Cents</h2>
-    <p>A small CLI that syncs a couple of folders to Backblaze B2, encrypted, so I could stop paying for Google and Dropbox storage I barely used.</p>
-    <p class="soft">A write-up on why I built it, the two-tier sync model, the cost math, and how it's put together.</p>
-    <a class="mail-send" href="https://storage.projects.jimsonyang.com" target="_blank" rel="noopener">Read the write-up ↗</a>
+    <h2>I didn't want to pay google and dropbox $2 for storage</h2>
+    <p>Problem: I was running out of storage on google and my computer, most of it was backups of photos/videos and archived files. 
+       So instead of paying money for a cloud storage I wanted to be on the free plan of google and dropbox,
+       I found there was a dev friendly storage called Backblaze that allowed you to pay for storage per GB. For my needs I would've payed $.13 a month.
+       <br><br>
+       Using claude to recreate dropping and syncing files, I'm saving $3 a month. 
+    </p>
+    <p class="soft">Attached is a write-up on why I built it, the two-tier sync model, a rudimentary cost analysis, and how it's put together. 
+    <a class="mail-send" href="https://storage.projects.jimsonyang.com" target="_blank" rel="noopener">Read the write-up</a>
   </div>
 </div>
 
@@ -399,11 +486,11 @@
 </div>
 
 <div class="dock pre-boot" id="dock">
-  <div class="dock-item g-about" data-tooltip="About.txt" onclick="toggleWindow('about')">TXT</div>
-  <div class="dock-item g-directory" data-tooltip="Directory" onclick="toggleWindow('directory')">▤</div>
-  <div class="dock-item g-soundboard" data-tooltip="Soundboard.app" onclick="toggleWindow('soundboard')">SB</div>
-  <div class="dock-item g-storage" data-tooltip="Storage.txt" onclick="toggleWindow('storage')">B2</div>
-  <div class="dock-item g-contact" data-tooltip="Contact.app" onclick="toggleWindow('contact')">@</div>
+  <div class="dock-item g-about" data-tooltip="About.txt" data-app="about" onclick="toggleWindow('about')"><svg class="app-g" viewBox="0 0 24 24"><use href="#ab-lines"></use></svg></div>
+  <div class="dock-item g-directory" data-tooltip="Directory" data-app="directory" onclick="toggleWindow('directory')"><svg class="app-g" viewBox="0 0 24 24"><use href="#dir-folder"></use></svg></div>
+  <div class="dock-item g-soundboard" data-tooltip="Soundboard.app" data-app="soundboard" onclick="toggleWindow('soundboard')"><svg class="app-g" viewBox="0 0 24 24"><use href="#sb-pads"></use></svg></div>
+  <div class="dock-item g-storage" data-tooltip="Storage.txt" data-app="storage" onclick="toggleWindow('storage')"><svg class="app-g" viewBox="0 0 24 24"><use href="#st-drive"></use></svg></div>
+  <div class="dock-item g-contact" data-tooltip="Contact.app" data-app="contact" onclick="toggleWindow('contact')"><svg class="app-g" viewBox="0 0 24 24"><use href="#ct-env"></use></svg></div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -415,13 +502,13 @@
 </div>
 
 <div class="context-menu" id="contextMenu">
+  <div class="menu-option" id="ctxOpen">Open</div>
+  <div class="menu-option" id="ctxChangeIcon">Change Icon&hellip;</div>
+  <div class="menu-divider" id="ctxIconDiv"></div>
   <div class="menu-option" onclick="cycleWallpaper()">Change Wallpaper</div>
   <div class="menu-divider"></div>
   <div class="menu-option" onclick="toggleWindow('about')">About This Page</div>
   <div class="menu-option" onclick="toggleWindow('directory')">Open Directory</div>
-  <div class="menu-option" onclick="toggleWindow('soundboard')">Open Soundboard.app</div>
-  <div class="menu-option" onclick="toggleWindow('storage')">Open Storage.txt</div>
-  <div class="menu-divider"></div>
   <div class="menu-option" onclick="location.reload()">Refresh</div>
 </div>
 
@@ -603,7 +690,15 @@
     document.getElementById('menu-window').innerHTML = rows;
   }
 
+  function openModal(title, bodyHtml) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').innerHTML = bodyHtml;
+    document.getElementById('modalOverlay').classList.add('open');
+  }
   function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modalOverlay') closeModal();
+  });
 
   const WALLPAPERS = ['wp-midnight', 'wp-amber', 'wp-slate'];
   function applyWallpaper(name) {
@@ -624,15 +719,25 @@
   })();
 
   const contextMenu = document.getElementById('contextMenu');
-  function closeContextMenu() { contextMenu.classList.remove('open'); }
+  let ctxIconKey = null;
+  function closeContextMenu() { contextMenu.classList.remove('open'); ctxIconKey = null; }
+  document.getElementById('ctxOpen').addEventListener('click', () => { if (ctxIconKey) openWindow(ctxIconKey); });
+  document.getElementById('ctxChangeIcon').addEventListener('click', () => { if (ctxIconKey) openIconPicker(ctxIconKey); });
   document.addEventListener('contextmenu', (e) => {
+    if (e.target.closest('.window') || e.target.closest('.dock') || e.target.closest('.modal-panel')) return;
     e.preventDefault();
     closeAllMenus();
-    const menuWidth = 220, menuHeight = 200;
+    const iconEl = e.target.closest('.icon');
+    ctxIconKey = iconEl ? iconEl.dataset.key : null;
+    const isIcon = !!iconEl;
+    document.getElementById('ctxOpen').style.display = isIcon ? '' : 'none';
+    document.getElementById('ctxChangeIcon').style.display = isIcon ? '' : 'none';
+    document.getElementById('ctxIconDiv').style.display = isIcon ? '' : 'none';
+    const menuWidth = 220, menuHeight = 260;
     const x = Math.min(e.clientX, window.innerWidth - menuWidth - 8);
     const y = Math.min(e.clientY, window.innerHeight - menuHeight - 8);
-    contextMenu.style.left = x + 'px';
-    contextMenu.style.top = y + 'px';
+    contextMenu.style.left = Math.max(4, x) + 'px';
+    contextMenu.style.top = Math.max(4, y) + 'px';
     contextMenu.classList.add('open');
   });
   document.addEventListener('click', closeContextMenu);
@@ -680,6 +785,82 @@
     });
   }
   runBootSequence();
+
+  /* ---------- app icons (Flat Keycaps) + right-click glyph switcher ----------
+     Every desktop/dock element carries data-app + an <svg class="app-g"><use></svg>.
+     renderIcons() points each <use> at the chosen glyph; choices persist in localStorage.
+     Six alternates per app; add one by dropping a <symbol> in the defs block up top. */
+  const GLYPH_SETS = {
+    about:      [['ab-lines','page + lines'], ['ab-term','terminal'], ['ab-bubble','speech'], ['ab-id','ID card'], ['ab-bust','portrait'], ['ab-photo','page + photo']],
+    directory:  [['dir-folder','folder'], ['dir-folders','folder stack'], ['dir-grid','grid'], ['dir-list','list'], ['dir-tree','file tree'], ['dir-cabinet','cabinet']],
+    soundboard: [['sb-pads','pad grid'], ['sb-wave','waveform'], ['sb-bars','equalizer'], ['sb-note','music notes'], ['sb-speaker','speaker'], ['sb-mic','mic']],
+    storage:    [['st-drive','hard drive'], ['st-db','database'], ['st-box','archive box'], ['st-cloud','cloud'], ['st-lock','encrypted'], ['st-sync','sync']],
+    contact:    [['ct-env','envelope'], ['ct-open','open envelope'], ['ct-plane','paper plane'], ['ct-bubble','speech'], ['ct-at','at-sign'], ['ct-chats','chat']]
+  };
+  const DEFAULT_GLYPHS = {
+    about: 'ab-lines', directory: 'dir-folder', soundboard: 'sb-pads', storage: 'st-drive', contact: 'ct-env'
+  };
+  const ICON_STORE = 'projectsos-icons-v1';
+
+  function loadGlyphs() {
+    const chosen = Object.assign({}, DEFAULT_GLYPHS);
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(ICON_STORE) || '{}'); } catch (e) { saved = {}; }
+    Object.keys(chosen).forEach(k => {
+      const ids = GLYPH_SETS[k].map(g => g[0]);
+      if (saved[k] && ids.includes(saved[k])) chosen[k] = saved[k];
+    });
+    return chosen;
+  }
+  let glyphChoice = loadGlyphs();
+  function saveGlyphs() {
+    try { localStorage.setItem(ICON_STORE, JSON.stringify(glyphChoice)); } catch (e) {}
+  }
+  function renderIcons() {
+    document.querySelectorAll('[data-app] > .app-g > use').forEach(use => {
+      const key = use.closest('[data-app]').dataset.app;
+      if (glyphChoice[key]) use.setAttribute('href', '#' + glyphChoice[key]);
+    });
+  }
+  function chooseGlyph(key, id) {
+    const ids = GLYPH_SETS[key].map(g => g[0]);
+    if (!ids.includes(id)) return;
+    glyphChoice[key] = id;
+    saveGlyphs();
+    renderIcons();
+  }
+  function openIconPicker(key) {
+    const set = GLYPH_SETS[key];
+    const app = apps.find(a => a.key === key);
+    if (!set || !app) return;
+    const cells = set.map(([id, label]) => `
+      <div class="ip-cell ${glyphChoice[key] === id ? 'active' : ''}" data-glyph="${id}">
+        <div class="ip-tile g-${key}">
+          <svg class="app-g" viewBox="0 0 24 24"><use href="#${id}"></use></svg>
+        </div>
+        <span class="ip-name">${label}</span>
+      </div>`).join('');
+    openModal(app.label + ' — icon', `
+      <p class="soft" style="margin:0 0 12px;">Pick a glyph. Saved to this browser; right-click the icon any time to change it.</p>
+      <div class="icon-picker" id="iconPicker">${cells}</div>
+      <div class="ip-foot">
+        <span>Saved automatically</span>
+        <button class="ip-reset" id="ipReset">Reset to default</button>
+      </div>
+    `);
+    const picker = document.getElementById('iconPicker');
+    picker.addEventListener('click', (e) => {
+      const cell = e.target.closest('.ip-cell');
+      if (!cell) return;
+      chooseGlyph(key, cell.dataset.glyph);
+      picker.querySelectorAll('.ip-cell').forEach(c => c.classList.toggle('active', c === cell));
+    });
+    document.getElementById('ipReset').addEventListener('click', () => {
+      chooseGlyph(key, DEFAULT_GLYPHS[key]);
+      picker.querySelectorAll('.ip-cell').forEach(c => c.classList.toggle('active', c.dataset.glyph === DEFAULT_GLYPHS[key]));
+    });
+  }
+  renderIcons();
 </script>
 
 </body>
