@@ -2,7 +2,11 @@
   "hiddenApps": [
     "aventos"
   ],
-  "wallpapers": [],
+  "wallpapers": [
+    "dicaprio-tv-1",
+    "grand-canyon-2",
+    "death-valley-1"
+  ],
   "wallpaperMinutes": 5,
   "bootMessages": [
     "Making food...",

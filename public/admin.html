@@ -171,7 +171,7 @@
 <script>
   const PASSWORD_SHA256 = '8160c5d5b0e16e2c0205df30bcffa0398c06d08679aa0d1462d1c5e26c48a1d0';
   const REPO = 'umich2021/jimson-sWebsite', BRANCH = 'main', FILE = 'public/site-content.json';
-  const DRAFT_KEY = 'jimsonos-admin-draft', TOKEN_KEY = 'jimsonos-admin-token', UNLOCK_KEY = 'jimsonos-admin-unlocked';
+  const DRAFT_KEY = 'jimsonos-admin-draft', BASE_KEY = 'jimsonos-admin-draft-base', TOKEN_KEY = 'jimsonos-admin-token', UNLOCK_KEY = 'jimsonos-admin-unlocked';
   const REGION_NAMES = {
     site: 'Page', boot: 'Boot screen', menubar: 'Menu bar & right-click menu', desktop: 'Desktop icon labels',
     about: 'About_Me.txt', aventos: 'Aventos.app', projects: 'Projects', experience: 'Experience.pdf',
@@ -226,8 +226,25 @@
     $('status').textContent = msg;
     $('status').className = 'status' + (kind ? ' ' + kind : '');
   }
+  /* Three-way merge so a stale draft (or a publish from another browser / a commit made in the repo)
+     never wipes newer changes: anything I changed since `base` wins, everything else comes from `theirs`. */
+  function merge(base, mine, theirs) {
+    const out = normalize(JSON.parse(serialize(theirs)));
+    ['hiddenApps', 'wallpapers', 'wallpaperMinutes', 'bootMessages'].forEach(k => {
+      if (JSON.stringify(mine[k]) !== JSON.stringify(base[k])) out[k] = mine[k];
+    });
+    ['text', 'links'].forEach(k => {
+      new Set([...Object.keys(base[k]), ...Object.keys(mine[k])]).forEach(key => {
+        if (mine[k][key] === base[k][key]) return;
+        if (key in mine[k]) out[k][key] = mine[k][key]; else delete out[k][key];
+      });
+    });
+    return out;
+  }
+
   function changed() {
     store.set(DRAFT_KEY, serialize(cfg));
+    store.set(BASE_KEY, serialize(published));
     const dirty = serialize(cfg) !== serialize(published);
     setStatus(dirty ? 'Unpublished changes' : 'Up to date');
   }
@@ -246,8 +263,14 @@
     readDefaults(html);
     published = normalize(live);
     let draft = null;
-    try { draft = JSON.parse(store.get(DRAFT_KEY) || 'null'); } catch (e) {}
-    cfg = normalize(draft || live);
+    let draftBase = null;
+    try {
+      draft = JSON.parse(store.get(DRAFT_KEY) || 'null');
+      draftBase = JSON.parse(store.get(BASE_KEY) || 'null');
+    } catch (e) {}
+    cfg = !draft ? normalize(live)
+      : draftBase ? merge(normalize(draftBase), normalize(draft), published)
+      : normalize(draft);
     render();
     changed();
   }
@@ -382,6 +405,7 @@
   $('discardBtn').addEventListener('click', () => {
     if (!confirm('Throw away all unpublished edits?')) return;
     store.del(DRAFT_KEY);
+    store.del(BASE_KEY);
     cfg = normalize(JSON.parse(serialize(published)));
     render();
     changed();
@@ -415,7 +439,14 @@
     try {
       const cur = await fetch(`${api}?ref=${BRANCH}`, { headers, cache: 'no-store' });
       if (!cur.ok && cur.status !== 404) throw new Error(`GitHub said ${cur.status} reading the file`);
-      const sha = cur.ok ? (await cur.json()).sha : undefined;
+      let sha;
+      if (cur.ok) {
+        const file = await cur.json();
+        sha = file.sha;
+        // the repo copy may be newer than what this page loaded (Pages lag, another browser, a code commit)
+        const remote = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(file.content.replace(/\n/g, '')), c => c.charCodeAt(0))));
+        cfg = merge(published, cfg, normalize(remote));
+      }
       const res = await fetch(api, {
         method: 'PUT', headers,
         body: JSON.stringify({ message: 'Update site content from admin panel', content: toBase64(serialize(cfg)), branch: BRANCH, sha })
@@ -423,6 +454,8 @@
       if (!res.ok) throw new Error(`GitHub said ${res.status}: ${(await res.json().catch(() => ({}))).message || ''}`);
       published = normalize(JSON.parse(serialize(cfg)));
       store.del(DRAFT_KEY);
+      store.del(BASE_KEY);
+      render();
       setStatus('Published — live in about a minute', 'ok');
     } catch (err) {
       setStatus(err.message, 'err');

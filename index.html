@@ -914,9 +914,7 @@
   { "id": "grand-canyon-1",     "label": "Grand Canyon I",          "src": "/wallpapers/grand-canyon-1.jpg" },
   { "id": "grand-canyon-2",     "label": "Grand Canyon II",         "src": "/wallpapers/grand-canyon-2.jpg" },
   { "id": "death-valley-1",     "label": "Death Valley I",          "src": "/wallpapers/death-valley-1.jpg" },
-  { "id": "death-valley-2",     "label": "Death Valley II",         "src": "/wallpapers/death-valley-2.jpg" },
-  { "id": "harbin-1",           "label": "Harbin Ice Festival I",   "src": "/wallpapers/harbin-1.jpg" },
-  { "id": "harbin-2",           "label": "Harbin Ice Festival II",  "src": "/wallpapers/harbin-2.jpg" }
+  { "id": "death-valley-2",     "label": "Death Valley II",         "src": "/wallpapers/death-valley-2.jpg" }
 ]
 </script>
 
@@ -1486,20 +1484,31 @@
 
   /* ---------- site content (edited from /admin.html) ----------
      site-content.json overrides the defaults written in this file:
-       text:  { "<data-edit key>": "new text" }       — any element with data-edit="…"
+       text:  { "<data-edit key>": "new text" }       — any element with data-edit="…" (\n and **bold** work)
        links: { "<data-edit-href key>": "https://…" } — any <a> with data-edit-href="…"
        hiddenApps: ["aventos", …]                     — hides icon, dock item, window, [data-needs-app]
-       wallpapers: ["harbin-1", …], wallpaperMinutes: 5, bootMessages: ["…"]
+       wallpapers: ["grand-canyon-2", …], wallpaperMinutes: 5, bootMessages: ["…"]
      /?preview shows the admin panel's unpublished draft (localStorage) instead. */
   let siteConfig = {};
   const hiddenApps = new Set();
   function appOn(key) { return !hiddenApps.has(key); }
 
+  // Edited text is plain text plus two niceties: line breaks are kept and **this** is bold.
+  function setRichText(el, value) {
+    el.textContent = '';
+    value.split(/\*\*(.+?)\*\*/s).forEach((part, i) => {
+      if (!part) return;
+      if (i % 2) { const b = document.createElement('strong'); b.textContent = part; el.appendChild(b); }
+      else el.appendChild(document.createTextNode(part));
+    });
+    if (value.includes('\n')) el.style.whiteSpace = 'pre-line';
+  }
+
   function applySiteConfig(cfg) {
     siteConfig = cfg || {};
     const text = siteConfig.text || {}, links = siteConfig.links || {};
     document.querySelectorAll('[data-edit]').forEach(el => {
-      if (typeof text[el.dataset.edit] === 'string') el.textContent = text[el.dataset.edit];
+      if (typeof text[el.dataset.edit] === 'string') setRichText(el, text[el.dataset.edit]);
     });
     document.querySelectorAll('[data-edit-href]').forEach(el => {
       if (typeof links[el.dataset.editHref] === 'string') el.setAttribute('href', links[el.dataset.editHref]);

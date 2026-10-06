@@ -36,6 +36,10 @@ owner's browser) → Pages redeploys.
   in `index.html`; files in `public/wallpapers/` (sources/licenses in `CREDITS.md`).
   `wallpapers: [ids]` picks the rotation (empty = all), `wallpaperMinutes` the interval (default 5).
   Two `.wallpaper` layers crossfade. To add one: drop the file in, add a catalog entry.
+- Text values are plain text; line breaks are kept and `**x**` renders bold (`setRichText()`).
+- The admin panel three-way-merges (`merge()`) its draft onto the latest repo copy when loading
+  and publishing, so editing `site-content.json` in a commit is safe — but pull first; the owner
+  publishes from the panel often.
 - `bootMessages` overrides the boot-screen captions. JS-built text (modals, Get Info) is not
   covered yet.
 - `/?preview` renders the admin panel's unpublished draft (localStorage) instead of the live JSON.
