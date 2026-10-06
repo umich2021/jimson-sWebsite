@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>JimsonOS Admin</title>
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<!--
+  Admin panel for www.jimsonyang.com. Edits public/site-content.json, which index.html reads on load.
+  - Apps on/off, wallpaper rotation, boot captions, and every element tagged data-edit / data-edit-href
+    in index.html are discovered automatically (this page parses /index.html for defaults).
+  - "Preview" stores a draft in localStorage and opens /?preview.
+  - "Publish" commits site-content.json to GitHub with a fine-grained token → Pages redeploys (~1 min).
+  The password gate only hides the UI; the GitHub token is what actually authorises a change.
+-->
+<style>
+  :root {
+    --bg: #f4f4f6; --panel: #fff; --line: #dedee3; --ink: #1c1c1e; --soft: #6b6b70;
+    --accent: #0072e0; --changed: #fff6e0; --changed-line: #f0cfa0; --ok: #1f9d55; --err: #c62828;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141416; --panel: #1d1d20; --line: #313136; --ink: #ececef; --soft: #9a9aa2;
+      --accent: #4c9bff; --changed: #2e2614; --changed-line: #6b5420; --ok: #5ccf8a; --err: #ff7a7a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  button, input, textarea { font: inherit; color: inherit; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 24px 16px 120px; }
+  h1 { font-size: 18px; margin: 0; }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--soft); margin: 0 0 12px; }
+  .soft { color: var(--soft); font-size: 12.5px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-top: 16px; }
+  .btn {
+    border: 1px solid var(--line); background: var(--panel); border-radius: 7px; padding: 8px 14px;
+    font-weight: 600; font-size: 13px; cursor: pointer;
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  input[type=text], input[type=password], input[type=number], textarea {
+    width: 100%; border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; background: var(--bg);
+  }
+  textarea { resize: vertical; min-height: 38px; }
+
+  /* lock */
+  .lock { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .lock form { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; }
+  .lock .err { color: var(--err); font-size: 12.5px; min-height: 18px; }
+
+  /* top bar */
+  .top {
+    position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  }
+  .top .bar { max-width: 860px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .top .grow { flex: 1; min-width: 120px; }
+  .status { font-size: 12.5px; color: var(--soft); }
+  .status.ok { color: var(--ok); } .status.err { color: var(--err); }
+
+  /* apps */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .toggle-row:last-child { border-bottom: 0; }
+  .switch { position: relative; width: 40px; height: 22px; flex: none; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch span { position: absolute; inset: 0; background: var(--line); border-radius: 22px; transition: background .15s; cursor: pointer; }
+  .switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s; }
+  .switch input:checked + span { background: var(--ok); }
+  .switch input:checked + span::after { transform: translateX(18px); }
+  .switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* wallpapers */
+  .wp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .wp { border: 2px solid transparent; border-radius: 9px; overflow: hidden; cursor: pointer; background: var(--bg); position: relative; }
+  .wp img { width: 100%; aspect-ratio: 16/10; object-fit: cover; display: block; background: var(--line); }
+  .wp .cap { font-size: 11.5px; padding: 5px 8px; display: flex; justify-content: space-between; gap: 6px; }
+  .wp.on { border-color: var(--accent); }
+  .wp input { margin: 0; }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .row input[type=number] { width: 80px; }
+
+  /* text fields */
+  .group { margin-top: 18px; }
+  .group:first-of-type { margin-top: 0; }
+  .group > summary { cursor: pointer; font-weight: 700; font-size: 13.5px; padding: 4px 0; }
+  .field { padding: 8px 0; border-bottom: 1px dashed var(--line); }
+  .field:last-child { border-bottom: 0; }
+  .field label { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--soft); margin-bottom: 4px; }
+  .field.changed textarea, .field.changed input { background: var(--changed); border-color: var(--changed-line); }
+  .field .reset { background: none; border: 0; color: var(--accent); cursor: pointer; font-size: 11px; font-weight: 600; padding: 0; visibility: hidden; }
+  .field.changed .reset { visibility: visible; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="lock" id="lock">
+  <form id="lockForm" autocomplete="off">
+    <h1>JimsonOS Admin</h1>
+    <input type="password" id="pw" placeholder="Password" autofocus />
+    <button class="btn primary" type="submit">Unlock</button>
+    <div class="err" id="pwErr"></div>
+  </form>
+</div>
+
+<div id="app" class="hidden">
+  <div class="top">
+    <div class="bar">
+      <h1 class="grow">JimsonOS Admin</h1>
+      <span class="status" id="status"></span>
+      <button class="btn" id="discardBtn" title="Throw away unpublished edits">Discard draft</button>
+      <button class="btn" id="previewBtn">Preview</button>
+      <button class="btn primary" id="publishBtn">Publish</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <section>
+      <h2>Apps</h2>
+      <p class="soft" style="margin:-4px 0 8px;">Switched-off apps disappear from the desktop, dock, and Window menu.</p>
+      <div id="apps"></div>
+    </section>
+
+    <section>
+      <h2>Wallpapers</h2>
+      <p class="soft" style="margin:-4px 0 12px;">Tick the ones to rotate. None ticked = all of them.</p>
+      <div class="wp-grid" id="wallpapers"></div>
+      <div class="row">
+        <label for="wpMinutes">Change every</label>
+        <input type="number" id="wpMinutes" min="1" step="1" />
+        <span>minutes</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Text</h2>
+      <input type="text" id="filter" placeholder="Filter text…" style="margin-bottom:14px;" />
+      <div id="textGroups"></div>
+    </section>
+
+    <section>
+      <h2>Links</h2>
+      <div id="linkFields"></div>
+    </section>
+
+    <section>
+      <h2>Boot screen captions</h2>
+      <p class="soft" style="margin:-4px 0 8px;">One per line. Leave empty to use the built-in ones.</p>
+      <textarea id="bootMessages" rows="4"></textarea>
+    </section>
+
+    <section>
+      <h2>Publishing</h2>
+      <p class="soft" style="margin:-4px 0 10px;">
+        Publish commits <code>public/site-content.json</code> to <code id="repoLabel"></code>; the site redeploys in about a minute.
+        Needs a GitHub fine-grained token with access to only that repo and <b>Contents: Read and write</b>
+        (github.com → Settings → Developer settings → Fine-grained tokens). It's kept in this browser only.
+      </p>
+      <div class="row" style="margin-top:0;">
+        <input type="password" id="token" placeholder="github_pat_…" style="flex:1; min-width:200px;" />
+        <button class="btn" id="saveToken">Save token</button>
+        <button class="btn" id="downloadBtn">Download JSON</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  const PASSWORD_SHA256 = '8160c5d5b0e16e2c0205df30bcffa0398c06d08679aa0d1462d1c5e26c48a1d0';
+  const REPO = 'umich2021/jimson-sWebsite', BRANCH = 'main', FILE = 'public/site-content.json';
+  const DRAFT_KEY = 'jimsonos-admin-draft', TOKEN_KEY = 'jimsonos-admin-token', UNLOCK_KEY = 'jimsonos-admin-unlocked';
+  const REGION_NAMES = {
+    site: 'Page', boot: 'Boot screen', menubar: 'Menu bar & right-click menu', desktop: 'Desktop icon labels',
+    about: 'About_Me.txt', aventos: 'Aventos.app', projects: 'Projects', experience: 'Experience.pdf',
+    education: 'Education.txt', contact: 'Contact.app'
+  };
+
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  /* ---------- lock ---------- */
+  $('lockForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (await sha256($('pw').value) === PASSWORD_SHA256) {
+      try { sessionStorage.setItem(UNLOCK_KEY, '1'); } catch (err) {}
+      unlock();
+    } else {
+      $('pwErr').textContent = 'Wrong password.';
+    }
+  });
+  let unlocked = false;
+  try { unlocked = sessionStorage.getItem(UNLOCK_KEY) === '1'; } catch (e) {}
+  if (unlocked) unlock();
+
+  /* ---------- state ---------- */
+  let cfg = null;           // the config being edited
+  let published = null;     // what's live (for "changed" status)
+  let defaults = { text: [], links: [], apps: [], wallpapers: [] };
+
+  function normalize(c) {
+    c = c && typeof c === 'object' ? c : {};
+    return {
+      hiddenApps: Array.isArray(c.hiddenApps) ? c.hiddenApps : [],
+      wallpapers: Array.isArray(c.wallpapers) ? c.wallpapers : [],
+      wallpaperMinutes: Number(c.wallpaperMinutes) > 0 ? Number(c.wallpaperMinutes) : 5,
+      bootMessages: Array.isArray(c.bootMessages) ? c.bootMessages : [],
+      text: c.text && typeof c.text === 'object' ? c.text : {},
+      links: c.links && typeof c.links === 'object' ? c.links : {}
+    };
+  }
+  const serialize = c => JSON.stringify(c, null, 2) + '\n';
+
+  function setStatus(msg, kind) {
+    $('status').textContent = msg;
+    $('status').className = 'status' + (kind ? ' ' + kind : '');
+  }
+  function changed() {
+    store.set(DRAFT_KEY, serialize(cfg));
+    const dirty = serialize(cfg) !== serialize(published);
+    setStatus(dirty ? 'Unpublished changes' : 'Up to date');
+  }
+
+  async function unlock() {
+    $('lock').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    $('repoLabel').textContent = REPO + '@' + BRANCH;
+    $('token').value = store.get(TOKEN_KEY) || '';
+    setStatus('Loading…');
+
+    const [html, live] = await Promise.all([
+      fetch('/index.html', { cache: 'no-cache' }).then(r => r.text()),
+      fetch('/site-content.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+    ]);
+    readDefaults(html);
+    published = normalize(live);
+    let draft = null;
+    try { draft = JSON.parse(store.get(DRAFT_KEY) || 'null'); } catch (e) {}
+    cfg = normalize(draft || live);
+    render();
+    changed();
+  }
+
+  /* defaults come straight from index.html, so new data-edit tags show up here with no admin changes */
+  function readDefaults(html) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    defaults.text = Array.from(doc.querySelectorAll('[data-edit]')).map(el => ({
+      key: el.dataset.edit,
+      value: el.textContent,
+      hint: (el.className || el.tagName.toLowerCase()).toString().split(' ')[0]
+    }));
+    defaults.links = Array.from(doc.querySelectorAll('[data-edit-href]')).map(el => ({
+      key: el.dataset.editHref,
+      value: el.getAttribute('href'),
+      hint: (el.querySelector('.file-name') || el).textContent.trim().slice(0, 60)
+    }));
+    defaults.apps = Array.from(doc.querySelectorAll('.icon[data-key]')).map(el => ({
+      key: el.dataset.key, label: el.querySelector('.icon-label').textContent, labelKey: el.querySelector('.icon-label').dataset.edit
+    }));
+    try { defaults.wallpapers = JSON.parse(doc.getElementById('wallpaperCatalog').textContent); } catch (e) {}
+    const msgs = html.match(/const messages = [^\[]*\[([\s\S]*?)\];/);
+    defaults.bootMessages = msgs ? Array.from(msgs[1].matchAll(/'([^']*)'/g)).map(m => m[1]) : [];
+  }
+
+  /* ---------- render ---------- */
+  function render() {
+    // apps
+    $('apps').innerHTML = '';
+    defaults.apps.forEach(a => {
+      const row = document.createElement('div');
+      row.className = 'toggle-row';
+      const label = cfg.text[a.labelKey] || a.label;
+      row.innerHTML = `<span></span><label class="switch"><input type="checkbox"><span></span></label>`;
+      row.firstChild.textContent = label;
+      const cb = row.querySelector('input');
+      cb.checked = !cfg.hiddenApps.includes(a.key);
+      cb.setAttribute('aria-label', 'Show ' + label);
+      cb.addEventListener('change', () => {
+        cfg.hiddenApps = cfg.hiddenApps.filter(k => k !== a.key);
+        if (!cb.checked) cfg.hiddenApps.push(a.key);
+        changed();
+      });
+      $('apps').appendChild(row);
+    });
+
+    // wallpapers
+    $('wallpapers').innerHTML = '';
+    defaults.wallpapers.forEach(w => {
+      const card = document.createElement('label');
+      card.className = 'wp';
+      card.innerHTML = `<img loading="lazy" alt=""><div class="cap"><span></span><input type="checkbox"></div>`;
+      card.querySelector('img').src = w.src;
+      card.querySelector('.cap span').textContent = w.label;
+      const cb = card.querySelector('input');
+      cb.checked = cfg.wallpapers.includes(w.id);
+      card.classList.toggle('on', cb.checked);
+      cb.addEventListener('change', () => {
+        cfg.wallpapers = cfg.wallpapers.filter(id => id !== w.id);
+        if (cb.checked) cfg.wallpapers.push(w.id);
+        card.classList.toggle('on', cb.checked);
+        changed();
+      });
+      $('wallpapers').appendChild(card);
+    });
+    $('wpMinutes').value = cfg.wallpaperMinutes;
+
+    // text, grouped by region
+    const groups = {};
+    defaults.text.forEach(f => (groups[f.key.split('.')[0]] = groups[f.key.split('.')[0]] || []).push(f));
+    $('textGroups').innerHTML = '';
+    Object.keys(groups).forEach(region => {
+      const det = document.createElement('details');
+      det.className = 'group';
+      det.open = ['about', 'experience'].includes(region);
+      det.innerHTML = `<summary></summary>`;
+      det.firstChild.textContent = REGION_NAMES[region] || region;
+      groups[region].forEach(f => det.appendChild(fieldEl(f, cfg.text, true)));
+      $('textGroups').appendChild(det);
+    });
+
+    // links
+    $('linkFields').innerHTML = '';
+    defaults.links.forEach(f => $('linkFields').appendChild(fieldEl(f, cfg.links, false)));
+
+    $('bootMessages').value = cfg.bootMessages.join('\n');
+    $('bootMessages').placeholder = defaults.bootMessages.join('\n');
+  }
+
+  function fieldEl(f, bucket, multiline) {
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+    wrap.dataset.search = (f.value + ' ' + (bucket[f.key] || '')).toLowerCase();
+    wrap.innerHTML = `<label><span></span><button type="button" class="reset">reset</button></label>`;
+    wrap.querySelector('label span').textContent = f.key + ' · ' + f.hint;
+    const input = document.createElement(multiline ? 'textarea' : 'input');
+    if (!multiline) input.type = 'text';
+    input.value = typeof bucket[f.key] === 'string' ? bucket[f.key] : f.value;
+    if (multiline) input.rows = Math.min(8, Math.max(1, Math.ceil(input.value.length / 90)));
+    wrap.appendChild(input);
+    const sync = () => {
+      if (input.value === f.value) delete bucket[f.key]; else bucket[f.key] = input.value;
+      wrap.classList.toggle('changed', f.key in bucket);
+    };
+    input.addEventListener('input', () => { sync(); changed(); });
+    wrap.querySelector('.reset').addEventListener('click', () => { input.value = f.value; sync(); changed(); });
+    wrap.classList.toggle('changed', f.key in bucket);
+    return wrap;
+  }
+
+  $('filter').addEventListener('input', () => {
+    const q = $('filter').value.trim().toLowerCase();
+    document.querySelectorAll('#textGroups .field').forEach(el => {
+      el.classList.toggle('hidden', q && !el.dataset.search.includes(q) && !el.querySelector('textarea').value.toLowerCase().includes(q));
+    });
+    document.querySelectorAll('#textGroups details').forEach(d => { if (q) d.open = true; });
+  });
+  $('wpMinutes').addEventListener('input', () => {
+    const n = Number($('wpMinutes').value);
+    if (n > 0) { cfg.wallpaperMinutes = n; changed(); }
+  });
+  $('bootMessages').addEventListener('input', () => {
+    cfg.bootMessages = $('bootMessages').value.split('\n').map(s => s.trim()).filter(Boolean);
+    changed();
+  });
+
+  /* ---------- actions ---------- */
+  $('previewBtn').addEventListener('click', () => {
+    store.set(DRAFT_KEY, serialize(cfg));
+    window.open('/?preview', '_blank');
+  });
+  $('discardBtn').addEventListener('click', () => {
+    if (!confirm('Throw away all unpublished edits?')) return;
+    store.del(DRAFT_KEY);
+    cfg = normalize(JSON.parse(serialize(published)));
+    render();
+    changed();
+  });
+  $('saveToken').addEventListener('click', () => {
+    store.set(TOKEN_KEY, $('token').value.trim());
+    setStatus('Token saved', 'ok');
+  });
+  $('downloadBtn').addEventListener('click', () => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([serialize(cfg)], { type: 'application/json' }));
+    a.download = 'site-content.json';
+    a.click();
+  });
+
+  function toBase64(str) {
+    const bytes = new TextEncoder().encode(str);
+    let bin = '';
+    bytes.forEach(b => (bin += String.fromCharCode(b)));
+    return btoa(bin);
+  }
+  $('publishBtn').addEventListener('click', async () => {
+    const token = $('token').value.trim() || store.get(TOKEN_KEY);
+    if (!token) { setStatus('Add a GitHub token under Publishing first', 'err'); $('token').focus(); return; }
+    store.set(TOKEN_KEY, token);
+    const btn = $('publishBtn');
+    btn.disabled = true;
+    setStatus('Publishing…');
+    const api = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+    const headers = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' };
+    try {
+      const cur = await fetch(`${api}?ref=${BRANCH}`, { headers, cache: 'no-store' });
+      if (!cur.ok && cur.status !== 404) throw new Error(`GitHub said ${cur.status} reading the file`);
+      const sha = cur.ok ? (await cur.json()).sha : undefined;
+      const res = await fetch(api, {
+        method: 'PUT', headers,
+        body: JSON.stringify({ message: 'Update site content from admin panel', content: toBase64(serialize(cfg)), branch: BRANCH, sha })
+      });
+      if (!res.ok) throw new Error(`GitHub said ${res.status}: ${(await res.json().catch(() => ({}))).message || ''}`);
+      published = normalize(JSON.parse(serialize(cfg)));
+      store.del(DRAFT_KEY);
+      setStatus('Published — live in about a minute', 'ok');
+    } catch (err) {
+      setStatus(err.message, 'err');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

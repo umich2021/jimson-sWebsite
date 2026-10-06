@@ -12,6 +12,36 @@ Orientation for coding agents. Keep this current when you change the things it d
   Pages. Its landing page source lives on the box, not here. See `SERVER-SETUP.md`
   (gitignored). `projects-landing/index.html` in this repo is a stale snapshot.
 
+## Content is edited from the admin panel — read this before changing text
+
+The owner edits site text, app visibility, and wallpapers from **`/admin.html`**
+(`public/admin.html`, password-gated) instead of asking for code changes. It writes
+**`public/site-content.json`**, which `index.html` fetches on load (`applySiteConfig()`), and
+publishes by committing that file through the GitHub API (fine-grained token kept in the
+owner's browser) → Pages redeploys.
+
+- **Overrides win.** A `text` / `links` entry in `site-content.json` replaces what's written in
+  `index.html`. If you change text in the HTML and it doesn't show up, check that file — and
+  when the owner asks for a text change, prefer editing `site-content.json` (or tell them it's
+  one click in the admin panel) over editing HTML that an override is hiding.
+- **Every editable element carries `data-edit="<region>.<n>"`** (links: `data-edit-href="<region>.linkN"`).
+  Regions: `site`, `boot`, `menubar`, `desktop`, `about`, `aventos`, `projects`, `experience`,
+  `education`, `contact`. Keys are stored in `site-content.json`, so **never renumber or reuse a
+  key** — give new elements a new unused key (e.g. next number in that region). Leaf elements
+  only (it sets `textContent`). The admin panel discovers fields by parsing `/index.html`, so a
+  new tag shows up there automatically.
+- **Apps on/off:** `hiddenApps: ["aventos"]` hides the desktop icon, dock item, Window-menu
+  row, the window, and anything tagged `data-needs-app="<app>"`. Use `appOn(key)` in new code.
+- **Wallpapers:** catalog is the `<script type="application/json" id="wallpaperCatalog">` block
+  in `index.html`; files in `public/wallpapers/` (sources/licenses in `CREDITS.md`).
+  `wallpapers: [ids]` picks the rotation (empty = all), `wallpaperMinutes` the interval (default 5).
+  Two `.wallpaper` layers crossfade. To add one: drop the file in, add a catalog entry.
+- `bootMessages` overrides the boot-screen captions. JS-built text (modals, Get Info) is not
+  covered yet.
+- `/?preview` renders the admin panel's unpublished draft (localStorage) instead of the live JSON.
+- The admin password is stored only as a SHA-256 hash in `admin.html`; it just hides the UI.
+  The GitHub token is the real authorisation. Never commit the plaintext password or a token.
+
 ## App icon system (Flat Keycaps)
 
 The desktop-rail and dock icons use one system, chosen from a set of directions
@@ -60,6 +90,8 @@ separate letter/gradient style and are **not** part of this system yet.
 
 - Education windows show a hand-built Michigan Block M (inline `<svg><polygon>`,
   `.edu-logo`) — no external asset.
+- Favicons (`public/favicon*.png|ico`, `apple-touch-icon.png`) are made from the owner's LinkedIn photo.
+- Keep the desktop minimal — no instructional copy on the desktop itself (the old "click an icon…" hint was removed on request).
 - Right-click behaviour, wallpaper cycling, boot sequence, window drag/resize are all
   in the single `<script>` at the bottom of `index.html`.
 - Don't commit `SERVER-SETUP.md` or any key (`.gitignore` covers `*.key`, `*.pem`, etc.).

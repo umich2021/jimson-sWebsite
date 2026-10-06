@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<title>Jimson Yang</title>
-<meta name="description" content="Jimson Yang — co-founder of Aventos, an AI anime studio. Builder across sales, GTM, and engineering." />
+<title data-edit="site.1">Jimson Yang</title>
+<meta name="description" content="Jimson Yang — forward deployed engineer at TrustPixel. Previously co-founded Aventos, an AI anime studio." />
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <style>
   :root {
     --menubar: rgba(30,30, 34, 0.55);
@@ -21,10 +25,7 @@
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    background:
-      radial-gradient(1200px 800px at 80% 10%, #6a5acd33, transparent 60%),
-      radial-gradient(1000px 700px at 10% 90%, #ff6b9733, transparent 60%),
-      linear-gradient(160deg, #2b2350 0%, #1a1330 45%, #0d0a1a 100%);
+    background: #121214;
     overflow: hidden;
     height: 100vh;
     height: 100dvh;
@@ -358,9 +359,16 @@
   }
   .dock-item:hover::before { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  .welcome-hint {
-    position: fixed; left: 16px; bottom: 90px; z-index: 4; color: rgba(255,255,255,0.75); font-size: 13px; max-width: 260px;
+  /* wallpaper — two stacked layers so a change crossfades (rotates every few minutes, like Windows) */
+  .wallpaper {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: center / cover no-repeat; opacity: 0; transition: opacity 1.2s ease;
   }
+  .wallpaper.show { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .wallpaper { transition: none; } }
+
+  /* apps switched off from the admin panel */
+  .app-off { display: none !important; }
 
   /* boot sequence (retro / playful chime) */
   .boot-screen {
@@ -413,7 +421,6 @@
     .win-scroll { padding: 16px; font-size: 13.5px; }
     .dock { gap: 6px; padding: 6px 8px; bottom: 8px; }
     .dock-item { width: 40px; height: 40px; font-size: 9.5px; border-radius: 9px; }
-    .welcome-hint { display: none; }
     .resize-handle { display: none; }
   }
 </style>
@@ -469,60 +476,60 @@
 </defs></svg>
 
 <div class="boot-screen" id="bootScreen">
-  <div class="boot-logo">◆</div>
-  <div class="boot-wordmark">JimsonOS</div>
+  <div data-edit="boot.1" class="boot-logo">◆</div>
+  <div data-edit="boot.2" class="boot-wordmark">JimsonOS</div>
   <p class="boot-caption" id="bootCaption"></p>
 </div>
 
 <div class="menubar pre-boot">
   <div class="menubar-left">
-    <span class="menubar-logo">◆ JimsonOS</span>
+    <span data-edit="menubar.1" class="menubar-logo">◆ JimsonOS</span>
 
     <div class="menu" data-menu="file">
-      <span class="menubar-item">File</span>
+      <span data-edit="menubar.2" class="menubar-item">File</span>
       <div class="menu-dropdown" id="menu-file">
-        <div class="menu-option" onclick="toggleWindow('contact')">New Message</div>
+        <div data-edit="menubar.3" class="menu-option" onclick="toggleWindow('contact')">New Message</div>
         <div class="menu-divider"></div>
-        <div class="menu-option" onclick="closeFocusedWindow()">Close Window <span class="menu-shortcut">Esc</span></div>
+        <div class="menu-option" onclick="closeFocusedWindow()">Close Window <span data-edit="menubar.4" class="menu-shortcut">Esc</span></div>
         <div class="menu-divider"></div>
-        <div class="menu-option" onclick="quitPrompt()">Quit JimsonOS <span class="menu-shortcut">⌘Q</span></div>
+        <div class="menu-option" onclick="quitPrompt()">Quit JimsonOS <span data-edit="menubar.5" class="menu-shortcut">⌘Q</span></div>
       </div>
     </div>
 
     <div class="menu" data-menu="edit">
-      <span class="menubar-item">Edit</span>
+      <span data-edit="menubar.6" class="menubar-item">Edit</span>
       <div class="menu-dropdown" id="menu-edit">
-        <div class="menu-option" onclick="copyEmail()">Copy Email Address</div>
-        <div class="menu-option" onclick="toastMessage('Nothing to select — try an icon instead.')">Select All</div>
+        <div data-edit="menubar.7" class="menu-option" onclick="copyEmail()">Copy Email Address</div>
+        <div data-edit="menubar.8" class="menu-option" onclick="toastMessage('Nothing to select — try an icon instead.')">Select All</div>
       </div>
     </div>
 
     <div class="menu" data-menu="view">
-      <span class="menubar-item">View</span>
+      <span data-edit="menubar.9" class="menubar-item">View</span>
       <div class="menu-dropdown" id="menu-view">
-        <div class="menu-option" onclick="cycleWallpaper()">Change Wallpaper</div>
-        <div class="menu-option" onclick="toggleFullscreen()">Enter Full Screen</div>
+        <div data-edit="menubar.10" class="menu-option" onclick="cycleWallpaper()">Change Wallpaper</div>
+        <div data-edit="menubar.11" class="menu-option" onclick="toggleFullscreen()">Enter Full Screen</div>
       </div>
     </div>
 
     <div class="menu" data-menu="window">
-      <span class="menubar-item">Window</span>
+      <span data-edit="menubar.12" class="menubar-item">Window</span>
       <div class="menu-dropdown" id="menu-window"></div>
     </div>
 
     <div class="menu" data-menu="help">
-      <span class="menubar-item">Help</span>
+      <span data-edit="menubar.13" class="menubar-item">Help</span>
       <div class="menu-dropdown" id="menu-help">
-        <div class="menu-option" onclick="toggleWindow('about')">About Jimson</div>
-        <div class="menu-option" onclick="showAboutOS()">About JimsonOS</div>
-        <div class="menu-option" onclick="showShortcuts()">Keyboard Shortcuts</div>
+        <div data-edit="menubar.14" class="menu-option" onclick="toggleWindow('about')">About Jimson</div>
+        <div data-edit="menubar.15" class="menu-option" onclick="showAboutOS()">About JimsonOS</div>
+        <div data-edit="menubar.16" class="menu-option" onclick="showShortcuts()">Keyboard Shortcuts</div>
         <div class="menu-divider"></div>
-        <div class="menu-option" onclick="toggleWindow('contact')">Say Hi 👋</div>
+        <div data-edit="menubar.17" class="menu-option" onclick="toggleWindow('contact')">Say Hi 👋</div>
       </div>
     </div>
   </div>
   <div class="menubar-right">
-    <span>San Francisco, CA</span>
+    <span data-edit="menubar.18">San Francisco, CA</span>
     <span id="clock">--:--</span>
   </div>
 </div>
@@ -531,113 +538,119 @@
 <div class="icon-list" id="iconList">
   <div class="icon" data-key="about" onclick="toggleWindow('about')">
     <div class="icon-glyph g-about" data-app="about"><svg class="app-g" viewBox="0 0 24 24"><use href="#ab-bust"></use></svg></div>
-    <div class="icon-label">About_Me.txt</div>
+    <div data-edit="desktop.1" class="icon-label">About_Me.txt</div>
   </div>
   <div class="icon" data-key="aventos" onclick="toggleWindow('aventos')">
     <div class="icon-glyph g-aventos" data-app="aventos"><svg class="app-g" viewBox="0 0 24 24"><use href="#av-cam"></use></svg></div>
-    <div class="icon-label">Aventos.app</div>
+    <div data-edit="desktop.2" class="icon-label">Aventos.app</div>
   </div>
   <div class="icon" data-key="projects" onclick="toggleWindow('projects')">
     <div class="icon-glyph g-projects" data-app="projects"><svg class="app-g" viewBox="0 0 24 24"><use href="#pj-terminal"></use></svg></div>
-    <div class="icon-label">Projects</div>
+    <div data-edit="desktop.3" class="icon-label">Projects</div>
   </div>
   <div class="icon" data-key="experience" onclick="toggleWindow('experience')">
     <div class="icon-glyph g-experience" data-app="experience"><svg class="app-g" viewBox="0 0 24 24"><use href="#ex-case"></use></svg></div>
-    <div class="icon-label">Experience.pdf</div>
+    <div data-edit="desktop.4" class="icon-label">Experience.pdf</div>
   </div>
   <div class="icon" data-key="education" onclick="toggleWindow('education')">
     <div class="icon-glyph g-education" data-app="education"><svg class="app-g" viewBox="0 0 24 24"><use href="#ed-cap"></use></svg></div>
-    <div class="icon-label">Education.txt</div>
+    <div data-edit="desktop.5" class="icon-label">Education.txt</div>
   </div>
   <div class="icon" data-key="contact" onclick="toggleWindow('contact')">
     <div class="icon-glyph g-contact" data-app="contact"><svg class="app-g" viewBox="0 0 24 24"><use href="#ct-env"></use></svg></div>
-    <div class="icon-label">Contact.app</div>
+    <div data-edit="desktop.6" class="icon-label">Contact.app</div>
   </div>
 </div>
 <div class="icon-dots" id="iconDots"></div>
 </div>
 
-<p class="welcome-hint">Click an icon to open it. Drag windows by their title bar, resize from the bottom-right corner, or right-click the desktop.</p>
+<div class="wallpaper" id="wallpaperA"></div>
+<div class="wallpaper" id="wallpaperB"></div>
 
 <!-- WINDOWS -->
 <div class="window" id="win-about" style="top:56px; left:80px; z-index:12; width:660px; height:600px;">
   <div class="win-header" data-target="win-about">
     <span class="traffic t-red" onclick="closeWindow('win-about')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
-    <span class="win-title">About_Me.txt</span>
+    <span data-edit="about.1" class="win-title">About_Me.txt</span>
   </div>
   <div class="win-railbody">
     <nav class="win-rail" aria-label="Sections">
-      <button class="active" data-to="about-overview">Overview</button>
-      <button data-to="about-experience">Experience</button>
-      <button data-to="about-projects">Projects</button>
-      <button data-to="about-education">Education</button>
-      <button data-to="about-contact">Contact</button>
+      <button data-edit="about.2" class="active" data-to="about-overview">Overview</button>
+      <button data-edit="about.3" data-to="about-experience">Experience</button>
+      <button data-edit="about.4" data-to="about-projects">Projects</button>
+      <button data-edit="about.5" data-to="about-education">Education</button>
+      <button data-edit="about.6" data-to="about-contact">Contact</button>
     </nav>
     <div class="win-scroll" id="about-scroll">
       <section class="win-section" id="about-overview">
-        <div class="sec-h">Overview</div>
-        <h2 style="margin-bottom:2px;">Jimson Yang</h2>
-        <p class="soft" style="margin-bottom:14px;">San Francisco, CA · jimsonyangbusiness@gmail.com</p>
-        <p>I co-founded Aventos, an AI anime studio, after a few years doing a little bit of everything at startups — sales, GTM, frontend engineering, and a stint on the VC side doing due diligence. I build my own backend for fun, ship frontend for work, and I'm currently trying to figure out how to make an AI-generated anime that's actually emotionally powerful and not just fast-paced slop.</p>
+        <div data-edit="about.7" class="sec-h">Overview</div>
+        <h2 data-edit="about.8" style="margin-bottom:2px;">Jimson Yang</h2>
+        <p data-edit="about.9" class="soft" style="margin-bottom:14px;">San Francisco, CA · jimsonyangbusiness@gmail.com</p>
+        <p data-edit="about.10">I'm a forward deployed engineer at TrustPixel. Before that I co-founded Aventos, an AI anime studio, after a few years doing a little bit of everything at startups — sales, GTM, frontend engineering, and a stint on the VC side doing due diligence. I build my own backend for fun, ship frontend for work, and I still think about how to make an AI-generated anime that's actually emotionally powerful and not just fast-paced slop.</p>
         <div class="stat-chip-row">
-          <div class="stat-chip"><div class="num">Aventos</div><div class="lbl">co-founder · present</div></div>
-          <div class="stat-chip"><div class="num">98.5M</div><div class="lbl">views via publisher deal</div></div>
-          <div class="stat-chip"><div class="num">$100K</div><div class="lbl">pre-seed raised</div></div>
-          <div class="stat-chip"><div class="num">3.89</div><div class="lbl">GPA · UMich</div></div>
+          <div class="stat-chip"><div data-edit="about.11" class="num">TrustPixel</div><div data-edit="about.12" class="lbl">forward deployed engineer</div></div>
+          <div class="stat-chip"><div data-edit="about.13" class="num">98.5M</div><div data-edit="about.14" class="lbl">views via publisher deal</div></div>
+          <div class="stat-chip"><div data-edit="about.15" class="num">$100K</div><div data-edit="about.16" class="lbl">pre-seed raised</div></div>
+          <div class="stat-chip"><div data-edit="about.17" class="num">3.89</div><div data-edit="about.18" class="lbl">GPA · UMich</div></div>
         </div>
-        <div class="group-label" style="margin-top:20px;">Elsewhere</div>
-        <a class="tab-link" href="https://github.com/umich2021" target="_blank" rel="noreferrer" style="margin-right:18px;">GitHub →</a>
-        <a class="tab-link" href="https://www.youtube.com/channel/UCfzG7qaPV5p_QE1sr1mcXaA" target="_blank" rel="noreferrer">YouTube →</a>
+        <div data-edit="about.19" class="group-label" style="margin-top:20px;">Elsewhere</div>
+        <a data-edit-href="about.link1" data-edit="about.20" class="tab-link" href="https://github.com/umich2021" target="_blank" rel="noreferrer" style="margin-right:18px;">GitHub →</a>
+        <a data-edit-href="about.link2" data-edit="about.21" class="tab-link" href="https://www.youtube.com/channel/UCfzG7qaPV5p_QE1sr1mcXaA" target="_blank" rel="noreferrer">YouTube →</a>
       </section>
       <section class="win-section" id="about-experience">
-        <div class="sec-h">Experience</div>
+        <div data-edit="about.22" class="sec-h">Experience</div>
         <div class="resume-entry">
-          <div class="pdf-role">Co-Founder — Aventos</div>
-          <div class="pdf-meta">May 2025 – Present · San Francisco, CA</div>
-          <div class="pdf-summary">AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS. Landed a publisher deal that's driven 98.5M views, a distribution deal with BlueBox.tv, and turned internal tooling into a platform with its first $10K in revenue.</div>
+          <div data-edit="about.23" class="pdf-role">Forward Deployed Engineer — TrustPixel</div>
+          <div data-edit="about.24" class="pdf-meta">Present</div>
+          <div data-edit="about.25" class="pdf-summary">Forward deployed engineer at TrustPixel.</div>
         </div>
         <div class="resume-entry">
-          <div class="pdf-role">Founder — Project GEO</div>
-          <div class="pdf-meta">2024 – 2025</div>
-          <div class="pdf-summary">AEO/LLM citation tracker — tracks how well a brand shows up when people ask ChatGPT or Claude AI questions about brand discoverability. Built the full tech stack solo and took it 0 to 1 in B2B SaaS sales.</div>
+          <div data-edit="about.26" class="pdf-role">Co-Founder — Aventos</div>
+          <div data-edit="about.27" class="pdf-meta">May 2025 – Present · San Francisco, CA</div>
+          <div data-edit="about.28" class="pdf-summary">AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS. Landed a publisher deal that's driven 98.5M views, a distribution deal with BlueBox.tv, and turned internal tooling into a platform with its first $10K in revenue.</div>
         </div>
         <div class="resume-entry">
-          <div class="pdf-role">Co-Founder, Business — Pink Inference</div>
-          <div class="pdf-meta">2023 – 2024</div>
-          <div class="pdf-summary">Business side of a deep-tech venture studio spanning wetware/biological computing to oil-and-gas-powered data centers. Raised a $100K pre-seed round from 1517 Fund.</div>
+          <div data-edit="about.29" class="pdf-role">Founder — Project GEO</div>
+          <div data-edit="about.30" class="pdf-meta">2024 – 2025</div>
+          <div data-edit="about.31" class="pdf-summary">AEO/LLM citation tracker — tracks how well a brand shows up when people ask ChatGPT or Claude AI questions about brand discoverability. Built the full tech stack solo and took it 0 to 1 in B2B SaaS sales.</div>
         </div>
         <div class="resume-entry">
-          <div class="pdf-role">Intern — CitySide Ventures</div>
-          <div class="pdf-meta">Mar 2023 – Jul 2024</div>
-          <div class="pdf-summary">Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors.</div>
+          <div data-edit="about.32" class="pdf-role">Co-Founder, Business — Pink Inference</div>
+          <div data-edit="about.33" class="pdf-meta">2023 – 2024</div>
+          <div data-edit="about.34" class="pdf-summary">Business side of a deep-tech venture studio spanning wetware/biological computing to oil-and-gas-powered data centers. Raised a $100K pre-seed round from 1517 Fund.</div>
         </div>
         <div class="resume-entry">
-          <div class="pdf-role">Summer Intern — Arboretum Ventures</div>
-          <div class="pdf-meta">Apr 2023 – Jul 2023</div>
-          <div class="pdf-summary">Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand.</div>
+          <div data-edit="about.35" class="pdf-role">Intern — CitySide Ventures</div>
+          <div data-edit="about.36" class="pdf-meta">Mar 2023 – Jul 2024</div>
+          <div data-edit="about.37" class="pdf-summary">Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors.</div>
         </div>
-        <a class="tab-link" href="#" onclick="toggleWindow('experience'); return false;">Open Experience.pdf →</a>
+        <div class="resume-entry">
+          <div data-edit="about.38" class="pdf-role">Summer Intern — Arboretum Ventures</div>
+          <div data-edit="about.39" class="pdf-meta">Apr 2023 – Jul 2023</div>
+          <div data-edit="about.40" class="pdf-summary">Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand.</div>
+        </div>
+        <a data-edit="about.41" class="tab-link" href="#" onclick="toggleWindow('experience'); return false;">Open Experience.pdf →</a>
       </section>
       <section class="win-section" id="about-projects">
-        <div class="sec-h">Projects</div>
-        <div class="group-label">Companies &amp; products</div>
-        <p class="soft resume-hint">Tap any row to open it and see more.</p>
-        <div class="file-row" style="cursor:pointer;" onclick="toggleWindow('aventos')">
-          <div class="file-icon g-aventos">▶</div>
-          <div><div class="file-name">Aventos.app</div><div class="file-desc">AI anime studio — 98.5M views via publisher deal, BlueBox.tv distribution.</div></div>
+        <div data-edit="about.42" class="sec-h">Projects</div>
+        <div data-edit="about.43" class="group-label">Companies &amp; products</div>
+        <p data-edit="about.44" class="soft resume-hint">Tap any row to open it and see more.</p>
+        <div class="file-row" style="cursor:pointer;" data-needs-app="aventos" onclick="toggleWindow('aventos')">
+          <div data-edit="about.45" class="file-icon g-aventos">▶</div>
+          <div><div data-edit="about.46" class="file-name">Aventos.app</div><div data-edit="about.47" class="file-desc">AI anime studio — 98.5M views via publisher deal, BlueBox.tv distribution.</div></div>
         </div>
         <div class="file-row" style="cursor:pointer;" onclick="toggleWindow('projects')">
-          <div class="file-icon g-geo">GEO</div>
-          <div><div class="file-name">Project GEO</div><div class="file-desc">AEO/LLM citation tracker — solo-built, 0 → 1 in B2B SaaS sales. Opens in Projects → For Work.</div></div>
+          <div data-edit="about.48" class="file-icon g-geo">GEO</div>
+          <div><div data-edit="about.49" class="file-name">Project GEO</div><div data-edit="about.50" class="file-desc">AEO/LLM citation tracker — solo-built, 0 → 1 in B2B SaaS sales. Opens in Projects → For Work.</div></div>
         </div>
-        <div class="group-label" style="margin-top:16px;">Side projects</div>
+        <div data-edit="about.51" class="group-label" style="margin-top:16px;">Side projects</div>
         <div class="file-row" style="cursor:pointer;" onclick="toggleWindow('projects')">
-          <div class="file-icon g-projects">▤</div>
-          <div><div class="file-name">Projects folder</div><div class="file-desc">Work builds (Seedance tool, Manhwa Reader, client sites) plus my self-hosted playground at projects.jimsonyang.com — Soundboard, a storage write-up, Jet Lag: SF.</div></div>
+          <div data-edit="about.52" class="file-icon g-projects">▤</div>
+          <div><div data-edit="about.53" class="file-name">Projects folder</div><div data-edit="about.54" class="file-desc">Work builds (Seedance tool, Manhwa Reader, client sites) plus my self-hosted playground at projects.jimsonyang.com — Soundboard, a storage write-up, Jet Lag: SF.</div></div>
         </div>
       </section>
       <section class="win-section" id="about-education">
-        <div class="sec-h">Education</div>
+        <div data-edit="about.55" class="sec-h">Education</div>
         <div class="edu-head">
           <div class="edu-logo">
             <svg viewBox="0 0 120 96" role="img" aria-label="University of Michigan block M">
@@ -645,19 +658,19 @@
             </svg>
           </div>
           <div>
-            <h2>University of Michigan</h2>
-            <p class="soft" style="margin:2px 0 0;">Stephen M. Ross School of Business</p>
+            <h2 data-edit="about.56">University of Michigan</h2>
+            <p data-edit="about.57" class="soft" style="margin:2px 0 0;">Stephen M. Ross School of Business</p>
           </div>
         </div>
-        <p>BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
+        <p data-edit="about.58">BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
       </section>
       <section class="win-section" id="about-contact">
-        <div class="sec-h">Contact</div>
-        <div class="group-label">Get in touch</div>
-        <div class="mail-field"><span class="label">Email</span><span>jimsonyangbusiness@gmail.com</span></div>
-        <div class="mail-field"><span class="label">GitHub</span><a class="tab-link" style="margin-top:0;" href="https://github.com/umich2021" target="_blank" rel="noreferrer">github.com/umich2021 →</a></div>
-        <div class="mail-field"><span class="label">YouTube</span><a class="tab-link" style="margin-top:0;" href="https://www.youtube.com/channel/UCfzG7qaPV5p_QE1sr1mcXaA" target="_blank" rel="noreferrer">Aventos channel →</a></div>
-        <a class="mail-send" href="mailto:jimsonyangbusiness@gmail.com?subject=Let%27s%20talk" style="margin-top:18px;">Send an email</a>
+        <div data-edit="about.59" class="sec-h">Contact</div>
+        <div data-edit="about.60" class="group-label">Get in touch</div>
+        <div class="mail-field"><span data-edit="about.61" class="label">Email</span><span data-edit="about.62">jimsonyangbusiness@gmail.com</span></div>
+        <div class="mail-field"><span data-edit="about.63" class="label">GitHub</span><a data-edit-href="about.link3" data-edit="about.64" class="tab-link" style="margin-top:0;" href="https://github.com/umich2021" target="_blank" rel="noreferrer">github.com/umich2021 →</a></div>
+        <div class="mail-field"><span data-edit="about.65" class="label">YouTube</span><a data-edit-href="about.link4" data-edit="about.66" class="tab-link" style="margin-top:0;" href="https://www.youtube.com/channel/UCfzG7qaPV5p_QE1sr1mcXaA" target="_blank" rel="noreferrer">Aventos channel →</a></div>
+        <a data-edit-href="about.link5" data-edit="about.67" class="mail-send" href="mailto:jimsonyangbusiness@gmail.com?subject=Let%27s%20talk" style="margin-top:18px;">Send an email</a>
       </section>
     </div>
   </div>
@@ -666,36 +679,36 @@
 <div class="window" id="win-aventos" style="top:110px; left:340px; z-index:11; height:480px;">
   <div class="win-header" data-target="win-aventos">
     <span class="traffic t-red" onclick="closeWindow('win-aventos')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
-    <span class="win-title">Aventos.app</span>
+    <span data-edit="aventos.1" class="win-title">Aventos.app</span>
   </div>
   <div class="win-tabs">
-    <div class="win-tab active" data-tab="overview" onclick="switchTab('win-aventos','overview')">Overview</div>
-    <div class="win-tab" data-tab="videos" onclick="switchTab('win-aventos','videos')">Videos</div>
-    <div class="win-tab" data-tab="platform" onclick="switchTab('win-aventos','platform')">Platform</div>
+    <div data-edit="aventos.2" class="win-tab active" data-tab="overview" onclick="switchTab('win-aventos','overview')">Overview</div>
+    <div data-edit="aventos.3" class="win-tab" data-tab="videos" onclick="switchTab('win-aventos','videos')">Videos</div>
+    <div data-edit="aventos.4" class="win-tab" data-tab="platform" onclick="switchTab('win-aventos','platform')">Platform</div>
   </div>
   <div class="win-body">
     <div class="tab-panel active" data-panel="overview">
-      <h2>Aventos</h2>
-      <p>Aventos is an AI anime studio — short-form, AI-generated anime built end to end, from concept and screenwriting to voice, animation, and post. The bet: anime-style storytelling doesn't just work as entertainment, it works as a marketing channel for B2B SaaS companies who all sound and look the same.</p>
+      <h2 data-edit="aventos.5">Aventos</h2>
+      <p data-edit="aventos.6">Aventos is an AI anime studio — short-form, AI-generated anime built end to end, from concept and screenwriting to voice, animation, and post. The bet: anime-style storytelling doesn't just work as entertainment, it works as a marketing channel for B2B SaaS companies who all sound and look the same.</p>
       <div class="stat-chip-row">
-        <div class="stat-chip"><div class="num">70K+</div><div class="lbl">trailer views</div></div>
-        <div class="stat-chip"><div class="num">98.5M</div><div class="lbl">views via publisher deal</div></div>
-        <div class="stat-chip"><div class="num">BlueBox.tv</div><div class="lbl">distribution partner</div></div>
+        <div class="stat-chip"><div data-edit="aventos.7" class="num">70K+</div><div data-edit="aventos.8" class="lbl">trailer views</div></div>
+        <div class="stat-chip"><div data-edit="aventos.9" class="num">98.5M</div><div data-edit="aventos.10" class="lbl">views via publisher deal</div></div>
+        <div class="stat-chip"><div data-edit="aventos.11" class="num">BlueBox.tv</div><div data-edit="aventos.12" class="lbl">distribution partner</div></div>
       </div>
     </div>
     <div class="tab-panel" data-panel="videos">
-      <h2>Videos</h2>
+      <h2 data-edit="aventos.13">Videos</h2>
       <div class="video-row">
-        <div class="video-thumb">▶ Trailer</div>
-        <div class="video-thumb">▶ Bill split</div>
+        <div data-edit="aventos.14" class="video-thumb">▶ Trailer</div>
+        <div data-edit="aventos.15" class="video-thumb">▶ Bill split</div>
       </div>
     </div>
     <div class="tab-panel" data-panel="platform">
-      <h2>Platform</h2>
-      <p>We turned Aventos's internal AI-video tooling — script-to-render pipeline, batch generation, asset management — into a creative-suite platform for other studios. The first paying customer was our own production team, buying generation credits to prove it out before opening it up further.</p>
-      <p>We also landed a publisher deal for "My Cat Is a Vegetarian" and a distribution deal with BlueBox.tv to get the content out further.</p>
+      <h2 data-edit="aventos.16">Platform</h2>
+      <p data-edit="aventos.17">We turned Aventos's internal AI-video tooling — script-to-render pipeline, batch generation, asset management — into a creative-suite platform for other studios. The first paying customer was our own production team, buying generation credits to prove it out before opening it up further.</p>
+      <p data-edit="aventos.18">We also landed a publisher deal for "My Cat Is a Vegetarian" and a distribution deal with BlueBox.tv to get the content out further.</p>
       <div class="stat-chip-row">
-        <div class="stat-chip"><div class="num">$10K</div><div class="lbl">first platform revenue</div></div>
+        <div class="stat-chip"><div data-edit="aventos.19" class="num">$10K</div><div data-edit="aventos.20" class="lbl">first platform revenue</div></div>
       </div>
     </div>
   </div>
@@ -704,82 +717,82 @@
 <div class="window" id="win-projects" style="top:88px; left:360px; z-index:8; width:760px; height:600px;">
   <div class="win-header" data-target="win-projects">
     <span class="traffic t-red" onclick="closeWindow('win-projects')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
-    <span class="win-title">Projects</span>
+    <span data-edit="projects.1" class="win-title">Projects</span>
   </div>
   <div class="win-railbody">
     <nav class="win-rail" aria-label="Sections">
-      <button class="active" data-to="projects-work">For Work</button>
-      <button data-to="projects-fun">For Fun</button>
+      <button data-edit="projects.2" class="active" data-to="projects-work">For Work</button>
+      <button data-edit="projects.3" data-to="projects-fun">For Fun</button>
     </nav>
     <div class="win-scroll" id="projects-scroll">
       <section class="win-section" id="projects-work">
-        <div class="sec-h">For Work</div>
-        <p class="proj-intro">Things I've built to ship — a solo product, internal tools, client sites, and pipelines. Source is on GitHub.</p>
-      <a class="file-row" href="https://github.com/umich2021/tracking_LLMs_bots" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
-        <div class="file-icon g-geo">GEO</div>
+        <div data-edit="projects.4" class="sec-h">For Work</div>
+        <p data-edit="projects.5" class="proj-intro">Things I've built to ship — a solo product, internal tools, client sites, and pipelines. Source is on GitHub.</p>
+      <a data-edit-href="projects.link1" class="file-row" href="https://github.com/umich2021/tracking_LLMs_bots" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+        <div data-edit="projects.6" class="file-icon g-geo">GEO</div>
         <div>
-          <div class="file-name">Project GEO</div>
-          <div class="file-desc">An answer-engine optimization tool — tracks how often and how well a brand shows up when people ask ChatGPT, Claude, and other AI assistants about brand discoverability. Built the full stack solo, from the citation-crawling pipeline to the dashboard, and took it 0 → 1 in B2B SaaS sales.</div>
-          <div class="proj-tags"><span class="proj-tag">Solo build</span><span class="proj-tag">AEO</span><span class="proj-tag">B2B SaaS</span></div>
+          <div data-edit="projects.7" class="file-name">Project GEO</div>
+          <div data-edit="projects.8" class="file-desc">An answer-engine optimization tool — tracks how often and how well a brand shows up when people ask ChatGPT, Claude, and other AI assistants about brand discoverability. Built the full stack solo, from the citation-crawling pipeline to the dashboard, and took it 0 → 1 in B2B SaaS sales.</div>
+          <div class="proj-tags"><span data-edit="projects.9" class="proj-tag">Solo build</span><span data-edit="projects.10" class="proj-tag">AEO</span><span data-edit="projects.11" class="proj-tag">B2B SaaS</span></div>
         </div>
       </a>
-      <a class="file-row" href="https://github.com/umich2021/InternalToolsSeedance" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
-        <div class="file-icon g-geo">FA</div>
+      <a data-edit-href="projects.link2" class="file-row" href="https://github.com/umich2021/InternalToolsSeedance" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+        <div data-edit="projects.12" class="file-icon g-geo">FA</div>
         <div>
-          <div class="file-name">Seedance Internal Tool</div>
-          <div class="file-desc">Internal tool for the production team to generate, review, and archive AI video through BytePlus Seedance — batch jobs, a review pass, and a searchable archive so nothing gets regenerated twice.</div>
-          <div class="proj-tags"><span class="proj-tag">FastAPI</span><span class="proj-tag">React</span><span class="proj-tag">BytePlus Seedance</span></div>
+          <div data-edit="projects.13" class="file-name">Seedance Internal Tool</div>
+          <div data-edit="projects.14" class="file-desc">Internal tool for the production team to generate, review, and archive AI video through BytePlus Seedance — batch jobs, a review pass, and a searchable archive so nothing gets regenerated twice.</div>
+          <div class="proj-tags"><span data-edit="projects.15" class="proj-tag">FastAPI</span><span data-edit="projects.16" class="proj-tag">React</span><span data-edit="projects.17" class="proj-tag">BytePlus Seedance</span></div>
         </div>
       </a>
-      <a class="file-row" href="https://github.com/umich2021/manhwa-reader" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
-        <div class="file-icon g-pink">MR</div>
+      <a data-edit-href="projects.link3" class="file-row" href="https://github.com/umich2021/manhwa-reader" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+        <div data-edit="projects.18" class="file-icon g-pink">MR</div>
         <div>
-          <div class="file-name">Manhwa Reader</div>
-          <div class="file-desc">A reader built to make sense of messy manhwa file collections — inconsistent folder names, out-of-order chapters, mixed image formats — and turn them into something you can actually sit down and read.</div>
-          <div class="proj-tags"><span class="proj-tag">Local library</span><span class="proj-tag">Reader UI</span></div>
+          <div data-edit="projects.19" class="file-name">Manhwa Reader</div>
+          <div data-edit="projects.20" class="file-desc">A reader built to make sense of messy manhwa file collections — inconsistent folder names, out-of-order chapters, mixed image formats — and turn them into something you can actually sit down and read.</div>
+          <div class="proj-tags"><span data-edit="projects.21" class="proj-tag">Local library</span><span data-edit="projects.22" class="proj-tag">Reader UI</span></div>
         </div>
       </a>
-      <a class="file-row" href="https://github.com/umich2021/tableau_website" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
-        <div class="file-icon g-projects">TB</div>
+      <a data-edit-href="projects.link4" class="file-row" href="https://github.com/umich2021/tableau_website" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+        <div data-edit="projects.23" class="file-icon g-projects">TB</div>
         <div>
-          <div class="file-name">Tableau Client Site</div>
-          <div class="file-desc">A website build for a client — design to deployed.</div>
-          <div class="proj-tags"><span class="proj-tag">Client work</span><span class="proj-tag">Front-end</span></div>
+          <div data-edit="projects.24" class="file-name">Tableau Client Site</div>
+          <div data-edit="projects.25" class="file-desc">A website build for a client — design to deployed.</div>
+          <div class="proj-tags"><span data-edit="projects.26" class="proj-tag">Client work</span><span data-edit="projects.27" class="proj-tag">Front-end</span></div>
         </div>
       </a>
       </section>
       <section class="win-section" id="projects-fun">
-        <div class="sec-h">For Fun</div>
-        <p class="proj-intro">Little things I build for myself — half-finished, personal, or just not meant for a public audience.</p>
+        <div data-edit="projects.28" class="sec-h">For Fun</div>
+        <p data-edit="projects.29" class="proj-intro">Little things I build for myself — half-finished, personal, or just not meant for a public audience.</p>
       <div class="proj-callout">
         <div class="pc-body">
-          <div class="pc-title">projects.jimsonyang.com</div>
-          <div class="pc-desc">My self-hosted playground — small tools and write-ups, each on its own subdomain, running on one tiny ARM box.</div>
+          <div data-edit="projects.30" class="pc-title">projects.jimsonyang.com</div>
+          <div data-edit="projects.31" class="pc-desc">My self-hosted playground — small tools and write-ups, each on its own subdomain, running on one tiny ARM box.</div>
         </div>
-        <a class="pc-btn" href="https://projects.jimsonyang.com" target="_blank" rel="noreferrer">Open ↗</a>
+        <a data-edit-href="projects.link5" data-edit="projects.32" class="pc-btn" href="https://projects.jimsonyang.com" target="_blank" rel="noreferrer">Open ↗</a>
       </div>
-      <a class="file-row" href="https://soundboard.projects.jimsonyang.com" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
-        <div class="file-icon g-sound">SB</div>
+      <a data-edit-href="projects.link6" class="file-row" href="https://soundboard.projects.jimsonyang.com" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+        <div data-edit="projects.33" class="file-icon g-sound">SB</div>
         <div>
-          <div class="file-name">Soundboard</div>
-          <div class="file-desc">Tap a tile to drop a meme sound effect into whatever call you're on. A web version of an old Android app — favorites, a quiet/loud toggle, and an optional Twilio "bot mode" that joins a conference line.</div>
-          <div class="proj-tags"><span class="proj-tag">Web</span><span class="proj-tag">Twilio</span><span class="proj-tag">Android origin</span></div>
+          <div data-edit="projects.34" class="file-name">Soundboard</div>
+          <div data-edit="projects.35" class="file-desc">Tap a tile to drop a meme sound effect into whatever call you're on. A web version of an old Android app — favorites, a quiet/loud toggle, and an optional Twilio "bot mode" that joins a conference line.</div>
+          <div class="proj-tags"><span data-edit="projects.36" class="proj-tag">Web</span><span data-edit="projects.37" class="proj-tag">Twilio</span><span data-edit="projects.38" class="proj-tag">Android origin</span></div>
         </div>
       </a>
-      <a class="file-row" href="https://storage.projects.jimsonyang.com" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
-        <div class="file-icon g-storage">B2</div>
+      <a data-edit-href="projects.link7" class="file-row" href="https://storage.projects.jimsonyang.com" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+        <div data-edit="projects.39" class="file-icon g-storage">B2</div>
         <div>
-          <div class="file-name">Storage</div>
-          <div class="file-desc">A write-up on the small CLI I built to move my files off Google and Dropbox onto encrypted Backblaze B2 — two folders, two sync rules, and the cost math that made it worth doing.</div>
-          <div class="proj-tags"><span class="proj-tag">Write-up</span><span class="proj-tag">rclone</span><span class="proj-tag">Backblaze B2</span></div>
+          <div data-edit="projects.40" class="file-name">Storage</div>
+          <div data-edit="projects.41" class="file-desc">A write-up on the small CLI I built to move my files off Google and Dropbox onto encrypted Backblaze B2 — two folders, two sync rules, and the cost math that made it worth doing.</div>
+          <div class="proj-tags"><span data-edit="projects.42" class="proj-tag">Write-up</span><span data-edit="projects.43" class="proj-tag">rclone</span><span data-edit="projects.44" class="proj-tag">Backblaze B2</span></div>
         </div>
       </a>
-      <a class="file-row" href="https://github.com/umich2021/jetlag_SF" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
-        <div class="file-icon fun">JL</div>
+      <a data-edit-href="projects.link8" class="file-row" href="https://github.com/umich2021/jetlag_SF" target="_blank" rel="noreferrer" style="text-decoration:none; color:inherit;">
+        <div data-edit="projects.45" class="file-icon fun">JL</div>
         <div>
-          <div class="file-name">Jet Lag: SF</div>
-          <div class="file-desc">A mobile app for playing Jet Lag: The Game across San Francisco neighborhoods — cards, timers, and a map, so nobody has to be the one holding the rulebook.</div>
-          <div class="proj-tags"><span class="proj-tag">Mobile</span><span class="proj-tag">Maps</span></div>
+          <div data-edit="projects.46" class="file-name">Jet Lag: SF</div>
+          <div data-edit="projects.47" class="file-desc">A mobile app for playing Jet Lag: The Game across San Francisco neighborhoods — cards, timers, and a map, so nobody has to be the one holding the rulebook.</div>
+          <div class="proj-tags"><span data-edit="projects.48" class="proj-tag">Mobile</span><span data-edit="projects.49" class="proj-tag">Maps</span></div>
         </div>
       </a>
       </section>
@@ -790,33 +803,38 @@
 <div class="window" id="win-experience" style="top:100px; left:520px; z-index:7; height:500px;">
   <div class="win-header" data-target="win-experience">
     <span class="traffic t-red" onclick="closeWindow('win-experience')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
-    <span class="win-title">Experience.pdf</span>
+    <span data-edit="experience.1" class="win-title">Experience.pdf</span>
   </div>
   <div class="win-body">
     <div class="pdf-page">
-      <div class="pdf-role">Co-Founder — Aventos</div>
-      <div class="pdf-meta">May 2025 – Present · San Francisco, CA</div>
-      <div class="pdf-summary">AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS. Landed a publisher deal that's driven 98.5M views, a distribution deal with BlueBox.tv, and turned internal tooling into a platform with its first $10K in revenue.</div>
+      <div data-edit="experience.2" class="pdf-role">Forward Deployed Engineer — TrustPixel</div>
+      <div data-edit="experience.3" class="pdf-meta">Present</div>
+      <div data-edit="experience.4" class="pdf-summary">Forward deployed engineer at TrustPixel.</div>
     </div>
     <div class="pdf-page">
-      <div class="pdf-role">Founder — Project GEO</div>
-      <div class="pdf-meta">2024 – 2025</div>
-      <div class="pdf-summary">AEO/LLM citation tracker — tracks how well a brand shows up when people ask ChatGPT or Claude AI questions about brand discoverability. Built the full tech stack solo and took it 0 to 1 in B2B SaaS sales.</div>
+      <div data-edit="experience.5" class="pdf-role">Co-Founder — Aventos</div>
+      <div data-edit="experience.6" class="pdf-meta">May 2025 – Present · San Francisco, CA</div>
+      <div data-edit="experience.7" class="pdf-summary">AI anime studio. Own the full stack of building it — product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS. Landed a publisher deal that's driven 98.5M views, a distribution deal with BlueBox.tv, and turned internal tooling into a platform with its first $10K in revenue.</div>
     </div>
     <div class="pdf-page">
-      <div class="pdf-role">Co-Founder, Business — Pink Inference</div>
-      <div class="pdf-meta">2023 – 2024</div>
-      <div class="pdf-summary">Business side of a deep-tech venture studio spanning wetware/biological computing to oil-and-gas-powered data centers. Raised a $100K pre-seed round from 1517 Fund.</div>
+      <div data-edit="experience.8" class="pdf-role">Founder — Project GEO</div>
+      <div data-edit="experience.9" class="pdf-meta">2024 – 2025</div>
+      <div data-edit="experience.10" class="pdf-summary">AEO/LLM citation tracker — tracks how well a brand shows up when people ask ChatGPT or Claude AI questions about brand discoverability. Built the full tech stack solo and took it 0 to 1 in B2B SaaS sales.</div>
     </div>
     <div class="pdf-page">
-      <div class="pdf-role">Intern — CitySide Ventures</div>
-      <div class="pdf-meta">Mar 2023 – Jul 2024</div>
-      <div class="pdf-summary">Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors.</div>
+      <div data-edit="experience.11" class="pdf-role">Co-Founder, Business — Pink Inference</div>
+      <div data-edit="experience.12" class="pdf-meta">2023 – 2024</div>
+      <div data-edit="experience.13" class="pdf-summary">Business side of a deep-tech venture studio spanning wetware/biological computing to oil-and-gas-powered data centers. Raised a $100K pre-seed round from 1517 Fund.</div>
     </div>
     <div class="pdf-page">
-      <div class="pdf-role">Summer Intern — Arboretum Ventures</div>
-      <div class="pdf-meta">Apr 2023 – Jul 2023</div>
-      <div class="pdf-summary">Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand.</div>
+      <div data-edit="experience.14" class="pdf-role">Intern — CitySide Ventures</div>
+      <div data-edit="experience.15" class="pdf-meta">Mar 2023 – Jul 2024</div>
+      <div data-edit="experience.16" class="pdf-summary">Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for investors.</div>
+    </div>
+    <div class="pdf-page">
+      <div data-edit="experience.17" class="pdf-role">Summer Intern — Arboretum Ventures</div>
+      <div data-edit="experience.18" class="pdf-meta">Apr 2023 – Jul 2023</div>
+      <div data-edit="experience.19" class="pdf-summary">Due diligence on healthcare companies. Learned cap tables and deal analysis firsthand.</div>
     </div>
   </div>
 </div>
@@ -824,7 +842,7 @@
 <div class="window" id="win-education" style="top:220px; left:340px; z-index:6; width:400px; height:230px;">
   <div class="win-header" data-target="win-education">
     <span class="traffic t-red" onclick="closeWindow('win-education')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
-    <span class="win-title">Education.txt</span>
+    <span data-edit="education.1" class="win-title">Education.txt</span>
   </div>
   <div class="win-body">
     <div class="edu-head">
@@ -834,24 +852,24 @@
         </svg>
       </div>
       <div>
-        <h2>University of Michigan</h2>
-        <p class="soft" style="margin:2px 0 0;">Stephen M. Ross School of Business</p>
+        <h2 data-edit="education.2">University of Michigan</h2>
+        <p data-edit="education.3" class="soft" style="margin:2px 0 0;">Stephen M. Ross School of Business</p>
       </div>
     </div>
-    <p>BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
+    <p data-edit="education.4">BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
   </div>
 </div>
 
 <div class="window" id="win-contact" style="top:150px; left:260px; z-index:5; width:480px; height:300px;">
   <div class="win-header" data-target="win-contact">
     <span class="traffic t-red" onclick="closeWindow('win-contact')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
-    <span class="win-title">New Message</span>
+    <span data-edit="contact.1" class="win-title">New Message</span>
   </div>
   <div class="win-body">
-    <div class="mail-field"><span class="label">To:</span><span>jimsonyangbusiness@gmail.com</span></div>
-    <div class="mail-field"><span class="label">Subject:</span><span>Let's talk</span></div>
-    <p class="soft" style="margin-top:14px;">Hi Jimson — I came across your site and wanted to reach out about...</p>
-    <a class="mail-send" href="mailto:jimsonyangbusiness@gmail.com?subject=Let%27s%20talk">Send</a>
+    <div class="mail-field"><span data-edit="contact.2" class="label">To:</span><span data-edit="contact.3">jimsonyangbusiness@gmail.com</span></div>
+    <div class="mail-field"><span data-edit="contact.4" class="label">Subject:</span><span data-edit="contact.5">Let's talk</span></div>
+    <p data-edit="contact.6" class="soft" style="margin-top:14px;">Hi Jimson — I came across your site and wanted to reach out about...</p>
+    <a data-edit-href="contact.link1" data-edit="contact.7" class="mail-send" href="mailto:jimsonyangbusiness@gmail.com?subject=Let%27s%20talk">Send</a>
   </div>
 </div>
 
@@ -866,14 +884,14 @@
 
 <!-- right-click context menu (desktop + icons) -->
 <div class="context-menu" id="contextMenu">
-  <div class="menu-option" id="ctxOpen">Open</div>
-  <div class="menu-option" id="ctxChangeIcon">Change Icon&hellip;</div>
-  <div class="menu-option" id="ctxInfo">Get Info</div>
+  <div data-edit="menubar.20" class="menu-option" id="ctxOpen">Open</div>
+  <div data-edit="menubar.21" class="menu-option" id="ctxChangeIcon">Change Icon&hellip;</div>
+  <div data-edit="menubar.22" class="menu-option" id="ctxInfo">Get Info</div>
   <div class="menu-divider" id="ctxDivider1"></div>
-  <div class="menu-option" id="ctxNewMessage">New Message</div>
-  <div class="menu-option" id="ctxWallpaper">Change Wallpaper</div>
+  <div data-edit="menubar.23" class="menu-option" id="ctxNewMessage">New Message</div>
+  <div data-edit="menubar.24" class="menu-option" id="ctxWallpaper">Change Wallpaper</div>
   <div class="menu-divider" id="ctxDivider2"></div>
-  <div class="menu-option" id="ctxAbout">About JimsonOS</div>
+  <div data-edit="menubar.25" class="menu-option" id="ctxAbout">About JimsonOS</div>
 </div>
 
 <!-- generic modal -->
@@ -886,6 +904,27 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Wallpaper catalog. Files live in public/wallpapers/. Which ones are in rotation (and how often
+     they change) is set from /admin.html → site-content.json; with nothing chosen, all of them rotate. -->
+<script type="application/json" id="wallpaperCatalog">
+[
+  { "id": "steins-gate-1",      "label": "Steins;Gate I",           "src": "/wallpapers/steins-gate-1.jpg" },
+  { "id": "steins-gate-2",      "label": "Steins;Gate II",          "src": "/wallpapers/steins-gate-2.jpg" },
+  { "id": "succession-1",       "label": "Succession I",            "src": "/wallpapers/succession-1.jpg" },
+  { "id": "succession-2",       "label": "Succession II",           "src": "/wallpapers/succession-2.jpg" },
+  { "id": "succession-meme-1",  "label": "Succession meme I",       "src": "/wallpapers/succession-meme-1.jpg" },
+  { "id": "succession-meme-2",  "label": "Succession meme II",      "src": "/wallpapers/succession-meme-2.jpg" },
+  { "id": "dicaprio-tv-1",      "label": "DiCaprio pointing I",     "src": "/wallpapers/dicaprio-tv-1.jpg" },
+  { "id": "dicaprio-tv-2",      "label": "DiCaprio pointing II",    "src": "/wallpapers/dicaprio-tv-2.jpg" },
+  { "id": "grand-canyon-1",     "label": "Grand Canyon I",          "src": "/wallpapers/grand-canyon-1.jpg" },
+  { "id": "grand-canyon-2",     "label": "Grand Canyon II",         "src": "/wallpapers/grand-canyon-2.jpg" },
+  { "id": "death-valley-1",     "label": "Death Valley I",          "src": "/wallpapers/death-valley-1.jpg" },
+  { "id": "death-valley-2",     "label": "Death Valley II",         "src": "/wallpapers/death-valley-2.jpg" },
+  { "id": "harbin-1",           "label": "Harbin Ice Festival I",   "src": "/wallpapers/harbin-1.jpg" },
+  { "id": "harbin-2",           "label": "Harbin Ice Festival II",  "src": "/wallpapers/harbin-2.jpg" }
+]
+</script>
 
 <script>
   let zTop = 20;
@@ -903,7 +942,7 @@
     about: { kind: "Resume", size: "5 tabs", modified: "Recently" },
     aventos: { kind: "Application", size: "98.5M views", modified: "2025" },
     projects: { kind: "Folder", size: "7 projects", modified: "Ongoing" },
-    experience: { kind: "PDF Document", size: "5 pages", modified: "Updated regularly" },
+    experience: { kind: "PDF Document", size: "6 pages", modified: "Updated regularly" },
     education: { kind: "Plain Text", size: "3.89 GPA", modified: "2021–2025" },
     contact: { kind: "Application", size: "1 inbox", modified: "Always open" }
   };
@@ -921,6 +960,7 @@
   }
 
   function openWindow(name) {
+    if (!appOn(name)) return;
     const win = document.getElementById('win-' + name);
     win.classList.add('open');
     focusWindow(win);
@@ -932,7 +972,7 @@
   }
   function toggleWindow(name) {
     const win = document.getElementById('win-' + name);
-    if (win.classList.contains('open')) {
+    if (win.classList.contains('open') || !appOn(name)) {
       win.classList.remove('open');
     } else {
       openWindow(name);
@@ -1129,7 +1169,7 @@
   document.addEventListener('click', closeAllMenus);
 
   function buildWindowMenu() {
-    const rows = apps.map(a => {
+    const rows = apps.filter(a => appOn(a.key)).map(a => {
       const isOpen = document.getElementById('win-' + a.key).classList.contains('open');
       return `<div class="menu-option${isOpen ? ' checked' : ''}" onclick="toggleWindow('${a.key}')">${a.label}</div>`;
     }).join('');
@@ -1143,7 +1183,7 @@
     document.querySelectorAll('.window.open').forEach(w => w.classList.remove('open'));
   }
   function bringAllToFront() {
-    apps.forEach(a => {
+    apps.filter(a => appOn(a.key)).forEach(a => {
       const win = document.getElementById('win-' + a.key);
       win.classList.add('open');
       clampWindow(win);
@@ -1176,7 +1216,8 @@
   function setupIconDots() {
     const list = document.getElementById('iconList');
     const dotsWrap = document.getElementById('iconDots');
-    const icons = Array.from(list.querySelectorAll('.icon'));
+    const icons = Array.from(list.querySelectorAll('.icon:not(.app-off)'));
+    dotsWrap.innerHTML = '';
 
     icons.forEach(() => {
       const dot = document.createElement('div');
@@ -1202,20 +1243,49 @@
       dots.forEach((dot, i) => dot.classList.toggle('active', i === closest));
     }
 
-    list.addEventListener('scroll', updateActive, { passive: true });
-    window.addEventListener('resize', () => { updateVisibility(); updateActive(); });
+    list.onscroll = updateActive;
+    window.onresize = () => { updateVisibility(); updateActive(); };
     updateVisibility();
     updateActive();
   }
-  const wallpapers = [
-    "radial-gradient(1200px 800px at 80% 10%, #6a5acd33, transparent 60%), radial-gradient(1000px 700px at 10% 90%, #ff6b9733, transparent 60%), linear-gradient(160deg, #2b2350 0%, #1a1330 45%, #0d0a1a 100%)",
-    "radial-gradient(1200px 800px at 20% 15%, #0891b233, transparent 60%), radial-gradient(1000px 700px at 85% 85%, #f472b633, transparent 60%), linear-gradient(160deg, #082032 0%, #0b3142 45%, #041016 100%)",
-    "radial-gradient(1200px 800px at 75% 20%, #f77f0033, transparent 60%), radial-gradient(1000px 700px at 15% 85%, #7ee78733, transparent 60%), linear-gradient(160deg, #201a10 0%, #14100a 45%, #0a0805 100%)"
-  ];
-  let wallpaperIdx = 0;
+  /* ---------- wallpaper rotation ----------
+     Two stacked layers crossfade. startWallpapers() is called once site-content.json is in. */
+  const WALLPAPERS = JSON.parse(document.getElementById('wallpaperCatalog').textContent);
+  let wpList = [], wpIdx = 0, wpTimer = null, wpMinutes = 5, wpFront = null;
+  function showWallpaper(i, tries) {
+    if (!wpList.length) return;
+    tries = tries || 0;
+    if (tries >= wpList.length) return;
+    wpIdx = (i + wpList.length) % wpList.length;
+    const wp = wpList[wpIdx];
+    const img = new Image();
+    img.onload = () => {
+      const a = document.getElementById('wallpaperA'), b = document.getElementById('wallpaperB');
+      const back = wpFront === a ? b : a;
+      back.style.backgroundImage = 'url("' + wp.src + '")';
+      back.classList.add('show');
+      if (wpFront) wpFront.classList.remove('show');
+      wpFront = back;
+    };
+    img.onerror = () => showWallpaper(wpIdx + 1, tries + 1);
+    img.src = wp.src;
+  }
+  function restartWallpaperTimer() {
+    clearInterval(wpTimer);
+    if (wpList.length > 1) wpTimer = setInterval(() => showWallpaper(wpIdx + 1), wpMinutes * 60 * 1000);
+  }
+  function startWallpapers(cfg) {
+    const chosen = Array.isArray(cfg.wallpapers) ? cfg.wallpapers : [];
+    wpList = chosen.length ? WALLPAPERS.filter(w => chosen.includes(w.id)) : WALLPAPERS.slice();
+    if (!wpList.length) wpList = WALLPAPERS.slice();
+    wpMinutes = Number(cfg.wallpaperMinutes) > 0 ? Number(cfg.wallpaperMinutes) : 5;
+    showWallpaper(Math.floor(Math.random() * wpList.length));
+    restartWallpaperTimer();
+  }
   function cycleWallpaper() {
-    wallpaperIdx = (wallpaperIdx + 1) % wallpapers.length;
-    document.body.style.background = wallpapers[wallpaperIdx];
+    if (wpList.length < 2) { toastMessage("Only one wallpaper is in rotation"); return; }
+    showWallpaper(wpIdx + 1);
+    restartWallpaperTimer();
     toastMessage("Wallpaper changed");
   }
   function toggleFullscreen() {
@@ -1232,6 +1302,7 @@
     openModal("About JimsonOS", `
       <p>JimsonOS v1.0 — a desktop metaphor for a portfolio, built by hand with plain HTML, CSS, and JS. No frameworks were harmed.</p>
       <p class="soft">Every "app" here is real content — click around.</p>
+      <p class="soft"><a href="/wallpapers/CREDITS.md" target="_blank" rel="noreferrer">Wallpaper credits</a></p>
     `);
   }
   function showShortcuts() {
@@ -1419,6 +1490,55 @@
 
   renderIcons();
 
+  /* ---------- site content (edited from /admin.html) ----------
+     site-content.json overrides the defaults written in this file:
+       text:  { "<data-edit key>": "new text" }       — any element with data-edit="…"
+       links: { "<data-edit-href key>": "https://…" } — any <a> with data-edit-href="…"
+       hiddenApps: ["aventos", …]                     — hides icon, dock item, window, [data-needs-app]
+       wallpapers: ["harbin-1", …], wallpaperMinutes: 5, bootMessages: ["…"]
+     /?preview shows the admin panel's unpublished draft (localStorage) instead. */
+  let siteConfig = {};
+  const hiddenApps = new Set();
+  function appOn(key) { return !hiddenApps.has(key); }
+
+  function applySiteConfig(cfg) {
+    siteConfig = cfg || {};
+    const text = siteConfig.text || {}, links = siteConfig.links || {};
+    document.querySelectorAll('[data-edit]').forEach(el => {
+      if (typeof text[el.dataset.edit] === 'string') el.textContent = text[el.dataset.edit];
+    });
+    document.querySelectorAll('[data-edit-href]').forEach(el => {
+      if (typeof links[el.dataset.editHref] === 'string') el.setAttribute('href', links[el.dataset.editHref]);
+    });
+    (siteConfig.hiddenApps || []).forEach(k => hiddenApps.add(k));
+    apps.forEach(a => {
+      const off = hiddenApps.has(a.key);
+      const icon = document.querySelector('.icon[data-key="' + a.key + '"]');
+      const label = icon && icon.querySelector('.icon-label');
+      if (label) a.label = label.textContent;
+      if (icon) icon.classList.toggle('app-off', off);
+      const dock = document.querySelector('.dock-item[data-app="' + a.key + '"]');
+      if (dock) { dock.classList.toggle('app-off', off); dock.dataset.tooltip = a.label; }
+      document.querySelectorAll('[data-needs-app="' + a.key + '"]').forEach(el => el.classList.toggle('app-off', off));
+      if (off) document.getElementById('win-' + a.key).classList.remove('open');
+    });
+    setupIconDots();
+    startWallpapers(siteConfig);
+  }
+
+  const siteConfigReady = (function loadSiteConfig() {
+    if (new URLSearchParams(location.search).has('preview')) {
+      try {
+        const draft = localStorage.getItem('jimsonos-admin-draft');
+        if (draft) return Promise.resolve(JSON.parse(draft));
+      } catch (e) {}
+    }
+    const fetched = fetch('/site-content.json', { cache: 'no-cache' })
+      .then(r => r.ok ? r.json() : {})
+      .catch(() => ({}));
+    return Promise.race([fetched, new Promise(res => setTimeout(() => res({}), 4000))]);
+  })().then(applySiteConfig);
+
   /* ---------- clock ---------- */
   function tick() {
     const now = new Date();
@@ -1432,7 +1552,7 @@
     const boot = document.getElementById('bootScreen');
     const caption = document.getElementById('bootCaption');
     const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const messages = [
+    const messages = (Array.isArray(siteConfig.bootMessages) && siteConfig.bootMessages.length) ? siteConfig.bootMessages : [
       'Starting JimsonOS…',
       'Booting frontend + backend…',
       'Warming up the anime render pipeline…',
@@ -1481,8 +1601,7 @@
       window.removeEventListener('keydown', skipOnce);
     });
   }
-  runBootSequence();
-  setupIconDots();
+  siteConfigReady.then(runBootSequence);
 </script>
 
 </body>
