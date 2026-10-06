@@ -2,11 +2,7 @@
   "hiddenApps": [
     "aventos"
   ],
-  "wallpapers": [
-    "dicaprio-tv-1",
-    "grand-canyon-2",
-    "death-valley-1"
-  ],
+  "wallpapers": [],
   "wallpaperMinutes": 5,
   "bootMessages": [
     "Making food...",
@@ -14,6 +10,18 @@
     "Bouldering...",
     "Hosting a party..."
   ],
-  "text": {},
+  "text": {
+    "menubar.17": "Come say hi!",
+    "about.10": "I'm a forward deployed engineer at TrustPixel. Before that I co-founded Aventos, an AI anime studio, after a few years doing various startups ventures. I've done everything from sales, GTM, engineering(self taught engineer) and a stint on the VC side doing due diligence\n\nAs an fde, I lean heavier towards the sales and marketing side, but I still code **without AI** sometimes. ",
+    "about.23": "Forward Deployed Engineer @ TrustPixel",
+    "about.26": "Co-Founder of Aventos",
+    "about.28": "AI anime studio. We were taking popular Korean Intellectual Property and turning them into anime using AI. I owned the full stack of building it: acquiring IP, directing, editing, coding our internal tools, marketing our show and negotiating IP deals with Korean publishers. Landed a publisher deal that's has 98.5M views in Korea, a distribution deal with BlueBox.tv, and turned our internal tooling into a platform with its first $10K in revenue.",
+    "about.29": "Founder - Project GEO",
+    "about.31": "AEO/LLM citation tracker which tracks how well a brand shows up when people ask ChatGPT or Claude AI questions about brand discoverability. Built the full tech stack solo and took it 0 to 1 in B2B SaaS sales.",
+    "about.32": "Co-Founder, at Pink Inference",
+    "about.35": "Intern at CitySide Ventures",
+    "about.37": "Wrote and reviewed due diligence reports across an industry-agnostic portfolio — healthcare, SaaS, deep tech — for an angel syndicate and small vc fund",
+    "about.40": "Due diligence on healthcare companies at a 1bn+ AUM medtech fund. Learned cap tables and deal analysis. "
+  },
   "links": {}
 }
