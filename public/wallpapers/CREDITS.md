@@ -2,7 +2,7 @@
 
 All images were downscaled to at most 2560px wide and re-encoded as progressive JPEG.
 The CC BY and CC BY-SA images need on-page attribution if they're shown publicly. The
-copyrighted film images are used as fan content and are not licensed.
+copyrighted film and anime images are used as fan content and are not licensed.
 
 | File | Description | Source | License / attribution |
 |---|---|---|---|
@@ -12,3 +12,4 @@ copyrighted film images are used as fan content and are not licensed.
 | `grand-canyon-2.jpg` | Grand Canyon at sunset from Yaki Point | https://commons.wikimedia.org/wiki/File:Grand_Canyon_National_Park,_Sunset_from_Yaki_Point_5207_-_Flickr_-_Grand_Canyon_NPS.jpg | Public domain (NPS), by Grand Canyon National Park, Wikimedia Commons |
 | `death-valley-1.jpg` | Zabriskie Point badlands and Manly Beacon at sunrise, Death Valley | https://commons.wikimedia.org/wiki/File:Zabriskie_Point_Sunrise_(53018561789).jpg | CC BY 2.0, by John D. from Pasadena, USA, Wikimedia Commons |
 | `death-valley-2.jpg` | Eureka Dunes under a pink-and-blue storm sky, Death Valley National Park | https://commons.wikimedia.org/wiki/File:In_Death_Valley_Calif_-_Eureka_Dunes_(15874735157).jpg | CC BY-SA 2.0, by Murray Foubister, Wikimedia Commons |
+| `steins-gate-2.jpg` | Steins;Gate background art: the Akihabara street with the Radio Kaikan building, daytime | https://steins-gate.fandom.com/wiki/File:Akihabara.jpg | Copyrighted (MAGES./5pb./Nitroplus) / fan use; via Steins;Gate Wiki (Fandom) |
