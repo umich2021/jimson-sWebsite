@@ -729,7 +729,8 @@
     .then(cfg => {
       wpList = (Array.isArray(cfg.wallpapers) && cfg.wallpapers.length) ? cfg.wallpapers : FALLBACK_WALLPAPERS;
       wpMinutes = Number(cfg.wallpaperMinutes) > 0 ? Number(cfg.wallpaperMinutes) : 5;
-      showWallpaper(Math.floor(Math.random() * wpList.length));
+      const def = wpList.indexOf(cfg.defaultWallpaper);
+      showWallpaper(def >= 0 ? def : Math.floor(Math.random() * wpList.length));
       restartWallpaperTimer();
     });
 

@@ -73,6 +73,12 @@
   .wp img { width: 100%; aspect-ratio: 16/10; object-fit: cover; display: block; background: var(--line); }
   .wp .cap { font-size: 11.5px; padding: 5px 8px; display: flex; justify-content: space-between; gap: 6px; }
   .wp.on { border-color: var(--accent); }
+  .wp .def {
+    display: block; width: 100%; border: 0; border-top: 1px solid var(--line); background: none;
+    font-size: 11px; font-weight: 600; color: var(--soft); padding: 5px 8px; text-align: left; cursor: pointer;
+  }
+  .wp .def:hover { color: var(--ink); }
+  .wp.is-default .def { color: var(--accent); }
   .wp input { margin: 0; }
   .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
   .row input[type=number] { width: 80px; }
@@ -121,7 +127,7 @@
 
     <section>
       <h2>Wallpapers</h2>
-      <p class="soft" style="margin:-4px 0 12px;">Tick the ones to rotate. None ticked = all of them.</p>
+      <p class="soft" style="margin:-4px 0 12px;">Tick the ones to rotate (none ticked = all of them). The ★ default is shown first when someone opens the site; with no default, it starts on a random one.</p>
       <div class="wp-grid" id="wallpapers"></div>
       <div class="row">
         <label for="wpMinutes">Change every</label>
@@ -210,6 +216,7 @@
       hiddenApps: Array.isArray(c.hiddenApps) ? c.hiddenApps : [],
       wallpapers: Array.isArray(c.wallpapers) ? c.wallpapers : [],
       wallpaperMinutes: Number(c.wallpaperMinutes) > 0 ? Number(c.wallpaperMinutes) : 5,
+      defaultWallpaper: typeof c.defaultWallpaper === 'string' ? c.defaultWallpaper : '',
       bootMessages: Array.isArray(c.bootMessages) ? c.bootMessages : [],
       text: c.text && typeof c.text === 'object' ? c.text : {},
       links: c.links && typeof c.links === 'object' ? c.links : {}
@@ -225,7 +232,7 @@
      never wipes newer changes: anything I changed since `base` wins, everything else comes from `theirs`. */
   function merge(base, mine, theirs) {
     const out = normalize(JSON.parse(serialize(theirs)));
-    ['hiddenApps', 'wallpapers', 'wallpaperMinutes', 'bootMessages'].forEach(k => {
+    ['hiddenApps', 'wallpapers', 'wallpaperMinutes', 'defaultWallpaper', 'bootMessages'].forEach(k => {
       if (JSON.stringify(mine[k]) !== JSON.stringify(base[k])) out[k] = mine[k];
     });
     ['text', 'links'].forEach(k => {
@@ -317,17 +324,29 @@
     defaults.wallpapers.forEach(w => {
       const card = document.createElement('label');
       card.className = 'wp';
-      card.innerHTML = `<img loading="lazy" alt=""><div class="cap"><span></span><input type="checkbox"></div>`;
+      card.innerHTML = `<img loading="lazy" alt=""><div class="cap"><span></span><input type="checkbox"></div><button type="button" class="def"></button>`;
       card.querySelector('img').src = w.src;
       card.querySelector('.cap span').textContent = w.label;
       const cb = card.querySelector('input');
       cb.checked = cfg.wallpapers.includes(w.id);
       card.classList.toggle('on', cb.checked);
+      const isDef = cfg.defaultWallpaper === w.id;
+      card.classList.toggle('is-default', isDef);
+      card.querySelector('.def').textContent = isDef ? '★ Shown first on load' : '☆ Make default';
       cb.addEventListener('change', () => {
         cfg.wallpapers = cfg.wallpapers.filter(id => id !== w.id);
         if (cb.checked) cfg.wallpapers.push(w.id);
-        card.classList.toggle('on', cb.checked);
+        else if (cfg.defaultWallpaper === w.id) cfg.defaultWallpaper = '';
         changed();
+        render();
+      });
+      card.querySelector('.def').addEventListener('click', e => {
+        e.preventDefault();
+        cfg.defaultWallpaper = isDef ? '' : w.id;
+        // the default must be in the rotation (unless the rotation is "all")
+        if (!isDef && cfg.wallpapers.length && !cfg.wallpapers.includes(w.id)) cfg.wallpapers.push(w.id);
+        changed();
+        render();
       });
       $('wallpapers').appendChild(card);
     });

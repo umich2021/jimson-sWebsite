@@ -1272,7 +1272,8 @@
     wpList = chosen.length ? WALLPAPERS.filter(w => chosen.includes(w.id)) : WALLPAPERS.slice();
     if (!wpList.length) wpList = WALLPAPERS.slice();
     wpMinutes = Number(cfg.wallpaperMinutes) > 0 ? Number(cfg.wallpaperMinutes) : 5;
-    showWallpaper(Math.floor(Math.random() * wpList.length));
+    const def = wpList.findIndex(w => w.id === cfg.defaultWallpaper);
+    showWallpaper(def >= 0 ? def : Math.floor(Math.random() * wpList.length));
     restartWallpaperTimer();
   }
   function cycleWallpaper() {
@@ -1488,7 +1489,7 @@
        text:  { "<data-edit key>": "new text" }       — any element with data-edit="…" (\n and **bold** work)
        links: { "<data-edit-href key>": "https://…" } — any <a> with data-edit-href="…"
        hiddenApps: ["aventos", …]                     — hides icon, dock item, window, [data-needs-app]
-       wallpapers: ["grand-canyon-2", …], wallpaperMinutes: 5, bootMessages: ["…"]
+       wallpapers: ["grand-canyon-2", …], defaultWallpaper: "…", wallpaperMinutes: 5, bootMessages: ["…"]
      /?preview shows the admin panel's unpublished draft (localStorage) instead. */
   let siteConfig = {};
   const hiddenApps = new Set();

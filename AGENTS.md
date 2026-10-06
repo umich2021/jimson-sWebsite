@@ -37,7 +37,8 @@ owner's browser) → Pages redeploys.
   row, the window, and anything tagged `data-needs-app="<app>"`. Use `appOn(key)` in new code.
 - **Wallpapers:** catalog is the `<script type="application/json" id="wallpaperCatalog">` block
   in `index.html`; files in `public/wallpapers/` (sources/licenses in `CREDITS.md`).
-  `wallpapers: [ids]` picks the rotation (empty = all), `wallpaperMinutes` the interval (default 5).
+  `wallpapers: [ids]` picks the rotation (empty = all), `defaultWallpaper` the one shown first on
+  load (empty = random), `wallpaperMinutes` the interval (default 5).
   Two `.wallpaper` layers crossfade. To add one: drop the file in, add a catalog entry.
 - Text values are plain text; line breaks are kept and `**x**` renders bold (`setRichText()`).
 - The admin panel three-way-merges (`merge()`) its draft onto the latest repo copy when loading
