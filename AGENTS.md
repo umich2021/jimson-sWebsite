@@ -9,7 +9,7 @@ Orientation for coding agents. Keep this current when you change the things it d
   Push to `main` → `.github/workflows/deploy.yml` builds `dist/` → GitHub Pages →
   `www.jimsonyang.com`. The React app under `src/` is not the live site (superseded).
 - **`projects.jimsonyang.com`** is a *separate* deploy on an Oracle VM, not this repo's
-  Pages. Its landing page source lives on the box, not here. See `SERVER-SETUP.md`
+  Pages. See `SERVER-SETUP.md`
   (gitignored). `projects-landing/index.html` in this repo mirrors the live page: edit it here,
   then `scp` it to `~/apps/projects-landing/index.html` on the VM (bind-mounted into Caddy as
   `/srv/projects-landing`; live immediately). It pulls its favicon, wallpaper files, and wallpaper
