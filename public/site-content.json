@@ -37,7 +37,9 @@
     "projects.42": "Write-up/Service",
     "projects.47": "A mobile app for playing Jet Lag: The Game across San Francisco neighborhoods. Super fun to do and to play. Talk to me if you to play together",
     "experience.2": "Forward Deployed Engineer -TrustPixel",
-    "experience.7": "AI anime studio. Own the full stack of building it: product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS. Landed a publisher deal that's driven 98.5M views, a distribution deal with BlueBox.tv, and turned internal tooling into a platform with its first $10K in revenue."
+    "experience.7": "AI anime studio. Own the full stack of building it: product, engineering, and go-to-market, including testing anime-style content as a marketing channel for B2B SaaS. Landed a publisher deal that's driven 98.5M views, a distribution deal with BlueBox.tv, and turned internal tooling into a platform with its first $10K in revenue.",
+    "experience.8": "Founder - Aventos  GEO",
+    "experience.10": "AEO/LLM citation tracker which tracks how well a brand shows up when people ask ChatGPT or Claude AI questions about brand discoverability. Built the full tech stack myself and took it 0 to 1 in B2B SaaS sales."
   },
   "links": {}
 }
