@@ -24,7 +24,19 @@
     "about.40": "Due diligence on healthcare companies at a 1bn+ AUM medtech fund. Learned cap tables and deal analysis. ",
     "about.47": "AI anime studio ",
     "about.50": "AEO/LLM citation tracker. Went 0 to 1",
-    "about.54": "Work builds (Seedance tool, Manhwa Reader, client sites). I also make fun projects like this @projects.jimsonyang.com — like a soundboard app to play on calls, my custom dropbox version, and mobile apps that turned SF into a board game"
+    "about.54": "Work builds (Seedance tool, Manhwa Reader, client sites). I also make fun projects like this @projects.jimsonyang.com — like a soundboard app to play on calls, my custom dropbox version, and mobile apps that turned SF into a board game",
+    "projects.5": "These are things I've built mainly for work",
+    "projects.8": "Brands/companies will show up on chatgpt/claude. Consumers will base their decision on what AI recommends them, and understanding where and how these brands show up was a tool I've built. Built the first production app and the whole crawler pipeline to show the dashboard.",
+    "projects.14": "Internal tool for the production team to generate, review, and archive AI video through BytePlus Seedance. Our entire workflow relies on generating, planning, and editing videos in a timeline manner. Initially used for interanl tools, we then were selling this as a platform.",
+    "projects.20": "A reader built to make sense of messy manhwa file collections -inconsistent folder names, out-of-order chapters, mixed image formats -and put them in a nice ui to read on your phone.",
+    "projects.25": "Tableu is data visualization software, it's incredibly complicated and we were building a complex AI agent that could generate up the visuals for you",
+    "projects.29": "Little things I build for myself: sometimes they're half finished, often they're personal, and almost always 'what if I build X' type of thoughts",
+    "projects.31": "This is the site where I host all my personal projects",
+    "projects.35": "What if during a phone call you can have sound effects. Specifically meme sound effects like a vine boom, or an anime girl saying 'ahhh'. This was a 'I thought it would be funny to build and show to my friends' type of idea. And yes it was very funny to use a vine boom during a conversation",
+    "projects.41": "I needed to backup some files and not pay for google photos. So I put a wrapper on a service called backblaze which had great pricing to back up some of my precious photos and memory",
+    "projects.42": "Write-up/Service",
+    "projects.47": "A mobile app for playing Jet Lag: The Game across San Francisco neighborhoods. Super fun to do and to play. Talk to me if you to play together",
+    "experience.2": "Forward Deployed Engineer —-TrustPixel"
   },
   "links": {}
 }
