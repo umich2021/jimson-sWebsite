@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 <title>Jimson Yang — Projects</title>
 <meta name="description" content="Small personal projects and tools, self-hosted by Jimson Yang." />
+<link rel="icon" href="https://www.jimsonyang.com/favicon.ico" sizes="any" />
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.jimsonyang.com/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="https://www.jimsonyang.com/favicon-192.png" />
+<link rel="apple-touch-icon" href="https://www.jimsonyang.com/apple-touch-icon.png" />
 <style>
   :root {
     --menubar: rgba(30,30, 34, 0.55);
@@ -32,24 +36,16 @@
   }
   a { color: inherit; }
 
-  body.wp-midnight {
-    background:
-      radial-gradient(1200px 800px at 80% 10%, #3b82f633, transparent 60%),
-      radial-gradient(1000px 700px at 10% 90%, #6366f133, transparent 60%),
-      linear-gradient(160deg, #10192e 0%, #0b1224 45%, #05070f 100%);
+  body { background: #121214; }
+
+  /* wallpaper — same photos and rotation as www.jimsonyang.com (picked in its /admin.html);
+     two stacked layers crossfade */
+  .wallpaper {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: center / cover no-repeat; opacity: 0; transition: opacity 1.2s ease;
   }
-  body.wp-amber {
-    background:
-      radial-gradient(1200px 800px at 80% 10%, #f77f0033, transparent 60%),
-      radial-gradient(1000px 700px at 10% 90%, #ffb02e22, transparent 60%),
-      linear-gradient(160deg, #241c14 0%, #17130e 45%, #0d0a07 100%);
-  }
-  body.wp-slate {
-    background:
-      radial-gradient(1200px 800px at 80% 10%, #64748b33, transparent 60%),
-      radial-gradient(1000px 700px at 10% 90%, #94a3b822, transparent 60%),
-      linear-gradient(160deg, #1e2530 0%, #151a22 45%, #0a0d12 100%);
-  }
+  .wallpaper.show { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .wallpaper { transition: none; } }
 
   .context-menu {
     position: fixed; min-width: 220px; background: rgba(28,28,32,0.98);
@@ -250,9 +246,6 @@
   }
   .dock-item:hover::before { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  .welcome-hint {
-    position: fixed; left: 16px; bottom: 90px; z-index: 4; color: rgba(255,255,255,0.75); font-size: 13px; max-width: 260px;
-  }
 
   .boot-screen {
     position: fixed; inset: 0; z-index: 500; background: #000;
@@ -295,12 +288,13 @@
     .win-body { padding: 16px; font-size: 13.5px; }
     .dock { gap: 6px; padding: 6px 8px; bottom: 8px; }
     .dock-item { width: 40px; height: 40px; font-size: 9.5px; border-radius: 9px; }
-    .welcome-hint { display: none; }
     .resize-handle { display: none; }
   }
 </style>
 </head>
-<body class="wp-midnight">
+<body>
+<div class="wallpaper" id="wallpaperA"></div>
+<div class="wallpaper" id="wallpaperB"></div>
 
 <!-- App icon glyphs (Flat Keycaps). renderIcons() points each <use> at the chosen glyph;
      6 alternates per app feed the runtime switcher. Add one: drop a <symbol> here, list its
@@ -399,7 +393,6 @@
   </div>
 </div>
 
-<p class="welcome-hint">Click an icon to open it. Drag windows by their title bar, resize from the bottom-right corner.</p>
 
 <div class="window open" id="win-about" style="top:70px; left:100px; z-index:12; width:480px; height:280px;">
   <div class="win-header" data-target="win-about">
@@ -700,23 +693,45 @@
     if (e.target.id === 'modalOverlay') closeModal();
   });
 
-  const WALLPAPERS = ['wp-midnight', 'wp-amber', 'wp-slate'];
-  function applyWallpaper(name) {
-    document.body.classList.remove(...WALLPAPERS);
-    document.body.classList.add(name);
-    try { localStorage.setItem('wallpaper', name); } catch {}
+  /* wallpapers: reads the rotation from the main site's site-content.json so both stay in sync */
+  const MAIN_SITE = 'https://www.jimsonyang.com';
+  const FALLBACK_WALLPAPERS = ['dicaprio-tv-1', 'grand-canyon-2', 'death-valley-1'];
+  let wpList = [], wpIdx = 0, wpTimer = null, wpMinutes = 5, wpFront = null;
+  function showWallpaper(i, tries) {
+    tries = tries || 0;
+    if (!wpList.length || tries >= wpList.length) return;
+    wpIdx = (i + wpList.length) % wpList.length;
+    const src = MAIN_SITE + '/wallpapers/' + wpList[wpIdx] + '.jpg';
+    const img = new Image();
+    img.onload = () => {
+      const a = document.getElementById('wallpaperA'), b = document.getElementById('wallpaperB');
+      const back = wpFront === a ? b : a;
+      back.style.backgroundImage = 'url("' + src + '")';
+      back.classList.add('show');
+      if (wpFront) wpFront.classList.remove('show');
+      wpFront = back;
+    };
+    img.onerror = () => showWallpaper(wpIdx + 1, tries + 1);
+    img.src = src;
+  }
+  function restartWallpaperTimer() {
+    clearInterval(wpTimer);
+    if (wpList.length > 1) wpTimer = setInterval(() => showWallpaper(wpIdx + 1), wpMinutes * 60 * 1000);
   }
   function cycleWallpaper() {
-    const current = WALLPAPERS.find(w => document.body.classList.contains(w)) || WALLPAPERS[0];
-    const next = WALLPAPERS[(WALLPAPERS.indexOf(current) + 1) % WALLPAPERS.length];
-    applyWallpaper(next);
+    if (wpList.length < 2) return;
+    showWallpaper(wpIdx + 1);
+    restartWallpaperTimer();
   }
-  (function restoreWallpaper() {
-    try {
-      const saved = localStorage.getItem('wallpaper');
-      if (saved && WALLPAPERS.includes(saved)) applyWallpaper(saved);
-    } catch {}
-  })();
+  fetch(MAIN_SITE + '/site-content.json', { cache: 'no-cache' })
+    .then(r => r.ok ? r.json() : {})
+    .catch(() => ({}))
+    .then(cfg => {
+      wpList = (Array.isArray(cfg.wallpapers) && cfg.wallpapers.length) ? cfg.wallpapers : FALLBACK_WALLPAPERS;
+      wpMinutes = Number(cfg.wallpaperMinutes) > 0 ? Number(cfg.wallpaperMinutes) : 5;
+      showWallpaper(Math.floor(Math.random() * wpList.length));
+      restartWallpaperTimer();
+    });
 
   const contextMenu = document.getElementById('contextMenu');
   let ctxIconKey = null;
