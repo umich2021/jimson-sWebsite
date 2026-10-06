@@ -14,6 +14,10 @@ Orientation for coding agents. Keep this current when you change the things it d
   then `scp` it to `~/apps/projects-landing/index.html` on the VM (bind-mounted into Caddy as
   `/srv/projects-landing`; live immediately). It pulls its favicon, wallpaper files, and wallpaper
   rotation from www.jimsonyang.com (`site-content.json`), so the admin panel drives both sites.
+  Its own text/links/apps/boot captions come from **`public/projects-content.json`** in this repo
+  (same `data-edit` scheme; edit it via the admin's "Projects site" tab). Caddy on the VM redirects
+  `projects.jimsonyang.com/admin(.html)` → `www.jimsonyang.com/admin.html?site=projects` and sends
+  `Access-Control-Allow-Origin: *` so the admin can read the page for its defaults.
 
 ## Content is edited from the admin panel — read this before changing text
 

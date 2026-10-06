@@ -53,6 +53,10 @@
   }
   .top .bar { max-width: 860px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .top .grow { flex: 1; min-width: 120px; }
+  .sites { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .sites button { border: 0; background: var(--panel); padding: 7px 12px; font-size: 12.5px; font-weight: 600; color: var(--soft); cursor: pointer; }
+  .sites button + button { border-left: 1px solid var(--line); }
+  .sites button.active { background: var(--accent); color: #fff; }
   .status { font-size: 12.5px; color: var(--soft); }
   .status.ok { color: var(--ok); } .status.err { color: var(--err); }
 
@@ -110,7 +114,12 @@
 <div id="app" class="hidden">
   <div class="top">
     <div class="bar">
-      <h1 class="grow">JimsonOS Admin</h1>
+      <h1>JimsonOS Admin</h1>
+      <div class="sites" role="tablist" aria-label="Site">
+        <button type="button" data-site="main">Main site</button>
+        <button type="button" data-site="projects">Projects site</button>
+      </div>
+      <span class="grow"></span>
       <span class="status" id="status"></span>
       <button class="btn" id="discardBtn" title="Throw away unpublished edits">Discard draft</button>
       <button class="btn" id="previewBtn">Preview</button>
@@ -125,8 +134,8 @@
       <div id="apps"></div>
     </section>
 
-    <section>
-      <h2>Wallpapers</h2>
+    <section id="wpSection">
+      <h2>Wallpapers <span style="text-transform:none; letter-spacing:0;">· shared by both sites</span></h2>
       <p class="soft" style="margin:-4px 0 12px;">Tick the ones to rotate (none ticked = all of them). The ★ default is shown first when someone opens the site; with no default, it starts on a random one.</p>
       <div class="wp-grid" id="wallpapers"></div>
       <div class="row">
@@ -156,7 +165,7 @@
     <section>
       <h2>Publishing</h2>
       <p class="soft" style="margin:-4px 0 10px;">
-        Publish commits <code>public/site-content.json</code> to <code id="repoLabel"></code>; the site redeploys in about a minute.
+        Publish commits <code id="fileLabel"></code> to <code id="repoLabel"></code>; the site redeploys in about a minute.
         Needs a GitHub fine-grained token with access to only that repo and <b>Contents: Read and write</b>
         (github.com → Settings → Developer settings → Fine-grained tokens). It's kept in this browser only.
       </p>
@@ -171,13 +180,28 @@
 
 <script>
   const PASSWORD_SHA256 = '8160c5d5b0e16e2c0205df30bcffa0398c06d08679aa0d1462d1c5e26c48a1d0';
-  const REPO = 'umich2021/jimson-sWebsite', BRANCH = 'main', FILE = 'public/site-content.json';
-  const DRAFT_KEY = 'jimsonos-admin-draft', BASE_KEY = 'jimsonos-admin-draft-base', TOKEN_KEY = 'jimsonos-admin-token', UNLOCK_KEY = 'jimsonos-admin-unlocked';
-  const REGION_NAMES = {
-    site: 'Page', boot: 'Boot screen', menubar: 'Menu bar & right-click menu', desktop: 'Desktop icon labels',
-    about: 'About_Me.txt', aventos: 'Aventos.app', projects: 'Projects', experience: 'Experience.pdf',
-    education: 'Education.txt', contact: 'Contact.app'
+  const REPO = 'umich2021/jimson-sWebsite', BRANCH = 'main';
+  const TOKEN_KEY = 'jimsonos-admin-token', UNLOCK_KEY = 'jimsonos-admin-unlocked';
+  // Both sites' content files live in this repo (public/) and are served by www.jimsonyang.com.
+  // projects.jimsonyang.com/admin.html redirects here with ?site=projects (Caddy on the VM).
+  const PROJECTS_ORIGIN = 'https://projects.jimsonyang.com';
+  const SITES = {
+    main: {
+      html: '/index.html', content: '/site-content.json', file: 'public/site-content.json',
+      draftKey: 'jimsonos-admin-draft', wallpapers: true,
+      preview: () => '/?preview'
+    },
+    projects: {
+      html: PROJECTS_ORIGIN + '/index.html', content: '/projects-content.json', file: 'public/projects-content.json',
+      draftKey: 'jimsonos-admin-draft-projects', wallpapers: false,
+      preview: c => PROJECTS_ORIGIN + '/#preview=' + encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(c)))))
+    }
   };
+  let siteKey = new URLSearchParams(location.search).get('site') === 'projects' ? 'projects' : 'main';
+  let site = SITES[siteKey];
+  let DRAFT_KEY = site.draftKey, BASE_KEY = site.draftKey + '-base';
+  const REGION_NAMES = { site: 'Page', boot: 'Boot screen', menubar: 'Menu bar & right-click menu', desktop: 'Desktop icon labels' };
+  let regionTitles = {};
 
   const $ = id => document.getElementById(id);
   const store = {
@@ -222,7 +246,12 @@
       links: c.links && typeof c.links === 'object' ? c.links : {}
     };
   }
-  const serialize = c => JSON.stringify(c, null, 2) + '\n';
+  // wallpaper settings live only in the main site's file (the projects page reads them from there)
+  const serialize = c => {
+    const o = Object.assign({}, c);
+    if (!site.wallpapers) { delete o.wallpapers; delete o.wallpaperMinutes; delete o.defaultWallpaper; }
+    return JSON.stringify(o, null, 2) + '\n';
+  };
 
   function setStatus(msg, kind) {
     $('status').textContent = msg;
@@ -251,17 +280,39 @@
     setStatus(dirty ? 'Unpublished changes' : 'Up to date');
   }
 
-  async function unlock() {
+  function unlock() {
     $('lock').classList.add('hidden');
     $('app').classList.remove('hidden');
     $('repoLabel').textContent = REPO + '@' + BRANCH;
     $('token').value = store.get(TOKEN_KEY) || '';
+    document.querySelectorAll('.sites button').forEach(b => b.addEventListener('click', () => {
+      if (b.dataset.site === siteKey) return;
+      siteKey = b.dataset.site;
+      site = SITES[siteKey];
+      DRAFT_KEY = site.draftKey; BASE_KEY = site.draftKey + '-base';
+      history.replaceState(null, '', siteKey === 'main' ? location.pathname : '?site=' + siteKey);
+      loadSite();
+    }));
+    loadSite();
+  }
+
+  async function loadSite() {
+    document.querySelectorAll('.sites button').forEach(b => b.classList.toggle('active', b.dataset.site === siteKey));
+    $('wpSection').classList.toggle('hidden', !site.wallpapers);
+    $('fileLabel').textContent = site.file;
+    $('filter').value = '';
     setStatus('Loading…');
 
-    const [html, live] = await Promise.all([
-      fetch('/index.html', { cache: 'no-cache' }).then(r => r.text()),
-      fetch('/site-content.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : {}).catch(() => ({}))
-    ]);
+    let html, live;
+    try {
+      [html, live] = await Promise.all([
+        fetch(site.html, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.text(); }),
+        fetch(site.content, { cache: 'no-cache' }).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+      ]);
+    } catch (e) {
+      setStatus("Couldn't load that site's page to read its text", 'err');
+      return;
+    }
     readDefaults(html);
     published = normalize(live);
     let draft = null;
@@ -282,7 +333,7 @@
     const doc = new DOMParser().parseFromString(html, 'text/html');
     defaults.text = Array.from(doc.querySelectorAll('[data-edit]')).map(el => ({
       key: el.dataset.edit,
-      value: el.textContent,
+      value: editableText(el),
       hint: (el.className || el.tagName.toLowerCase()).toString().split(' ')[0]
     }));
     defaults.links = Array.from(doc.querySelectorAll('[data-edit-href]')).map(el => ({
@@ -293,9 +344,28 @@
     defaults.apps = Array.from(doc.querySelectorAll('.icon[data-key]')).map(el => ({
       key: el.dataset.key, label: el.querySelector('.icon-label').textContent, labelKey: el.querySelector('.icon-label').dataset.edit
     }));
-    try { defaults.wallpapers = JSON.parse(doc.getElementById('wallpaperCatalog').textContent); } catch (e) {}
+    if (site.wallpapers) {
+      try { defaults.wallpapers = JSON.parse(doc.getElementById('wallpaperCatalog').textContent); } catch (e) {}
+    }
     const msgs = html.match(/const messages = [^\[]*\[([\s\S]*?)\];/);
-    defaults.bootMessages = msgs ? Array.from(msgs[1].matchAll(/'([^']*)'/g)).map(m => m[1]) : [];
+    defaults.bootMessages = msgs ? Array.from(msgs[1].matchAll(/'([^']*)'|"([^"]*)"/g)).map(m => m[1] || m[2]) : [];
+    regionTitles = {};
+    doc.querySelectorAll('.window[id^="win-"]').forEach(w => {
+      const t = w.querySelector('.win-title');
+      if (t) regionTitles[w.id.slice(4)] = t.textContent.trim();
+    });
+  }
+
+  // what the site's setRichText() expects: <br> → line break, <strong>/<b> → **bold**, source whitespace collapsed
+  function editableText(el) {
+    let out = '';
+    el.childNodes.forEach(n => {
+      if (n.nodeType === 3) out += n.textContent.replace(/\s+/g, ' ');
+      else if (n.nodeName === 'BR') out += '\n';
+      else if (n.nodeName === 'STRONG' || n.nodeName === 'B') out += '**' + n.textContent.replace(/\s+/g, ' ') + '**';
+      else out += n.textContent;
+    });
+    return out.split('\n').map(l => l.trim()).join('\n').trim();
   }
 
   /* ---------- render ---------- */
@@ -359,9 +429,9 @@
     Object.keys(groups).forEach(region => {
       const det = document.createElement('details');
       det.className = 'group';
-      det.open = ['about', 'experience'].includes(region);
+      det.open = region === 'about';
       det.innerHTML = `<summary></summary>`;
-      det.firstChild.textContent = REGION_NAMES[region] || region;
+      det.firstChild.textContent = REGION_NAMES[region] || regionTitles[region] || region;
       groups[region].forEach(f => det.appendChild(fieldEl(f, cfg.text, true)));
       $('textGroups').appendChild(det);
     });
@@ -414,7 +484,7 @@
   /* ---------- actions ---------- */
   $('previewBtn').addEventListener('click', () => {
     store.set(DRAFT_KEY, serialize(cfg));
-    window.open('/?preview', '_blank');
+    window.open(site.preview(cfg), '_blank');
   });
   $('discardBtn').addEventListener('click', () => {
     if (!confirm('Throw away all unpublished edits?')) return;
@@ -448,7 +518,7 @@
     const btn = $('publishBtn');
     btn.disabled = true;
     setStatus('Publishing…');
-    const api = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+    const api = `https://api.github.com/repos/${REPO}/contents/${site.file}`;
     const headers = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' };
     try {
       const cur = await fetch(`${api}?ref=${BRANCH}`, { headers, cache: 'no-store' });

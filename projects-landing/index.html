@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<title>Jimson Yang — Projects</title>
+<title data-edit="site.1">Jimson Yang — Projects</title>
 <meta name="description" content="Small personal projects and tools, self-hosted by Jimson Yang." />
 <link rel="icon" href="https://www.jimsonyang.com/favicon.ico" sizes="any" />
 <link rel="icon" type="image/png" sizes="32x32" href="https://www.jimsonyang.com/favicon-32.png" />
@@ -37,6 +37,8 @@
   a { color: inherit; }
 
   body { background: #121214; }
+
+  .app-off { display: none !important; }
 
   /* wallpaper — same photos and rotation as www.jimsonyang.com (picked in its /admin.html);
      two stacked layers crossfade */
@@ -337,59 +339,59 @@
 </defs></svg>
 
 <div class="boot-screen" id="bootScreen">
-  <div class="boot-logo">▤</div>
-  <div class="boot-wordmark">PROJECTS</div>
+  <div data-edit="boot.1" class="boot-logo">▤</div>
+  <div data-edit="boot.2" class="boot-wordmark">PROJECTS</div>
   <p class="boot-caption" id="bootCaption"></p>
 </div>
 
 <div class="menubar pre-boot">
   <div class="menubar-left">
-    <span class="menubar-logo">▤ Projects</span>
+    <span data-edit="menubar.1" class="menubar-logo">▤ Projects</span>
     <div class="menu" data-menu="file">
-      <span class="menubar-item">File</span>
+      <span data-edit="menubar.2" class="menubar-item">File</span>
       <div class="menu-dropdown" id="menu-file">
-        <div class="menu-option" onclick="toggleWindow('contact')">New Message</div>
+        <div data-edit="menubar.3" class="menu-option" onclick="toggleWindow('contact')">New Message</div>
         <div class="menu-divider"></div>
-        <div class="menu-option" onclick="closeFocusedWindow()">Close Window</div>
+        <div data-edit="menubar.4" class="menu-option" onclick="closeFocusedWindow()">Close Window</div>
       </div>
     </div>
     <div class="menu" data-menu="window">
-      <span class="menubar-item">Window</span>
+      <span data-edit="menubar.5" class="menubar-item">Window</span>
       <div class="menu-dropdown" id="menu-window"></div>
     </div>
     <div class="menu" data-menu="help">
-      <span class="menubar-item">Help</span>
+      <span data-edit="menubar.6" class="menubar-item">Help</span>
       <div class="menu-dropdown" id="menu-help">
-        <div class="menu-option" onclick="toggleWindow('about')">About This Page</div>
-        <div class="menu-option" onclick="toggleWindow('contact')">Say Hi 👋</div>
+        <div data-edit="menubar.7" class="menu-option" onclick="toggleWindow('about')">About This Page</div>
+        <div data-edit="menubar.8" class="menu-option" onclick="toggleWindow('contact')">Say Hi 👋</div>
       </div>
     </div>
   </div>
   <div class="menubar-right">
-    <a href="https://www.jimsonyang.com" style="color:#fff; text-decoration:none; opacity:0.85;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.85">jimsonyang.com ↗</a>
+    <a data-edit-href="menubar.link1" data-edit="menubar.9" href="https://www.jimsonyang.com" style="color:#fff; text-decoration:none; opacity:0.85;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.85">jimsonyang.com ↗</a>
   </div>
 </div>
 
 <div class="desktop-icons pre-boot" id="desktopIcons">
   <div class="icon" data-key="about" onclick="toggleWindow('about')">
     <div class="icon-glyph g-about" data-app="about"><svg class="app-g" viewBox="0 0 24 24"><use href="#ab-lines"></use></svg></div>
-    <div class="icon-label">About.txt</div>
+    <div data-edit="desktop.1" class="icon-label">About.txt</div>
   </div>
   <div class="icon" data-key="directory" onclick="toggleWindow('directory')">
     <div class="icon-glyph g-directory" data-app="directory"><svg class="app-g" viewBox="0 0 24 24"><use href="#dir-folder"></use></svg></div>
-    <div class="icon-label">Directory</div>
+    <div data-edit="desktop.2" class="icon-label">Directory</div>
   </div>
   <div class="icon" data-key="soundboard" onclick="toggleWindow('soundboard')">
     <div class="icon-glyph g-soundboard" data-app="soundboard"><svg class="app-g" viewBox="0 0 24 24"><use href="#sb-pads"></use></svg></div>
-    <div class="icon-label">Soundboard.app</div>
+    <div data-edit="desktop.3" class="icon-label">Soundboard.app</div>
   </div>
   <div class="icon" data-key="storage" onclick="toggleWindow('storage')">
     <div class="icon-glyph g-storage" data-app="storage"><svg class="app-g" viewBox="0 0 24 24"><use href="#st-drive"></use></svg></div>
-    <div class="icon-label">Storage.txt</div>
+    <div data-edit="desktop.4" class="icon-label">Storage.txt</div>
   </div>
   <div class="icon" data-key="contact" onclick="toggleWindow('contact')">
     <div class="icon-glyph g-contact" data-app="contact"><svg class="app-g" viewBox="0 0 24 24"><use href="#ct-env"></use></svg></div>
-    <div class="icon-label">Contact.app</div>
+    <div data-edit="desktop.5" class="icon-label">Contact.app</div>
   </div>
 </div>
 
@@ -397,84 +399,84 @@
 <div class="window open" id="win-about" style="top:70px; left:100px; z-index:12; width:480px; height:280px;">
   <div class="win-header" data-target="win-about">
     <span class="traffic t-red" onclick="closeWindow('win-about')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
-    <span class="win-title">About.txt</span>
+    <span data-edit="about.1" class="win-title">About.txt</span>
   </div>
   <div class="win-body">
-    <h2>Projects</h2>
-    <p>The part of my website where I host tools and show off to friends. Not really to show off for work but more so when I build things I don't need to buy a new domain and do configuration.
+    <h2 data-edit="about.2">Projects</h2>
+    <p data-edit="about.3">The part of my website where I host tools and show off to friends. Not really to show off for work but more so when I build things I don't need to buy a new domain and do configuration.
       <br><br> Projects can vary from having a site to help my friend gets date to storing my data. <strong>This page also serves so I can see what I've built over time</strong>. Things may not be finished
       ui wise, but that's okay because to me they are useful.
       <br><br>
     </p>
-    <p>P.s. happy to chat more if you're curious on what else I'm building on the site, just go to contacts or help for my email </p>
+    <p data-edit="about.4">P.s. happy to chat more if you're curious on what else I'm building on the site, just go to contacts or help for my email </p>
   </div>
 </div>
 
 <div class="window" id="win-directory" style="top:120px; left:260px; z-index:11; width:520px; height:360px;">
   <div class="win-header" data-target="win-directory">
     <span class="traffic t-red" onclick="closeWindow('win-directory')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
-    <span class="win-title">Directory</span>
+    <span data-edit="directory.1" class="win-title">Directory</span>
   </div>
   <div class="win-body">
-    <div class="group-label">Live projects</div>
-    <div class="file-row" style="cursor:pointer;" onclick="window.open('https://soundboard.projects.jimsonyang.com','_blank')">
-      <div class="file-icon" style="background: linear-gradient(135deg, #b794f6, #6c4ce0);">SB</div>
+    <div data-edit="directory.2" class="group-label">Live projects</div>
+    <a data-edit-href="directory.link1" class="file-row" href="https://soundboard.projects.jimsonyang.com" target="_blank" rel="noopener" style="text-decoration:none; color:inherit;">
+      <div data-edit="directory.3" class="file-icon" style="background: linear-gradient(135deg, #b794f6, #6c4ce0);">SB</div>
       <div>
-        <div class="file-name">Soundboard</div>
-        <div class="file-desc">Putting vine booms in every phone call— soundboard.projects.jimsonyang.com ↗</div>
+        <div data-edit="directory.4" class="file-name">Soundboard</div>
+        <div data-edit="directory.5" class="file-desc">Putting vine booms in every phone call— soundboard.projects.jimsonyang.com ↗</div>
       </div>
-    </div>
-    <div class="file-row" style="cursor:pointer;" onclick="window.open('https://storage.projects.jimsonyang.com','_blank')">
-      <div class="file-icon" style="background: linear-gradient(135deg, #5eead4, #0891b2);">B2</div>
+    </a>
+    <a data-edit-href="directory.link2" class="file-row" href="https://storage.projects.jimsonyang.com" target="_blank" rel="noopener" style="text-decoration:none; color:inherit;">
+      <div data-edit="directory.6" class="file-icon" style="background: linear-gradient(135deg, #5eead4, #0891b2);">B2</div>
       <div>
-        <div class="file-name">Storage</div>
-        <div class="file-desc">Moving my files off Google &amp; Dropbox onto Backblaze B2 — storage.projects.jimsonyang.com ↗</div>
+        <div data-edit="directory.7" class="file-name">Storage</div>
+        <div data-edit="directory.8" class="file-desc">Moving my files off Google &amp; Dropbox onto Backblaze B2 — storage.projects.jimsonyang.com ↗</div>
       </div>
-    </div>
+    </a>
   </div>
 </div>
 
 <div class="window" id="win-soundboard" style="top:150px; left:180px; z-index:10; width:460px; height:340px;">
   <div class="win-header" data-target="win-soundboard">
     <span class="traffic t-red" onclick="closeWindow('win-soundboard')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
-    <span class="win-title">Soundboard.app</span>
+    <span data-edit="soundboard.1" class="win-title">Soundboard.app</span>
   </div>
   <div class="win-body">
-    <h2>SoundBoard Caller</h2>
-    <p>A soundboard for phone calls. Imagine during a phone call, someone says something funny-don't you wish you have a vineboom? Or someone says something sus-boom among us sound effects. Anyways this was a silly project that anyone can use so sfx can happen during a phone call. </p>
+    <h2 data-edit="soundboard.2">SoundBoard Caller</h2>
+    <p data-edit="soundboard.3">A soundboard for phone calls. Imagine during a phone call, someone says something funny-don't you wish you have a vineboom? Or someone says something sus-boom among us sound effects. Anyways this was a silly project that anyone can use so sfx can happen during a phone call. </p>
     <br><br>
-    <p class="soft">Built for andriod, no IOS unfortunately</p>
-    <a class="mail-send" href="https://soundboard.projects.jimsonyang.com" target="_blank" rel="noopener">Open Soundboard web version ↗</a>
+    <p data-edit="soundboard.4" class="soft">Built for andriod, no IOS unfortunately</p>
+    <a data-edit-href="soundboard.link1" data-edit="soundboard.5" class="mail-send" href="https://soundboard.projects.jimsonyang.com" target="_blank" rel="noopener">Open Soundboard web version ↗</a>
   </div>
 </div>
 
 <div class="window" id="win-storage" style="top:140px; left:220px; z-index:8; width:460px; height:340px;">
   <div class="win-header" data-target="win-storage">
     <span class="traffic t-red" onclick="closeWindow('win-storage')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
-    <span class="win-title">Storage.txt</span>
+    <span data-edit="storage.1" class="win-title">Storage.txt</span>
   </div>
   <div class="win-body">
-    <h2>I didn't want to pay google and dropbox $2 for storage</h2>
-    <p>Problem: I was running out of storage on google and my computer, most of it was backups of photos/videos and archived files. 
+    <h2 data-edit="storage.2">I didn't want to pay google and dropbox $2 for storage</h2>
+    <p data-edit="storage.3">Problem: I was running out of storage on google and my computer, most of it was backups of photos/videos and archived files. 
        So instead of paying money for a cloud storage I wanted to be on the free plan of google and dropbox,
        I found there was a dev friendly storage called Backblaze that allowed you to pay for storage per GB. For my needs I would've payed $.13 a month.
        <br><br>
        Using claude to recreate dropping and syncing files, I'm saving $3 a month. 
     </p>
-    <p class="soft">Attached is a write-up on why I built it, the two-tier sync model, a rudimentary cost analysis, and how it's put together. 
-    <a class="mail-send" href="https://storage.projects.jimsonyang.com" target="_blank" rel="noopener">Read the write-up</a>
+    <p data-edit="storage.4" class="soft">Attached is a write-up on why I built it, the two-tier sync model, a rudimentary cost analysis, and how it's put together.</p>
+    <a data-edit-href="storage.link1" data-edit="storage.5" class="mail-send" href="https://storage.projects.jimsonyang.com" target="_blank" rel="noopener">Read the write-up</a>
   </div>
 </div>
 
 <div class="window" id="win-contact" style="top:180px; left:340px; z-index:9; width:480px; height:280px;">
   <div class="win-header" data-target="win-contact">
     <span class="traffic t-red" onclick="closeWindow('win-contact')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
-    <span class="win-title">New Message</span>
+    <span data-edit="contact.1" class="win-title">New Message</span>
   </div>
   <div class="win-body">
-    <div class="mail-field"><span class="label">To:</span><span>jimsonyangbusiness@gmail.com</span></div>
-    <div class="mail-field"><span class="label">Subject:</span><span>Hey, about your projects page</span></div>
-    <a class="mail-send" href="mailto:jimsonyangbusiness@gmail.com?subject=Hey%2C%20about%20your%20projects%20page">Send</a>
+    <div class="mail-field"><span data-edit="contact.2" class="label">To:</span><span data-edit="contact.3">jimsonyangbusiness@gmail.com</span></div>
+    <div class="mail-field"><span data-edit="contact.4" class="label">Subject:</span><span data-edit="contact.5">Hey, about your projects page</span></div>
+    <a data-edit-href="contact.link1" data-edit="contact.6" class="mail-send" href="mailto:jimsonyangbusiness@gmail.com?subject=Hey%2C%20about%20your%20projects%20page">Send</a>
   </div>
 </div>
 
@@ -495,14 +497,14 @@
 </div>
 
 <div class="context-menu" id="contextMenu">
-  <div class="menu-option" id="ctxOpen">Open</div>
-  <div class="menu-option" id="ctxChangeIcon">Change Icon&hellip;</div>
+  <div data-edit="menubar.10" class="menu-option" id="ctxOpen">Open</div>
+  <div data-edit="menubar.11" class="menu-option" id="ctxChangeIcon">Change Icon&hellip;</div>
   <div class="menu-divider" id="ctxIconDiv"></div>
-  <div class="menu-option" onclick="cycleWallpaper()">Change Wallpaper</div>
+  <div data-edit="menubar.12" class="menu-option" onclick="cycleWallpaper()">Change Wallpaper</div>
   <div class="menu-divider"></div>
-  <div class="menu-option" onclick="toggleWindow('about')">About This Page</div>
-  <div class="menu-option" onclick="toggleWindow('directory')">Open Directory</div>
-  <div class="menu-option" onclick="location.reload()">Refresh</div>
+  <div data-edit="menubar.13" class="menu-option" onclick="toggleWindow('about')">About This Page</div>
+  <div data-edit="menubar.14" class="menu-option" onclick="toggleWindow('directory')">Open Directory</div>
+  <div data-edit="menubar.15" class="menu-option" onclick="location.reload()">Refresh</div>
 </div>
 
 <script>
@@ -527,6 +529,7 @@
     win.style.top = top + 'px';
   }
   function openWindow(name) {
+    if (!appOn(name)) return;
     const win = document.getElementById('win-' + name);
     win.classList.add('open');
     focusWindow(win);
@@ -538,7 +541,7 @@
   }
   function toggleWindow(name) {
     const win = document.getElementById('win-' + name);
-    if (win.classList.contains('open')) win.classList.remove('open');
+    if (win.classList.contains('open') || !appOn(name)) win.classList.remove('open');
     else openWindow(name);
   }
   function closeFocusedWindow() {
@@ -676,7 +679,7 @@
   document.addEventListener('click', closeAllMenus);
 
   function buildWindowMenu() {
-    const rows = apps.map(a => {
+    const rows = apps.filter(a => appOn(a.key)).map(a => {
       const isOpen = document.getElementById('win-' + a.key).classList.contains('open');
       return `<div class="menu-option${isOpen ? ' checked' : ''}" onclick="toggleWindow('${a.key}')">${a.label}</div>`;
     }).join('');
@@ -767,7 +770,7 @@
     const icons = document.getElementById('desktopIcons');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let startTimer, msgTimer, autoTimer, finished = false;
-    const messages = ["Mounting projects…", "Almost there…"];
+    const messages = (Array.isArray(siteConfig.bootMessages) && siteConfig.bootMessages.length) ? siteConfig.bootMessages : ["Mounting projects…", "Almost there…"];
 
     function finish() {
       if (finished) return;
@@ -800,7 +803,54 @@
       window.removeEventListener('keydown', skipOnce);
     });
   }
-  runBootSequence();
+  /* ---------- page content (edited from www.jimsonyang.com/admin.html → "Projects site") ----------
+     projects-content.json lives in the main site's repo (public/) and overrides the defaults here:
+       text: { "<data-edit key>": "…" } (\n and **bold** work), links: { "<data-edit-href key>": "…" },
+       hiddenApps: ["storage", …], bootMessages: ["…"]
+     The admin's Preview opens this page with the draft in the URL hash (#preview=…). */
+  let siteConfig = {};
+  const hiddenApps = new Set();
+  function appOn(key) { return !hiddenApps.has(key); }
+  function setRichText(el, value) {
+    el.textContent = '';
+    value.split(/\*\*(.+?)\*\*/s).forEach((part, i) => {
+      if (!part) return;
+      if (i % 2) { const b = document.createElement('strong'); b.textContent = part; el.appendChild(b); }
+      else el.appendChild(document.createTextNode(part));
+    });
+    if (value.includes('\n')) el.style.whiteSpace = 'pre-line';
+  }
+  function applySiteConfig(cfg) {
+    siteConfig = cfg || {};
+    const text = siteConfig.text || {}, links = siteConfig.links || {};
+    document.querySelectorAll('[data-edit]').forEach(el => {
+      if (typeof text[el.dataset.edit] === 'string') setRichText(el, text[el.dataset.edit]);
+    });
+    document.querySelectorAll('[data-edit-href]').forEach(el => {
+      if (typeof links[el.dataset.editHref] === 'string') el.setAttribute('href', links[el.dataset.editHref]);
+    });
+    (siteConfig.hiddenApps || []).forEach(k => hiddenApps.add(k));
+    apps.forEach(a => {
+      const off = hiddenApps.has(a.key);
+      const icon = document.querySelector('.icon[data-key="' + a.key + '"]');
+      const label = icon && icon.querySelector('.icon-label');
+      if (label) a.label = label.textContent;
+      if (icon) icon.classList.toggle('app-off', off);
+      const dock = document.querySelector('.dock-item[data-app="' + a.key + '"]');
+      if (dock) { dock.classList.toggle('app-off', off); dock.dataset.tooltip = a.label; }
+      if (off) document.getElementById('win-' + a.key).classList.remove('open');
+    });
+  }
+  (function loadSiteConfig() {
+    const m = location.hash.match(/^#preview=(.+)$/);
+    if (m) {
+      try { return Promise.resolve(JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))))); } catch (e) {}
+    }
+    const fetched = fetch(MAIN_SITE + '/projects-content.json', { cache: 'no-cache' })
+      .then(r => r.ok ? r.json() : {})
+      .catch(() => ({}));
+    return Promise.race([fetched, new Promise(res => setTimeout(() => res({}), 4000))]);
+  })().then(applySiteConfig).then(runBootSequence);
 
   /* ---------- app icons (Flat Keycaps) + right-click glyph switcher ----------
      Every desktop/dock element carries data-app + an <svg class="app-g"><use></svg>.
