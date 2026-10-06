@@ -1,8 +1,15 @@
 {
-  "hiddenApps": [],
+  "hiddenApps": [
+    "aventos"
+  ],
   "wallpapers": [],
   "wallpaperMinutes": 5,
-  "bootMessages": [],
+  "bootMessages": [
+    "Making food...",
+    "Running a half marathon...",
+    "Bouldering...",
+    "Hosting a party..."
+  ],
   "text": {},
   "links": {}
 }
