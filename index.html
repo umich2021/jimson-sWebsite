@@ -258,6 +258,8 @@
     font-size: 14px; line-height: 1.6; touch-action: pan-y; -webkit-overflow-scrolling: touch;
   }
   .win-section { scroll-margin-top: 4px; }
+  .paged .win-section:not(.current) { display: none; }
+  .paged .win-section + .win-section { margin-top: 0; padding-top: 0; border-top: 0; }
   .win-section + .win-section { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
   .sec-h { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); margin: 0 0 10px; }
   @media (prefers-reduced-motion: reduce) { .win-scroll { scroll-behavior: auto; } }
@@ -268,6 +270,7 @@
   .stat-chip .lbl { font-size: 10.5px; color: var(--ink-soft); margin-top: 2px; }
   .tab-link { display: inline-block; margin-top: 14px; font-size: 12.5px; font-weight: 600; color: var(--accent); text-decoration: none; }
   .tab-link:hover { text-decoration: underline; }
+  .inline-link { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 
   .file-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); touch-action: pan-y; }
   .file-row:last-child { border-bottom: none; }
@@ -573,10 +576,10 @@
     <span class="traffic t-red" onclick="closeWindow('win-about')"></span><span class="traffic t-yellow"></span><span class="traffic t-green"></span>
     <span data-edit="about.1" class="win-title">About_Me.txt</span>
   </div>
-  <div class="win-railbody">
+  <div class="win-railbody paged">
     <nav class="win-rail" aria-label="Sections">
       <button data-edit="about.2" class="active" data-to="about-overview">Overview</button>
-      <button data-edit="about.3" data-to="about-experience">Experience</button>
+      <button data-edit="about.3" data-to="about-experience" data-needs-app="experience">Experience</button>
       <button data-edit="about.4" data-to="about-projects">Projects</button>
       <button data-edit="about.5" data-to="about-education">Education</button>
       <button data-edit="about.6" data-to="about-contact">Contact</button>
@@ -591,13 +594,13 @@
           <div class="stat-chip"><div data-edit="about.11" class="num">TrustPixel</div><div data-edit="about.12" class="lbl">forward deployed engineer</div></div>
           <div class="stat-chip"><div data-edit="about.13" class="num">98.5M</div><div data-edit="about.14" class="lbl">views via publisher deal</div></div>
           <div class="stat-chip"><div data-edit="about.15" class="num">$100K</div><div data-edit="about.16" class="lbl">pre-seed raised</div></div>
-          <div class="stat-chip"><div data-edit="about.17" class="num">3.89</div><div data-edit="about.18" class="lbl">GPA · UMich</div></div>
+          <div class="stat-chip"><div data-edit="about.17" class="num">3.9</div><div data-edit="about.18" class="lbl">GPA · UMich</div></div>
         </div>
         <div data-edit="about.19" class="group-label" style="margin-top:20px;">Elsewhere</div>
+        <a data-edit-href="about.link6" data-edit="about.68" class="tab-link" href="https://www.linkedin.com/in/jimsonyang/" target="_blank" rel="noreferrer" style="margin-right:18px;">LinkedIn →</a>
         <a data-edit-href="about.link1" data-edit="about.20" class="tab-link" href="https://github.com/umich2021" target="_blank" rel="noreferrer" style="margin-right:18px;">GitHub →</a>
-        <a data-edit-href="about.link2" data-edit="about.21" class="tab-link" href="https://www.youtube.com/channel/UCfzG7qaPV5p_QE1sr1mcXaA" target="_blank" rel="noreferrer">YouTube →</a>
       </section>
-      <section class="win-section" id="about-experience">
+      <section class="win-section" id="about-experience" data-needs-app="experience">
         <div data-edit="about.22" class="sec-h">Experience</div>
         <div class="resume-entry">
           <div data-edit="about.23" class="pdf-role">Forward Deployed Engineer — TrustPixel</div>
@@ -662,12 +665,13 @@
             <p data-edit="about.57" class="soft" style="margin:2px 0 0;">Stephen M. Ross School of Business</p>
           </div>
         </div>
-        <p data-edit="about.58">BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
+        <p data-edit="about.58">BBA · Magna Cum Laude · 3.9 GPA · 2021 – 2025</p>
       </section>
       <section class="win-section" id="about-contact">
         <div data-edit="about.59" class="sec-h">Contact</div>
         <div data-edit="about.60" class="group-label">Get in touch</div>
         <div class="mail-field"><span data-edit="about.61" class="label">Email</span><span data-edit="about.62">jimsonyangbusiness@gmail.com</span></div>
+        <div class="mail-field"><span data-edit="about.69" class="label">LinkedIn</span><a data-edit-href="about.link7" data-edit="about.70" class="tab-link" style="margin-top:0;" href="https://www.linkedin.com/in/jimsonyang/" target="_blank" rel="noreferrer">linkedin.com/in/jimsonyang →</a></div>
         <div class="mail-field"><span data-edit="about.63" class="label">GitHub</span><a data-edit-href="about.link3" data-edit="about.64" class="tab-link" style="margin-top:0;" href="https://github.com/umich2021" target="_blank" rel="noreferrer">github.com/umich2021 →</a></div>
         <div class="mail-field"><span data-edit="about.65" class="label">YouTube</span><a data-edit-href="about.link4" data-edit="about.66" class="tab-link" style="margin-top:0;" href="https://www.youtube.com/channel/UCfzG7qaPV5p_QE1sr1mcXaA" target="_blank" rel="noreferrer">Aventos channel →</a></div>
         <a data-edit-href="about.link5" data-edit="about.67" class="mail-send" href="mailto:jimsonyangbusiness@gmail.com?subject=Let%27s%20talk" style="margin-top:18px;">Send an email</a>
@@ -856,7 +860,7 @@
         <p data-edit="education.3" class="soft" style="margin:2px 0 0;">Stephen M. Ross School of Business</p>
       </div>
     </div>
-    <p data-edit="education.4">BBA · Magna Cum Laude · 3.89 GPA · 2021 – 2025</p>
+    <p data-edit="education.4">BBA · Magna Cum Laude · 3.9 GPA · 2021 – 2025</p>
   </div>
 </div>
 
@@ -936,7 +940,7 @@
     aventos: { kind: "Application", size: "98.5M views", modified: "2025" },
     projects: { kind: "Folder", size: "7 projects", modified: "Ongoing" },
     experience: { kind: "PDF Document", size: "6 pages", modified: "Updated regularly" },
-    education: { kind: "Plain Text", size: "3.89 GPA", modified: "2021–2025" },
+    education: { kind: "Plain Text", size: "3.9 GPA", modified: "2021–2025" },
     contact: { kind: "Application", size: "1 inbox", modified: "Always open" }
   };
 
@@ -983,7 +987,8 @@
     win.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === tabKey));
   }
 
-  /* section-rail windows: rail click scrolls, scroll position drives the active rail item */
+  /* section-rail windows: rail click scrolls, scroll position drives the active rail item.
+     A `.paged` railbody instead shows one section at a time, like pages. */
   function setupSectionRail(winId) {
     const win = document.getElementById(winId);
     if (!win) return;
@@ -998,6 +1003,17 @@
         b.classList.toggle('active', on);
         if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
       });
+    }
+
+    if (win.querySelector('.win-railbody.paged')) {
+      const show = id => {
+        setActive(id);
+        buttons.forEach(b => { const s = document.getElementById(b.dataset.to); if (s) s.classList.toggle('current', b.dataset.to === id); });
+        scroller.scrollTop = 0;
+      };
+      buttons.forEach(b => b.addEventListener('click', () => show(b.dataset.to)));
+      show(buttons[0].dataset.to);
+      return;
     }
 
     buttons.forEach(b => {
@@ -1495,13 +1511,24 @@
   const hiddenApps = new Set();
   function appOn(key) { return !hiddenApps.has(key); }
 
-  // Edited text is plain text plus two niceties: line breaks are kept and **this** is bold.
+  // Edited text is plain text plus three niceties: line breaks are kept, **this** is bold,
+  // and [label](https://…) is a link (http/https only; opens in a new tab).
+  function appendLinked(el, text) {
+    text.split(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/).forEach((part, i, arr) => {
+      if (i % 3 === 2) return;
+      if (i % 3 === 1) {
+        const a = document.createElement('a');
+        a.className = 'inline-link'; a.href = arr[i + 1]; a.target = '_blank'; a.rel = 'noreferrer';
+        a.textContent = part; el.appendChild(a);
+      } else if (part) el.appendChild(document.createTextNode(part));
+    });
+  }
   function setRichText(el, value) {
     el.textContent = '';
     value.split(/\*\*(.+?)\*\*/s).forEach((part, i) => {
       if (!part) return;
-      if (i % 2) { const b = document.createElement('strong'); b.textContent = part; el.appendChild(b); }
-      else el.appendChild(document.createTextNode(part));
+      if (i % 2) { const b = document.createElement('strong'); appendLinked(b, part); el.appendChild(b); }
+      else appendLinked(el, part);
     });
     if (value.includes('\n')) el.style.whiteSpace = 'pre-line';
   }

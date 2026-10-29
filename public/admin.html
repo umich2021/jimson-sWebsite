@@ -356,13 +356,14 @@
     });
   }
 
-  // what the site's setRichText() expects: <br> → line break, <strong>/<b> → **bold**, source whitespace collapsed
+  // what the site's setRichText() expects: <br> → line break, <strong>/<b> → **bold**, <a> → [label](url), source whitespace collapsed
   function editableText(el) {
     let out = '';
     el.childNodes.forEach(n => {
       if (n.nodeType === 3) out += n.textContent.replace(/\s+/g, ' ');
       else if (n.nodeName === 'BR') out += '\n';
       else if (n.nodeName === 'STRONG' || n.nodeName === 'B') out += '**' + n.textContent.replace(/\s+/g, ' ') + '**';
+      else if (n.nodeName === 'A' && /^https?:/.test(n.getAttribute('href') || '')) out += '[' + n.textContent.replace(/\s+/g, ' ') + '](' + n.getAttribute('href') + ')';
       else out += n.textContent;
     });
     return out.split('\n').map(l => l.trim()).join('\n').trim();

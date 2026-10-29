@@ -44,7 +44,9 @@ owner's browser) → Pages redeploys.
   `wallpapers: [ids]` picks the rotation (empty = all), `defaultWallpaper` the one shown first on
   load (empty = random), `wallpaperMinutes` the interval (default 5).
   Two `.wallpaper` layers crossfade. To add one: drop the file in, add a catalog entry.
-- Text values are plain text; line breaks are kept and `**x**` renders bold (`setRichText()`).
+- Text values are plain text; line breaks are kept, `**x**` renders bold, and `[label](https://…)`
+  renders a new-tab link (`setRichText()`; http/https only). The admin's `editableText()` maps
+  `<a>` back to that syntax. `projects-landing/index.html` has its own copy without link support.
 - The admin panel three-way-merges (`merge()`) its draft onto the latest repo copy when loading
   and publishing, so editing `site-content.json` in a commit is safe — but pull first; the owner
   publishes from the panel often.
@@ -104,6 +106,9 @@ separate letter/gradient style and are **not** part of this system yet.
   `.edu-logo`) — no external asset.
 - Favicons (`public/favicon*.png|ico`, `apple-touch-icon.png`) are made from the owner's LinkedIn photo.
 - Keep the desktop minimal — no instructional copy on the desktop itself (the old "click an icon…" hint was removed on request).
+- Rail windows (About, Projects) use `setupSectionRail()`. About's `.win-railbody.paged` shows one
+  section per rail click (pages); Projects still scrolls with scroll-spy. About's Experience tab
+  carries `data-needs-app="experience"`, so `hiddenApps` hides it with the Experience app.
 - Right-click behaviour, wallpaper cycling, boot sequence, window drag/resize are all
   in the single `<script>` at the bottom of `index.html`.
 - Don't commit `SERVER-SETUP.md` or any key (`.gitignore` covers `*.key`, `*.pem`, etc.).
