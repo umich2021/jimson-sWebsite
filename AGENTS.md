@@ -19,6 +19,11 @@ Orientation for coding agents. Keep this current when you change the things it d
   `projects.jimsonyang.com/admin(.html)` → `www.jimsonyang.com/admin.html?site=projects` and sends
   `Access-Control-Allow-Origin: *` so the admin can read the page for its defaults.
 
+- **`public/omakase/index.html`** → `www.jimsonyang.com/omakase/`: the owner's dinner-invite page
+  (standalone; React UMD + htm, GSAP, Lenis from CDNs; photos in `public/omakase/img/`, Unsplash).
+  `noindex`. The `DINNER` block at the top of its script holds the 3-course menu (changes every
+  time the owner hosts) and `cal`, the Cal.com event link rendered as an inline booking embed.
+
 ## Content is edited from the admin panel — read this before changing text
 
 The owner edits site text, app visibility, and wallpapers from **`/admin.html`**

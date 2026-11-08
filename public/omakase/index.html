@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Omakase at Jimson's</title>
+<meta name="description" content="A three-course Japanese dinner at my place. Pick a night.">
+<meta property="og:title" content="Omakase at Jimson's">
+<meta property="og:description" content="A three-course Japanese dinner at my place. Pick a night.">
+<meta property="og:image" content="https://www.jimsonyang.com/omakase/img/hero-chef-forming-uni-gunkan-01.jpg">
+<link rel="icon" href="/favicon-32.png">
+<script>(function(){if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;var d=document.documentElement;d.classList.add("js");setTimeout(function(){d.classList.remove("js");},6000);})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@400;500;600&display=swap">
+<style>
+/* Layout: one short page. Photo hero, three course cards, three steps, one plum booking band.
+   Colours from the researched "Counter, Light" set (Kosaka / Jungsik / Omakase Room by Tatsu). Single light look. */
+:root {
+  --ground: #efedec;   /* Kosaka light band */
+  --paper: #ffffff;    /* Kosaka white sections */
+  --ink: #2f2b29;      /* Kosaka warm charcoal */
+  --taupe: #71655f;    /* Kosaka taupe, darkened for small text */
+  --plum: #463d40;     /* Jungsik plum-brown */
+  --sand: #f2d4aa;     /* Jungsik sand, on plum only */
+  --bone: #e8e4da;     /* Omakase Room by Tatsu, type on photos and plum */
+  --rule: rgba(47,43,41,.18);
+  --ink-soft: rgba(47,43,41,.78);
+  --serif: "Cormorant Garamond", "EB Garamond", Garamond, "Times New Roman", serif;
+  --sans: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+  --ease: cubic-bezier(.16,1,.3,1);
+  color-scheme: light;
+}
+html { background: var(--ground); }
+body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--sans); font-size: 13px; line-height: 2.1; letter-spacing: .14em; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+*, *::before, *::after { box-sizing: border-box; }
+p, h1, h2, h3, ol, figure { margin: 0; }
+ol { padding: 0; list-style: none; }
+img { display: block; width: 100%; height: 100%; object-fit: cover; max-width: 100%; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+.wrap { max-width: 1240px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.pad { padding-block: clamp(80px, 10vw, 140px); }
+.label { display: inline-flex; align-items: center; gap: 14px; font-size: 11px; font-weight: 600; letter-spacing: .29em; line-height: 1.8; text-transform: uppercase; color: var(--taupe); }
+.label::before { content: ""; width: 36px; height: 1px; background: currentColor; }
+.h2 { font-family: var(--serif); font-weight: 300; font-size: clamp(40px, 5.4vw, 74px); line-height: 1.04; margin-top: 18px; text-wrap: balance; }
+.w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .1em; margin-bottom: -.1em; }
+.wi { display: inline-block; will-change: transform; }
+.frame { position: relative; overflow: hidden; background: #e3dfdc; }
+.frame img { will-change: transform; }
+.zoom img { transition: transform 1.6s var(--ease); }
+.zoom:hover img { transform: scale(1.05); }
+
+/* loader */
+.loader { display: none; }
+.js .loader { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: var(--plum); color: var(--bone); }
+.loader-mark { font-family: var(--serif); font-weight: 300; font-size: clamp(32px, 5vw, 60px); letter-spacing: .02em; text-align: center; padding-inline: 16px; }
+.loader-bar { margin: 22px auto 0; width: 140px; height: 1px; background: rgba(232,228,218,.25); overflow: hidden; }
+.loader-bar i { display: block; height: 100%; background: var(--bone); transform: scaleX(0); transform-origin: left; }
+.boot { min-height: 60vh; display: grid; place-items: center; font-family: var(--serif); font-size: 28px; }
+
+/* header */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--ground); }
+.top { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; z-index: 40; color: var(--bone); transition: transform .7s var(--ease), background-color .5s ease, color .5s ease; }
+.top.solid { background: rgba(239,237,236,.92); color: var(--ink); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.top.away { transform: translateY(-110%); }
+.top-in { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; padding-block: 16px; }
+.mark { font-size: 12px; font-weight: 600; letter-spacing: .42em; text-transform: uppercase; text-decoration: none; }
+.nav { display: flex; gap: 22px; }
+.nav a { position: relative; font-size: 10.5px; font-weight: 500; letter-spacing: .29em; text-transform: uppercase; text-decoration: none; line-height: 2.4; }
+.nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 2px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform .6s var(--ease); }
+.nav a:hover::after { transform: scaleX(1); transform-origin: left; }
+
+/* buttons */
+.btn { position: relative; display: inline-flex; align-items: center; gap: 14px; overflow: hidden; isolation: isolate; font: 600 11px/1 var(--sans); letter-spacing: .29em; text-transform: uppercase; text-decoration: none; padding: 19px 28px; border: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; }
+.btn::before { content: ""; position: absolute; inset: 0; z-index: -1; background: currentColor; transform: translateY(101%); transition: transform .7s var(--ease); }
+.btn span { transition: color .5s ease; }
+.btn:hover::before { transform: translateY(0); }
+.btn-light { color: var(--bone); } .btn-light:hover span { color: var(--plum); }
+.btn .arr { width: 18px; height: 1px; background: currentColor; position: relative; transition: width .6s var(--ease); }
+.btn .arr::after { content: ""; position: absolute; right: 0; top: -3px; width: 7px; height: 7px; border-top: 1px solid currentColor; border-right: 1px solid currentColor; transform: rotate(45deg); }
+.btn:hover .arr { width: 30px; }
+.btn[aria-disabled="true"] { opacity: .7; cursor: default; }
+.btn[aria-disabled="true"]::before { display: none; }
+.tlink { font-size: 11px; font-weight: 500; letter-spacing: .29em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 4px; }
+
+/* hero */
+.hero { position: relative; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 4px; height: min(80svh, 860px); min-height: 520px; overflow: hidden; }
+.hero .frame { height: 100%; background: #2a2523; }
+.hero-text { position: absolute; left: 0; right: 0; bottom: 0; padding-top: 140px; padding-bottom: clamp(34px, 5vw, 60px); color: var(--bone); background: linear-gradient(to top, rgba(0,0,0,.66) 0%, rgba(0,0,0,.45) 50%, rgba(0,0,0,0) 100%); }
+.hero-text .label { color: var(--bone); }
+.hero h1 { font-family: var(--serif); font-weight: 300; font-size: clamp(54px, 9.6vw, 144px); line-height: .94; margin: 14px 0 20px; }
+.hero h1 em { font-style: italic; }
+.hero-sub { font-family: var(--serif); font-size: clamp(20px, 2vw, 26px); line-height: 1.45; max-width: 36ch; letter-spacing: .005em; }
+.hero-cta { margin-top: 26px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 30px; }
+
+/* menu */
+.menu-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 18px 48px; }
+.menu-head p { max-width: 38ch; font-size: 12px; color: var(--ink-soft); }
+.courses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2.6vw, 36px); margin-top: clamp(40px, 5vw, 64px); }
+.course:nth-child(2) { margin-top: clamp(0px, 5vw, 72px); }
+.course .frame { aspect-ratio: 3/4; }
+.course-meta { display: flex; align-items: baseline; gap: 14px; margin-top: 20px; }
+.course-n { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--taupe); font-variant-numeric: lining-nums; }
+.course h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 2.6vw, 36px); line-height: 1.2; letter-spacing: .005em; }
+.course p { margin-top: 8px; font-size: 12.5px; line-height: 2; letter-spacing: .1em; color: var(--ink-soft); max-width: 36ch; }
+
+/* steps */
+.steps-band { background: var(--paper); }
+.steps-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: clamp(40px, 7vw, 110px); align-items: start; }
+.steps-pic { aspect-ratio: 4/5; }
+.steps { margin-top: 36px; position: relative; }
+.step { position: relative; display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 0 18px; padding-block: 24px; }
+.step::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--rule); }
+.step-n { font-family: var(--serif); font-weight: 300; font-size: 44px; line-height: 1; color: var(--taupe); font-variant-numeric: lining-nums tabular-nums; }
+.step h3 { font-family: var(--serif); font-weight: 500; font-size: 26px; line-height: 1.3; letter-spacing: .005em; }
+.step p { margin-top: 6px; font-size: 12.5px; line-height: 2; letter-spacing: .1em; color: var(--ink-soft); max-width: 52ch; }
+
+/* booking band */
+.book { position: relative; overflow: hidden; color: var(--bone); background: var(--plum); }
+.book .frame { position: absolute; inset: 0; background: var(--plum); }
+.book .frame img { position: absolute; top: -12%; height: 124%; opacity: .38; }
+.book-in { position: relative; }
+.book .label { color: var(--sand); }
+.book .h2 { font-size: clamp(48px, 8vw, 120px); }
+.book-in > .btn { margin-top: 34px; }
+.cal-card { margin-top: clamp(32px, 4vw, 52px); background: var(--paper); color: var(--ink); min-height: 560px; overflow: hidden; }
+.cal-card .cal-inline { width: 100%; min-height: 560px; overflow: auto; }
+.cal-empty { min-height: 320px; display: grid; place-items: center; text-align: center; padding: 40px 16px; font-family: var(--serif); font-size: clamp(22px, 2.4vw, 30px); letter-spacing: .005em; color: var(--taupe); }
+.cal-alt { display: inline-block; margin-top: 18px; color: var(--sand); }
+.book-note { margin-top: 18px; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--sand); }
+
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 28px; padding-block: 28px 34px; font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-soft); }
+
+/* cursor */
+.cursor { position: fixed; z-index: 90; left: 0; top: 0; pointer-events: none; display: none; }
+.cursor .dot { position: absolute; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--ink); }
+.cursor .ring { position: absolute; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 1px solid rgba(47,43,41,.45); display: grid; place-items: center; font-size: 9px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--bone); transition: width .5s var(--ease), height .5s var(--ease), margin .5s var(--ease), background-color .4s ease, border-color .4s ease; }
+.cursor .ring em { font-style: normal; opacity: 0; transition: opacity .3s ease; }
+.cursor.big .ring { width: 84px; height: 84px; margin: -42px 0 0 -42px; background: rgba(47,43,41,.82); border-color: transparent; }
+.cursor.big .ring em { opacity: 1; }
+.cursor.link .ring { width: 62px; height: 62px; margin: -31px 0 0 -31px; border-color: rgba(47,43,41,.8); }
+@media (hover: hover) and (pointer: fine) { .has-cursor .cursor { display: block; } }
+
+@media (max-width: 900px) {
+  .courses { grid-template-columns: minmax(0, 1fr); gap: 56px; }
+  .course:nth-child(2) { margin-top: 0; }
+  .course .frame { aspect-ratio: 4/3; }
+  .steps-grid { grid-template-columns: minmax(0, 1fr); }
+  .steps-pic { aspect-ratio: 16/9; }
+}
+@media (max-width: 640px) {
+  .hero { grid-template-columns: minmax(0, 1fr); height: min(80svh, 680px); min-height: 500px; }
+  .hero .h-b { display: none; }
+  .nav a:not(:last-child) { display: none; }
+  .step { grid-template-columns: 40px minmax(0, 1fr); gap: 0 12px; }
+  .step-n { font-size: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="loader" aria-hidden="true">
+  <div><p class="loader-mark">Omakase at Jimson's</p><div class="loader-bar"><i></i></div></div>
+</div>
+
+<div id="root"><p class="boot">Omakase at Jimson's</p></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+/* ===== Edit this block each time you host ===== */
+const DINNER = {
+  cal: "",   // your Cal.com event link, e.g. "https://cal.com/your-name/omakase" (or just "your-name/omakase")
+  courses: [
+    { name: "Sashimi", text: "Hamachi and scallop, sliced thin, with citrus and sea salt.", img: "img/hero-chef-slicing-tuna-01.jpg", alt: "Hands slicing a block of tuna on a wooden board" },
+    { name: "Nigiri", text: "Eight pieces. I make them one at a time and hand each one over when it's ready.", img: "img/hero-chef-hands-nikiri-brush-01.jpg", alt: "Hands brushing glaze onto a piece of nigiri" },
+    { name: "Dessert", text: "Persimmon with hojicha cream.", img: "img/autumn-persimmons-01.jpg", alt: "Ripe persimmons on a small white plate" }
+  ]
+};
+/* ============================================== */
+
+(function () {
+  const root = document.getElementById("root");
+  const doc = document.documentElement;
+  if (!(window.React && window.ReactDOM && window.htm)) { doc.classList.remove("js"); return; }
+  const { useEffect, useRef } = React;
+  const html = htm.bind(React.createElement);
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const motion = !reduce && !!(window.gsap && window.ScrollTrigger);
+
+  // Headline words wrapped for masked reveals
+  const Words = ({ text }) => text.split(" ").flatMap((w, i) => [i ? " " : null, html`<span class="w" key=${i}><span class="wi">${w}</span></span>`]);
+
+  const calPath = DINNER.cal.trim().replace(/^https?:\/\/(app\.)?cal\.com\//, "").replace(/^\/+|\/+$/g, "");
+
+  // Buttons scroll down to the calendar
+  const BookButton = ({ label }) => html`<a class="btn btn-light" href="#book" data-magnet><span>${label}</span><i class="arr"></i></a>`;
+
+  // Cal.com inline booking calendar (official embed loader)
+  function CalEmbed() {
+    const box = useRef(null);
+    useEffect(() => {
+      if (!calPath) return;
+      (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+      Cal("init", "omakase", { origin: "https://app.cal.com" });
+      Cal.ns.omakase("inline", { elementOrSelector: "#cal-inline", calLink: calPath, config: { layout: "month_view", theme: "light" } });
+      Cal.ns.omakase("ui", { theme: "light", hideEventTypeDetails: false, layout: "month_view", cssVarsPerTheme: { light: { "cal-brand": "#463d40" } } });
+      // The calendar grows as it loads; keep scroll animations in step
+      let ro;
+      if (window.ResizeObserver && window.ScrollTrigger) { ro = new ResizeObserver(() => ScrollTrigger.refresh()); ro.observe(box.current); }
+      return () => ro && ro.disconnect();
+    }, []);
+    return calPath
+      ? html`<div class="cal-card" ref=${box}><div id="cal-inline" class="cal-inline"></div></div>
+             <a class="tlink cal-alt" href=${"https://cal.com/" + calPath} target="_blank" rel="noopener">Open the calendar in a new tab</a>`
+      : html`<div class="cal-card" ref=${box}><p class="cal-empty">The calendar goes here once I've set it up.</p></div>`;
+  }
+
+  function App() {
+    const ref = useRef(null);
+
+    useEffect(() => {
+      if (!motion) { doc.classList.remove("js"); return; }
+      gsap.registerPlugin(ScrollTrigger);
+      doc.classList.add("has-cursor");
+      const q = (s) => Array.from(ref.current.querySelectorAll(s));
+
+      // Smooth scrolling
+      let lenis = null;
+      if (window.Lenis) {
+        lenis = new Lenis({ duration: 1.2, smoothWheel: true });
+        lenis.on("scroll", ScrollTrigger.update);
+        gsap.ticker.add((t) => lenis.raf(t * 1000));
+        gsap.ticker.lagSmoothing(0);
+      }
+      const onAnchor = (e) => {
+        const a = e.target.closest('a[href^="#"]'); if (!a) return;
+        const el = document.querySelector(a.getAttribute("href")); if (!el) return;
+        e.preventDefault();
+        lenis ? lenis.scrollTo(el, { offset: -60, duration: 1.5 }) : el.scrollIntoView({ behavior: "smooth" });
+      };
+      document.addEventListener("click", onAnchor);
+
+      const ctx = gsap.context(() => {
+        // Intro: loader lifts, photos open, headline rises
+        const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
+        const L = (s) => document.querySelector(s);
+        tl.from(L(".loader-mark"), { yPercent: 40, opacity: 0, duration: .9 })
+          .to(L(".loader-bar i"), { scaleX: 1, duration: .8, ease: "power2.inOut" }, "-=.5")
+          .to(L(".loader"), { yPercent: -100, duration: 1, ease: "expo.inOut" })
+          .add(() => doc.classList.remove("js"))
+          .from(".hero .frame", { clipPath: "inset(100% 0 0 0)", duration: 1.5, stagger: .12, ease: "expo.inOut" }, "-=.8")
+          .from(".hero img", { scale: 1.3, duration: 2.4 }, "<")
+          .from(".hero .wi", { yPercent: 110, duration: 1.3, stagger: .08 }, "-=1.7")
+          .from(".hero [data-rise]", { y: 24, opacity: 0, duration: 1.1, stagger: .1 }, "-=1")
+          .from(".top", { yPercent: -100, opacity: 0, duration: .9 }, "-=.9");
+
+        // Hero drift
+        gsap.to(".hero .h-a img", { yPercent: 12, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+        gsap.to(".hero .h-b img", { yPercent: 20, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+        gsap.to(".hero-text", { yPercent: -16, opacity: .25, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+
+        // Header turns solid after the hero, hides while scrolling down
+        const top = ref.current.querySelector(".top");
+        ScrollTrigger.create({ start: () => ref.current.querySelector(".hero").offsetHeight - 70, end: "max",
+          onToggle: (s) => top.classList.toggle("solid", s.isActive),
+          onUpdate: (s) => top.classList.toggle("away", s.isActive && s.direction === 1 && s.getVelocity() > 40) });
+
+        // Headings and text
+        q("section:not(.hero) .h2").forEach((h) => gsap.from(h.querySelectorAll(".wi"), { yPercent: 110, duration: 1.3, stagger: .07, ease: "expo.out", scrollTrigger: { trigger: h, start: "top 90%" } }));
+        q("section:not(.hero) [data-rise]").forEach((el) => gsap.from(el, { y: 30, opacity: 0, duration: 1.2, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 92%" } }));
+
+        // Course cards: frame opens, photo settles, text follows, then drifts with scroll
+        q(".course").forEach((c) => {
+          const fr = c.querySelector(".frame");
+          gsap.from(fr, { clipPath: "inset(16% 12% 16% 12%)", duration: 1.6, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 90%" } });
+          gsap.from(fr.querySelector("img"), { scale: 1.3, duration: 2.2, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 90%" } });
+          gsap.from(c.querySelectorAll(".course-meta, p"), { y: 26, opacity: 0, duration: 1.1, stagger: .1, delay: .15, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 90%" } });
+          gsap.fromTo(fr.querySelector("img"), { yPercent: -5 }, { yPercent: 5, ease: "none", immediateRender: false, scrollTrigger: { trigger: c, start: "top bottom", end: "bottom top", scrub: true } });
+        });
+
+        // Steps
+        gsap.from(".steps-pic", { clipPath: "inset(0 0 100% 0)", duration: 1.6, ease: "expo.inOut", scrollTrigger: { trigger: ".steps-band", start: "top 75%" } });
+        gsap.fromTo(".steps-pic img", { scale: 1.25, yPercent: -6 }, { scale: 1, yPercent: 6, ease: "none", scrollTrigger: { trigger: ".steps-band", start: "top bottom", end: "bottom top", scrub: true } });
+        q(".step").forEach((s) => {
+          gsap.from(s, { y: 26, opacity: 0, duration: 1.1, ease: "expo.out", scrollTrigger: { trigger: s, start: "top 90%" } });
+          gsap.from(s.querySelector(".step-n"), { yPercent: 60, opacity: 0, duration: 1.3, ease: "expo.out", scrollTrigger: { trigger: s, start: "top 90%" } });
+        });
+
+        // Booking band
+        gsap.fromTo(".book .frame img", { yPercent: -8, scale: 1.1 }, { yPercent: 8, scale: 1, ease: "none", scrollTrigger: { trigger: ".book", start: "top bottom", end: "bottom top", scrub: true } });
+        gsap.from(".cal-card", { y: 40, opacity: 0, duration: 1.3, ease: "expo.out", scrollTrigger: { trigger: ".book", start: "top 75%" } });
+      }, ref);
+
+      // Magnetic buttons and cursor
+      const cleanups = [];
+      if (fine) {
+        q("[data-magnet]").forEach((el) => {
+          const xTo = gsap.quickTo(el, "x", { duration: .6, ease: "power3" }), yTo = gsap.quickTo(el, "y", { duration: .6, ease: "power3" });
+          const mv = (e) => { const r = el.getBoundingClientRect(); xTo((e.clientX - r.left - r.width / 2) * .3); yTo((e.clientY - r.top - r.height / 2) * .3); };
+          const lv = () => { xTo(0); yTo(0); };
+          el.addEventListener("mousemove", mv); el.addEventListener("mouseleave", lv);
+          cleanups.push(() => { el.removeEventListener("mousemove", mv); el.removeEventListener("mouseleave", lv); });
+        });
+        const cur = ref.current.querySelector(".cursor");
+        const cx = gsap.quickTo(cur, "x", { duration: .18, ease: "power3" }), cy = gsap.quickTo(cur, "y", { duration: .18, ease: "power3" });
+        const mm = (e) => { cx(e.clientX); cy(e.clientY); };
+        window.addEventListener("mousemove", mm);
+        cleanups.push(() => window.removeEventListener("mousemove", mm));
+        const over = (e) => {
+          cur.classList.toggle("big", !!e.target.closest(".zoom"));
+          cur.classList.toggle("link", !e.target.closest(".zoom") && !!e.target.closest("a, button, .btn"));
+        };
+        document.addEventListener("mouseover", over);
+        cleanups.push(() => document.removeEventListener("mouseover", over));
+      }
+
+      const refresh = () => ScrollTrigger.refresh();
+      window.addEventListener("load", refresh);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+      return () => { ctx.revert(); cleanups.forEach((f) => f()); document.removeEventListener("click", onAnchor); window.removeEventListener("load", refresh); if (lenis) lenis.destroy(); };
+    }, []);
+
+    return html`
+      <div ref=${ref}>
+        <div class="cursor" aria-hidden="true"><div class="ring"><em>View</em></div><div class="dot"></div></div>
+
+        <header class="top">
+          <div class="wrap top-in">
+            <a class="mark" href="#hero">Jimson's</a>
+            <nav class="nav" aria-label="Sections">
+              <a href="#menu">Menu</a>
+              <a href="#how">How it works</a>
+              <a href="#book">Book</a>
+            </nav>
+          </div>
+        </header>
+
+        <main>
+          <section class="hero" id="hero" aria-label="Omakase at Jimson's">
+            <div class="frame h-a"><img src="img/hero-chef-forming-uni-gunkan-01.jpg" alt="Sushi being made at a pale wood counter" width="2000" height="1333" fetchpriority="high" /></div>
+            <div class="frame h-b"><img src="img/hero-nigiri-tuna-counter-01.jpg" alt="A piece of tuna nigiri on a wooden stand" width="2000" height="2987" /></div>
+            <div class="hero-text">
+              <div class="wrap">
+                <span class="label" data-rise>Dinner at my place</span>
+                <h1><${Words} text="Omakase at" /> <em><${Words} text="Jimson’s" /></em></h1>
+                <p class="hero-sub" data-rise>I'm making a three-course Japanese dinner at home. Pick a night that works for you.</p>
+                <div class="hero-cta" data-rise>
+                  <${BookButton} label="Pick your night" />
+                  <a class="tlink" href="#menu">See the menu</a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="wrap pad" id="menu" aria-labelledby="menu-h">
+            <div class="menu-head">
+              <div>
+                <span class="label" data-rise>Next dinner</span>
+                <h2 class="h2" id="menu-h"><${Words} text="Three courses" /></h2>
+              </div>
+              <p data-rise>I change the menu every time I host. This is the one I'm making next.</p>
+            </div>
+            <ol class="courses">
+              ${DINNER.courses.map((c, i) => html`
+                <li class="course" key=${c.name}>
+                  <div class="frame zoom"><img src=${c.img} alt=${c.alt} loading="lazy" /></div>
+                  <div class="course-meta"><span class="course-n">${i + 1}</span><h3>${c.name}</h3></div>
+                  <p>${c.text}</p>
+                </li>`)}
+            </ol>
+          </section>
+
+          <section class="steps-band" id="how" aria-labelledby="how-h">
+            <div class="wrap pad steps-grid">
+              <div class="frame steps-pic zoom"><img src="img/sake-pour-tokkuri-01.jpg" alt="Sake poured from a blue and white flask into a matching cup" loading="lazy" /></div>
+              <div>
+                <span class="label" data-rise>How it works</span>
+                <h2 class="h2" id="how-h"><${Words} text="Book, tell me, come over" /></h2>
+                <ol class="steps">
+                  <li class="step"><span class="step-n">1</span><div><h3>Pick a night</h3></div></li>
+                  <li class="step"><span class="step-n">2</span><div><h3>Tell me what you don't eat</h3></div></li>
+                  <li class="step"><span class="step-n">3</span><div><h3>Come over</h3></div></li>
+                </ol>
+              </div>
+            </div>
+          </section>
+
+          <section class="book" id="book" aria-labelledby="book-h">
+            <div class="frame" aria-hidden="true"><img src="img/counter-knife-spoons-moody-01.jpg" alt="" loading="lazy" /></div>
+            <div class="wrap pad book-in">
+              <span class="label" data-rise>Book</span>
+              <h2 class="h2" id="book-h"><${Words} text="Pick a night" /></h2>
+              <${CalEmbed} />
+            </div>
+          </section>
+        </main>
+
+        <footer class="wrap foot">
+          <span>Omakase at Jimson's</span>
+          <span>Photography: Unsplash</span>
+        </footer>
+      </div>`;
+  }
+
+  ReactDOM.createRoot(root).render(html`<${App} />`);
+})();
+</script>
+</body>
+</html>
