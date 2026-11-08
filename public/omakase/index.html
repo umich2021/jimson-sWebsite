@@ -136,15 +136,40 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 .foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 28px; padding-block: 28px 34px; font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-soft); }
 
-/* cursor */
-.cursor { position: fixed; z-index: 90; left: 0; top: 0; pointer-events: none; display: none; }
-.cursor .dot { position: absolute; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--ink); }
-.cursor .ring { position: absolute; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 1px solid rgba(47,43,41,.45); display: grid; place-items: center; font-size: 9px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--bone); transition: width .5s var(--ease), height .5s var(--ease), margin .5s var(--ease), background-color .4s ease, border-color .4s ease; }
-.cursor .ring em { font-style: normal; opacity: 0; transition: opacity .3s ease; }
-.cursor.big .ring { width: 84px; height: 84px; margin: -42px 0 0 -42px; background: rgba(47,43,41,.82); border-color: transparent; }
-.cursor.big .ring em { opacity: 1; }
-.cursor.link .ring { width: 62px; height: 62px; margin: -31px 0 0 -31px; border-color: rgba(47,43,41,.8); }
-@media (hover: hover) and (pointer: fine) { .has-cursor .cursor { display: block; } }
+/* cursor: a pair of chopsticks; the tips are the hotspot */
+.cursor { position: fixed; z-index: 120; left: 0; top: 0; pointer-events: none; display: none; transition: opacity .25s ease; }
+.cursor.off { opacity: 0; }
+.cursor .sticks { position: absolute; left: -8px; top: -69px; width: 76px; height: 76px; overflow: visible; filter: drop-shadow(0 2px 2.5px rgba(30,24,22,.28)); }
+.cursor .cur-label { position: absolute; left: 18px; top: 10px; padding: 7px 12px 6px; border-radius: 999px; background: var(--ink); color: var(--bone); font: 600 9px/1 var(--sans); letter-spacing: .26em; text-transform: uppercase; white-space: nowrap; opacity: 0; transform: translateY(6px) scale(.9); transform-origin: left top; transition: opacity .3s ease, transform .5s var(--ease); }
+.cursor.view .cur-label { opacity: 1; transform: none; }
+@media (hover: hover) and (pointer: fine) {
+  .has-cursor .cursor { display: block; }
+  .has-cursor, .has-cursor a, .has-cursor button, .has-cursor .btn { cursor: none; }
+  .has-cursor .cal-card, .has-cursor .cal-card * { cursor: auto; }
+}
+
+/* photo viewer */
+.course-open { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; font: inherit; color: inherit; }
+.lb { position: fixed; inset: 0; z-index: 100; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: center; gap: clamp(24px, 4vw, 64px); padding: clamp(64px, 8vh, 96px) max(16px, 5vw) clamp(32px, 6vh, 64px); }
+.lb-bg { position: absolute; inset: 0; background: var(--ground); }
+.lb-pic { position: relative; height: min(78vh, 900px); overflow: hidden; background: #e3dfdc; }
+.lb-pic img { width: 100%; height: 100%; object-fit: cover; }
+.lb-cap { position: relative; max-width: 42ch; }
+.lb-n { font-family: var(--serif); font-style: italic; font-size: 26px; color: var(--taupe); font-variant-numeric: lining-nums; }
+.lb-cap h3 { font-family: var(--serif); font-weight: 300; font-size: clamp(44px, 5vw, 76px); line-height: 1.02; letter-spacing: .005em; margin: 6px 0 18px; }
+.lb-cap p { font-size: 13px; line-height: 2.1; letter-spacing: .1em; color: var(--ink-soft); }
+.lb-cap .credit { margin-top: 16px; font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--taupe); }
+.lb-nav { display: flex; align-items: center; gap: 22px; margin-top: 34px; font-size: 11px; letter-spacing: .29em; text-transform: uppercase; }
+.lb-nav button, .lb-close { border: 0; background: none; padding: 6px 0; font: 600 11px/1 var(--sans); letter-spacing: .29em; text-transform: uppercase; color: var(--ink); cursor: pointer; border-bottom: 1px solid transparent; }
+.lb-nav button:hover, .lb-close:hover { border-bottom-color: currentColor; }
+.lb-count { color: var(--taupe); font-weight: 500; }
+.lb-close:focus-visible { outline-offset: 6px; }
+.lb-close { position: absolute; top: 22px; right: max(16px, 5vw); z-index: 2; }
+html.lb-lock, html.lb-lock body { overflow: hidden; }
+@media (max-width: 800px) {
+  .lb { grid-template-columns: minmax(0, 1fr); align-content: center; overflow-y: auto; }
+  .lb-pic { height: 52vh; }
+}
 
 @media (max-width: 900px) {
   .courses { grid-template-columns: minmax(0, 1fr); gap: 56px; }
@@ -196,7 +221,7 @@ function start(DINNER) {
   const root = document.getElementById("root");
   const doc = document.documentElement;
   if (!(window.React && window.ReactDOM && window.htm)) { doc.classList.remove("js"); return; }
-  const { useEffect, useRef } = React;
+  const { useEffect, useRef, useState } = React;
   const html = htm.bind(React.createElement);
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
@@ -231,8 +256,91 @@ function start(DINNER) {
       : html`<div class="cal-card" ref=${box}><p class="cal-empty">The calendar goes here once I've set it up.</p></div>`;
   }
 
+  const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
+
+  // Large photo view for a course
+  function Lightbox({ i, courses, onClose, onGo }) {
+    const box = useRef(null);
+    const first = useRef(true);
+    const c = courses[i];
+    useEffect(() => {
+      const el = box.current;
+      el.querySelector(".lb-close").focus({ preventScroll: true });
+      if (motion) {
+        const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
+        if (first.current) tl.from(el.querySelector(".lb-bg"), { opacity: 0, duration: .5, ease: "power2.out" });
+        tl.fromTo(el.querySelector(".lb-pic"), { clipPath: first.current ? "inset(14% 18% 14% 18%)" : "inset(0 0 0 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.2, ease: "expo.inOut" }, first.current ? "-=.25" : 0)
+          .fromTo(el.querySelector(".lb-pic img"), { scale: 1.25 }, { scale: 1, duration: 1.8 }, "<")
+          .fromTo(el.querySelectorAll(".lb-cap > *"), { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: .07 }, "<.35")
+          .fromTo(el.querySelector(".lb-close"), { opacity: 0 }, { opacity: 1, duration: .6 }, "<");
+      }
+      first.current = false;
+    }, [i]);
+    useEffect(() => {
+      const key = (e) => {
+        if (e.key === "Escape") onClose();
+        if (e.key === "ArrowRight") onGo(1);
+        if (e.key === "ArrowLeft") onGo(-1);
+        if (e.key === "Tab") { // keep focus inside
+          const f = Array.from(box.current.querySelectorAll("button"));
+          const k = f.indexOf(document.activeElement);
+          if (e.shiftKey && k <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+          else if (!e.shiftKey && k === f.length - 1) { e.preventDefault(); f[0].focus(); }
+        }
+      };
+      document.addEventListener("keydown", key);
+      return () => document.removeEventListener("keydown", key);
+    }, [onClose, onGo]);
+    const many = courses.filter((x) => x.img).length > 1;
+    return html`
+      <div class="lb" ref=${box} role="dialog" aria-modal="true" aria-label=${c.name}>
+        <div class="lb-bg" onClick=${onClose}></div>
+        <button class="lb-close" type="button" onClick=${onClose}>Close</button>
+        <div class="lb-pic" key=${"p" + i}><img src=${c.img} alt=${c.alt || c.name} /></div>
+        <div class="lb-cap" key=${"c" + i}>
+          <span class="lb-n">${i + 1}</span>
+          <h3>${c.name}</h3>
+          <p>${c.text}</p>
+          ${c.credit && c.credit !== "Unsplash" ? html`<p class="credit">Photo: ${c.credit}</p>` : null}
+          ${many ? html`<div class="lb-nav">
+            <button type="button" onClick=${() => onGo(-1)}>Previous</button>
+            <span class="lb-count">${i + 1} / ${courses.length}</span>
+            <button type="button" onClick=${() => onGo(1)}>Next</button>
+          </div>` : null}
+        </div>
+      </div>`;
+  }
+
   function App() {
     const ref = useRef(null);
+    const lenisRef = useRef(null);
+    const opener = useRef(null);
+    const [view, setView] = useState(null);
+
+    const openView = (i, el) => {
+      opener.current = el;
+      setView(i);
+      doc.classList.add("lb-lock");
+      if (lenisRef.current) lenisRef.current.stop();
+    };
+    const closeView = React.useCallback(() => {
+      const done = () => {
+        setView(null);
+        doc.classList.remove("lb-lock");
+        if (lenisRef.current) lenisRef.current.start();
+        if (opener.current) opener.current.focus({ preventScroll: true });
+      };
+      const lb = document.querySelector(".lb");
+      if (motion && lb) gsap.to(lb, { opacity: 0, duration: .45, ease: "power2.in", onComplete: done });
+      else done();
+    }, []);
+    const goView = React.useCallback((d) => {
+      setView((v) => {
+        const n = DINNER.courses.length;
+        for (let k = 1; k <= n; k++) { const j = (v + d * k + n * k) % n; if (DINNER.courses[j].img) return j; }
+        return v;
+      });
+    }, []);
 
     useEffect(() => {
       if (!motion) { doc.classList.remove("js"); return; }
@@ -244,6 +352,7 @@ function start(DINNER) {
       let lenis = null;
       if (window.Lenis) {
         lenis = new Lenis({ duration: 1.2, smoothWheel: true });
+        lenisRef.current = lenis;
         lenis.on("scroll", ScrollTrigger.update);
         gsap.ticker.add((t) => lenis.raf(t * 1000));
         gsap.ticker.lagSmoothing(0);
@@ -317,17 +426,47 @@ function start(DINNER) {
           el.addEventListener("mousemove", mv); el.addEventListener("mouseleave", lv);
           cleanups.push(() => { el.removeEventListener("mousemove", mv); el.removeEventListener("mouseleave", lv); });
         });
+        // Chopsticks: they follow the pointer, lean with its speed, open over food and pinch on click
         const cur = ref.current.querySelector(".cursor");
-        const cx = gsap.quickTo(cur, "x", { duration: .18, ease: "power3" }), cy = gsap.quickTo(cur, "y", { duration: .18, ease: "power3" });
-        const mm = (e) => { cx(e.clientX); cy(e.clientY); };
-        window.addEventListener("mousemove", mm);
-        cleanups.push(() => window.removeEventListener("mousemove", mm));
-        const over = (e) => {
-          cur.classList.toggle("big", !!e.target.closest(".zoom"));
-          cur.classList.toggle("link", !e.target.closest(".zoom") && !!e.target.closest("a, button, .btn"));
+        const tilt = cur.querySelector(".tilt"), top = cur.querySelector(".s2");
+        gsap.set(tilt, { svgOrigin: "7 58" });
+        const cx = gsap.quickTo(cur, "x", { duration: .08, ease: "power3" }), cy = gsap.quickTo(cur, "y", { duration: .08, ease: "power3" });
+        const lean = gsap.quickTo(tilt, "rotation", { duration: .6, ease: "power3" });
+        const jaw = { a: 5 };
+        const setJaw = () => top.setAttribute("transform", `rotate(${jaw.a.toFixed(2)} 50 -4) translate(0 -4)`);
+        const openTo = (a, d) => gsap.to(jaw, { a, duration: d || .45, ease: "power3.out", overwrite: true, onUpdate: setJaw });
+        setJaw();
+        let lastX = 0, rest = 5;
+        const mm = (e) => {
+          cx(e.clientX); cy(e.clientY);
+          lean(Math.max(-14, Math.min(14, (e.clientX - lastX) * .9))); lastX = e.clientX;
+          clearTimeout(mm.t); mm.t = setTimeout(() => lean(0), 90);
         };
+        const over = (e) => {
+          const t = e.target;
+          const off = !!t.closest(".cal-card");
+          const food = !off && !!t.closest(".course-open");
+          const link = !off && !food && !!t.closest("a, button, .btn");
+          cur.classList.toggle("off", off);
+          cur.classList.toggle("view", food);
+          rest = food ? 11 : link ? 2.5 : 5;
+          openTo(rest);
+        };
+        const down = () => openTo(-1.6, .14);
+        const up = () => openTo(rest, .5);
+        const leave = () => cur.classList.add("off");
+        const enter = () => cur.classList.remove("off");
+        window.addEventListener("mousemove", mm);
         document.addEventListener("mouseover", over);
-        cleanups.push(() => document.removeEventListener("mouseover", over));
+        window.addEventListener("mousedown", down);
+        window.addEventListener("mouseup", up);
+        document.documentElement.addEventListener("mouseleave", leave);
+        document.documentElement.addEventListener("mouseenter", enter);
+        cleanups.push(() => {
+          window.removeEventListener("mousemove", mm); document.removeEventListener("mouseover", over);
+          window.removeEventListener("mousedown", down); window.removeEventListener("mouseup", up);
+          document.documentElement.removeEventListener("mouseleave", leave); document.documentElement.removeEventListener("mouseenter", enter);
+        });
       }
 
       const refresh = () => ScrollTrigger.refresh();
@@ -338,7 +477,24 @@ function start(DINNER) {
 
     return html`
       <div ref=${ref}>
-        <div class="cursor" aria-hidden="true"><div class="ring"><em>View</em></div><div class="dot"></div></div>
+        <div class="cursor off" aria-hidden="true">
+          <svg class="sticks" viewBox="0 0 64 64">
+            <defs>
+              <linearGradient id="wood" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#b98d5e" /><stop offset=".55" stop-color="#d7b688" /><stop offset="1" stop-color="#c49a69" />
+              </linearGradient>
+            </defs>
+            <g class="tilt">
+              <g transform="translate(7 58) rotate(-45)">
+                <path d="M0 -1 L56 -2.6 Q57.6 0 56 2.6 L0 1 Q-.8 0 0 -1Z" fill="url(#wood)" stroke="rgba(47,43,41,.72)" stroke-width=".7" />
+                <g class="s2">
+                  <path d="M0 -1 L56 -2.6 Q57.6 0 56 2.6 L0 1 Q-.8 0 0 -1Z" fill="url(#wood)" stroke="rgba(47,43,41,.72)" stroke-width=".7" />
+                </g>
+              </g>
+            </g>
+          </svg>
+          <span class="cur-label">View</span>
+        </div>
 
         <header class="top">
           <div class="wrap top-in">
@@ -379,7 +535,9 @@ function start(DINNER) {
             <ol class="courses">
               ${DINNER.courses.map((c, i) => html`
                 <li class="course" key=${c.name}>
-                  <div class="frame zoom">${c.img ? html`<img src=${c.img} alt=${c.alt || c.name} loading="lazy" />` : html`<div class="frame-wait" aria-hidden="true"></div>`}</div>
+                  ${c.img
+                    ? html`<button type="button" class="frame zoom course-open" aria-label=${"View the photo of " + c.name} onClick=${(e) => openView(i, e.currentTarget)}><img src=${c.img} alt=${c.alt || c.name} loading="lazy" /></button>`
+                    : html`<div class="frame"><div class="frame-wait" aria-hidden="true"></div></div>`}
                   <div class="course-meta"><span class="course-n">${i + 1}</span><h3>${c.name}</h3></div>
                   <p>${c.text}</p>
                 </li>`)}
@@ -410,6 +568,8 @@ function start(DINNER) {
             </div>
           </section>
         </main>
+
+        ${view !== null && DINNER.courses[view] && DINNER.courses[view].img ? html`<${Lightbox} i=${view} courses=${DINNER.courses} onClose=${closeView} onGo=${goView} />` : null}
 
         <footer class="wrap foot">
           <span>Omakase at Jimson's</span>
