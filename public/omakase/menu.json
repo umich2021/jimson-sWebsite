@@ -3,20 +3,20 @@
   "note": "I change the menu every time I host. This is the one I'm making next.",
   "courses": [
     {
-      "name": "Sashimi",
-      "text": "Hamachi and scallop, sliced thin, with citrus and sea salt.",
-      "img": "img/sashimi-unsplash-7E_xB6juinI.jpg",
-      "alt": "Sliced raw fish arranged on a dark round slate plate",
+      "name": "Chips + Crackers",
+      "text": "Vairous chips and ritz crackers as an appetizer",
+      "img": "",
+      "alt": "",
       "photoHint": "",
-      "credit": "MChe Lee / Unsplash"
+      "credit": ""
     },
     {
-      "name": "Nigiri",
-      "text": "Eight pieces. I make them one at a time and hand each one over when it's ready.",
-      "img": "img/hero-chef-hands-nikiri-brush-01.jpg",
-      "alt": "Hands brushing glaze onto a piece of nigiri",
+      "name": "Squash Soup w/ Croissant",
+      "text": "NYT recipe for squash soup with a crispy croissant as bread",
+      "img": "",
+      "alt": "",
       "photoHint": "",
-      "credit": "Unsplash"
+      "credit": ""
     },
     {
       "name": "Dessert",
