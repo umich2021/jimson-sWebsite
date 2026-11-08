@@ -181,7 +181,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <script>
 /* ===== Edit this block each time you host ===== */
 const DINNER = {
-  cal: "",   // your Cal.com event link, e.g. "https://cal.com/your-name/omakase" (or just "your-name/omakase")
+  cal: "https://cal.com/jimson-yang-bgy7zl/dinner",   // your Cal.com event link, e.g. "https://cal.com/your-name/omakase" (or just "your-name/omakase")
   courses: [
     { name: "Sashimi", text: "Hamachi and scallop, sliced thin, with citrus and sea salt.", img: "img/hero-chef-slicing-tuna-01.jpg", alt: "Hands slicing a block of tuna on a wooden board" },
     { name: "Nigiri", text: "Eight pieces. I make them one at a time and hand each one over when it's ready.", img: "img/hero-chef-hands-nikiri-brush-01.jpg", alt: "Hands brushing glaze onto a piece of nigiri" },
@@ -214,9 +214,10 @@ const DINNER = {
     useEffect(() => {
       if (!calPath) return;
       (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-      Cal("init", "omakase", { origin: "https://app.cal.com" });
-      Cal.ns.omakase("inline", { elementOrSelector: "#cal-inline", calLink: calPath, config: { layout: "month_view", theme: "light" } });
-      Cal.ns.omakase("ui", { theme: "light", hideEventTypeDetails: false, layout: "month_view", cssVarsPerTheme: { light: { "cal-brand": "#463d40" } } });
+      Cal("init", "dinner", { origin: "https://app.cal.com" });
+      Cal.config = Cal.config || {}; Cal.config.forwardQueryParams = true;
+      Cal.ns.dinner("inline", { elementOrSelector: "#cal-inline", calLink: calPath, config: { layout: "month_view", useSlotsViewOnSmallScreen: "true", theme: "light" } });
+      Cal.ns.dinner("ui", { theme: "light", hideEventTypeDetails: false, layout: "month_view", cssVarsPerTheme: { light: { "cal-brand": "#463d40" } } });
       // The calendar grows as it loads; keep scroll animations in step
       let ro;
       if (window.ResizeObserver && window.ScrollTrigger) { ro = new ResizeObserver(() => ScrollTrigger.refresh()); ro.observe(box.current); }
