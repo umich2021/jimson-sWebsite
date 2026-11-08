@@ -21,10 +21,10 @@
     {
       "name": "Dessert",
       "text": "Ice Cream with chocolate",
-      "img": "",
-      "alt": "",
+      "img": "img/dessert-unsplash-PWwKJLHzekk.jpg",
+      "alt": "Scoops of chocolate chip ice cream in small bowls on linen",
       "photoHint": "",
-      "credit": ""
+      "credit": "American Heritage Chocolate / Unsplash"
     }
   ]
 }
