@@ -136,11 +136,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 .foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 28px; padding-block: 28px 34px; font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-soft); }
 
-/* cursor: a pair of chopsticks; the tips are the hotspot */
+/* cursor: black lacquer chopsticks with a gold band; the tips are the hotspot */
 .cursor { position: fixed; z-index: 120; left: 0; top: 0; pointer-events: none; display: none; transition: opacity .25s ease; }
 .cursor.off { opacity: 0; }
-.cursor .sticks { position: absolute; left: -8px; top: -69px; width: 76px; height: 76px; overflow: visible; filter: drop-shadow(0 2px 2.5px rgba(30,24,22,.28)); }
-.cursor .cur-label { position: absolute; left: 18px; top: 10px; padding: 7px 12px 6px; border-radius: 999px; background: var(--ink); color: var(--bone); font: 600 9px/1 var(--sans); letter-spacing: .26em; text-transform: uppercase; white-space: nowrap; opacity: 0; transform: translateY(6px) scale(.9); transform-origin: left top; transition: opacity .3s ease, transform .5s var(--ease); }
+.cursor .sticks { position: absolute; left: -8px; top: -69px; width: 76px; height: 76px; overflow: visible; filter: drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+.cursor .cur-label { position: absolute; left: 18px; top: 10px; padding: 6px 11px 5px; border: 1px solid #b8935a; background: #1f1a19; color: #e4c690; font: 600 9px/1 var(--sans); letter-spacing: .26em; text-transform: uppercase; white-space: nowrap; opacity: 0; transform: translateY(6px) scale(.9); transform-origin: left top; transition: opacity .3s ease, transform .5s var(--ease); }
 .cursor.view .cur-label { opacity: 1; transform: none; }
 @media (hover: hover) and (pointer: fine) {
   .has-cursor .cursor { display: block; }
@@ -432,11 +432,11 @@ function start(DINNER) {
         gsap.set(tilt, { svgOrigin: "7 58" });
         const cx = gsap.quickTo(cur, "x", { duration: .08, ease: "power3" }), cy = gsap.quickTo(cur, "y", { duration: .08, ease: "power3" });
         const lean = gsap.quickTo(tilt, "rotation", { duration: .6, ease: "power3" });
-        const jaw = { a: 5 };
+        const jaw = { a: 4 };
         const setJaw = () => top.setAttribute("transform", `rotate(${jaw.a.toFixed(2)} 50 -4) translate(0 -4)`);
         const openTo = (a, d) => gsap.to(jaw, { a, duration: d || .45, ease: "power3.out", overwrite: true, onUpdate: setJaw });
         setJaw();
-        let lastX = 0, rest = 5;
+        let lastX = 0, rest = 4;
         const mm = (e) => {
           cx(e.clientX); cy(e.clientY);
           lean(Math.max(-14, Math.min(14, (e.clientX - lastX) * .9))); lastX = e.clientX;
@@ -449,10 +449,11 @@ function start(DINNER) {
           const link = !off && !food && !!t.closest("a, button, .btn");
           cur.classList.toggle("off", off);
           cur.classList.toggle("view", food);
-          rest = food ? 11 : link ? 2.5 : 5;
+          rest = food ? 8 : link ? 2 : 4;
           openTo(rest);
         };
-        const down = () => openTo(-1.6, .14);
+        const sticks = cur.querySelector(".sticks");
+        const down = () => { openTo(-1.6, .14); gsap.to(sticks, { y: 3, duration: .08, yoyo: true, repeat: 1, ease: "power2.out" }); };
         const up = () => openTo(rest, .5);
         const leave = () => cur.classList.add("off");
         const enter = () => cur.classList.remove("off");
@@ -480,15 +481,15 @@ function start(DINNER) {
         <div class="cursor off" aria-hidden="true">
           <svg class="sticks" viewBox="0 0 64 64">
             <defs>
-              <linearGradient id="wood" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stop-color="#b98d5e" /><stop offset=".55" stop-color="#d7b688" /><stop offset="1" stop-color="#c49a69" />
+              <linearGradient id="lacq" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#4a403c" /><stop offset=".45" stop-color="#1f1a19" /><stop offset="1" stop-color="#120f0e" />
               </linearGradient>
             </defs>
             <g class="tilt">
               <g transform="translate(7 58) rotate(-45)">
-                <path d="M0 -1 L56 -2.6 Q57.6 0 56 2.6 L0 1 Q-.8 0 0 -1Z" fill="url(#wood)" stroke="rgba(47,43,41,.72)" stroke-width=".7" />
+                <path d="M0 -1 L56 -2.6 Q57.6 0 56 2.6 L0 1 Q-.8 0 0 -1Z" fill="url(#lacq)" stroke="rgba(232,228,218,.55)" stroke-width=".6" /><rect x="41" y="-2.4" width="2.4" height="4.8" fill="#c9a46a" /><rect x="45" y="-2.5" width=".8" height="5" fill="#c9a46a" />
                 <g class="s2">
-                  <path d="M0 -1 L56 -2.6 Q57.6 0 56 2.6 L0 1 Q-.8 0 0 -1Z" fill="url(#wood)" stroke="rgba(47,43,41,.72)" stroke-width=".7" />
+                  <path d="M0 -1 L56 -2.6 Q57.6 0 56 2.6 L0 1 Q-.8 0 0 -1Z" fill="url(#lacq)" stroke="rgba(232,228,218,.55)" stroke-width=".6" /><rect x="41" y="-2.4" width="2.4" height="4.8" fill="#c9a46a" /><rect x="45" y="-2.5" width=".8" height="5" fill="#c9a46a" />
                 </g>
               </g>
             </g>
