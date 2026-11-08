@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Menu admin · Omakase at Jimson's</title>
+<link rel="icon" href="/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@400;500;600&display=swap">
+<!--
+  Edits public/omakase/menu.json (the dinner page reads it on load).
+  Same sign-in as /admin.html: the password only hides the UI; the GitHub fine-grained token
+  (Contents: read and write on this repo, stored in this browser) is what authorises a change.
+  Publishing commits menu.json (plus any uploaded photos). A course whose photo is empty gets one
+  from the "Omakase photos" GitHub Action (.github/workflows/omakase-photos.yml), which runs Claude Code.
+-->
+<style>
+:root {
+  --ground: #efedec;   /* page, same as the dinner page */
+  --paper: #ffffff;    /* cards */
+  --sunk: #f7f5f3;     /* inputs at rest, thumbnails */
+  --line: #e4dfdb;     /* card borders */
+  --line-strong: #cfc7c1;
+  --ink: #2f2b29;
+  --soft: #71655f;
+  --plum: #463d40;     /* primary action, matches the dinner page */
+  --plum-hover: #2f2b29;
+  --focus: rgba(70,61,64,.22);
+  --ok: #4f6b55; --ok-bg: #e9efe9;
+  --warn: #8d5f2c; --warn-bg: #f8eedf;
+  --err: #9b3b32; --err-bg: #f8e9e7;
+  --info: #3d5a80; --info-bg: #ebf0f7;
+  --radius: 10px;
+  --sans: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --serif: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--ground); color: var(--ink); }
+body { font: 14px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+button, input, textarea { font: inherit; color: inherit; }
+.hidden { display: none !important; }
+a { color: inherit; }
+
+/* lock */
+.lock { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+.lock form { width: 100%; max-width: 340px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 28px; box-shadow: 0 1px 2px rgba(47,43,41,.04), 0 12px 32px rgba(47,43,41,.06); }
+.lock h1 { font: 500 30px/1.1 var(--serif); margin: 0 0 4px; }
+.lock p { margin: 0 0 18px; color: var(--soft); font-size: 13px; }
+.lock .err { color: var(--err); font-size: 12.5px; min-height: 18px; margin-top: 8px; }
+
+/* top bar */
+.bar { position: sticky; top: 0; z-index: 10; background: rgba(247,246,244,.9); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.bar-in { max-width: 680px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.bar h1 { font: 500 28px/1 var(--serif); margin: 0; letter-spacing: .005em; }
+.bar .grow { flex: 1; }
+.pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 999px; background: var(--sunk); color: var(--soft); white-space: nowrap; }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pill.ok { background: var(--ok-bg); color: var(--ok); }
+.pill.warn { background: var(--warn-bg); color: var(--warn); }
+.pill.err { background: var(--err-bg); color: var(--err); }
+.pill.info { background: var(--info-bg); color: var(--info); }
+.pill.info::before { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+
+/* layout */
+main { max-width: 680px; margin: 0 auto; padding: 24px 16px 80px; }
+.intro { color: var(--soft); font-size: 13px; margin: 0 0 8px; }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 24px; margin-top: 20px; box-shadow: 0 1px 0 rgba(47,43,41,.05); }
+.card h2 { font-size: 13px; font-weight: 600; margin: 0 0 2px; }
+.card .sub { color: var(--soft); font-size: 12.5px; margin: 0 0 14px; }
+.section-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-top: 32px; }
+.section-head h2 { font: 500 26px/1.1 var(--serif); margin: 0; }
+
+/* fields */
+label.f { display: block; margin-top: 16px; }
+label.f:first-child { margin-top: 0; }
+.f > span { display: block; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--soft); margin-bottom: 6px; }
+.f > span span { text-transform: none; letter-spacing: 0; }
+.f > small { display: block; color: var(--soft); font-size: 12px; margin-top: 4px; }
+input[type=text], input[type=url], input[type=password], textarea {
+  width: 100%; min-height: 40px; padding: 9px 12px; border: 1px solid var(--line-strong); border-radius: 8px;
+  background: var(--paper); transition: border-color .15s, box-shadow .15s;
+}
+textarea { resize: vertical; min-height: 64px; }
+input:focus, textarea:focus { outline: none; border-color: var(--plum); box-shadow: 0 0 0 3px var(--focus); }
+.changed input, .changed textarea, input.changed, textarea.changed { border-color: #d9b98a; background: #fffcf6; }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--paper); font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; white-space: nowrap; transition: background .15s, border-color .15s; }
+.btn:hover { background: var(--sunk); }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus); }
+.btn.primary { background: var(--plum); border-color: var(--plum); color: #fff; }
+.btn.primary:hover { background: var(--plum-hover); }
+.btn.quiet { border-color: transparent; background: transparent; color: var(--soft); }
+.btn.quiet:hover { background: var(--sunk); color: var(--ink); }
+.btn.danger:hover { color: var(--err); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn.small { min-height: 30px; padding: 0 10px; font-size: 12.5px; }
+.btn[data-act="up"], .btn[data-act="down"] { font-size: 16px; min-width: 32px; padding: 0; }
+
+/* courses */
+.course { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 20px; }
+.course-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.course-top h3 { margin: 0; font: 500 22px/1.1 var(--serif); }
+.course-top h3 em { font-style: italic; color: var(--soft); margin-right: 8px; }
+.thumb { position: relative; aspect-ratio: 3/4; border-radius: 8px; overflow: hidden; background: var(--sunk); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb .ph { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 12px; font-size: 12px; color: var(--soft); }
+.thumb .tag { position: absolute; left: 8px; bottom: 8px; right: 8px; font-size: 11px; font-weight: 500; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,.92); color: var(--ink); }
+.photo-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.notice { margin-top: 10px; font-size: 12.5px; padding: 8px 10px; border-radius: 8px; background: var(--warn-bg); color: var(--warn); }
+.notice.info { background: var(--info-bg); color: var(--info); }
+.notice .btn { margin-left: 6px; }
+.add { width: 100%; margin-top: 16px; min-height: 48px; border-style: dashed; color: var(--soft); }
+
+details.card summary { cursor: pointer; font-size: 13px; font-weight: 600; list-style: none; }
+details.card summary::-webkit-details-marker { display: none; }
+details.card summary::after { content: "Show"; float: right; font-weight: 500; color: var(--soft); font-size: 12.5px; }
+details.card[open] summary::after { content: "Hide"; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row > input { flex: 1; min-width: 200px; }
+.log { margin-top: 10px; font-size: 12px; color: var(--soft); }
+
+@media (max-width: 600px) {
+  .course { grid-template-columns: minmax(0, 1fr); }
+  .thumb { aspect-ratio: 4/3; }
+  .bar h1 { font-size: 21px; }
+}
+</style>
+</head>
+<body>
+
+<div class="lock" id="lock">
+  <form id="lockForm">
+    <h1>Menu admin</h1>
+    <p>Omakase at Jimson's</p>
+    <label class="f"><span>Password</span><input type="password" id="pw" autocomplete="current-password" autofocus></label>
+    <div class="err" id="pwErr"></div>
+    <button class="btn primary" style="width:100%;margin-top:6px">Unlock</button>
+  </form>
+</div>
+
+<div id="app" class="hidden">
+  <header class="bar">
+    <div class="bar-in">
+      <h1>Menu admin</h1>
+      <span class="pill" id="status">Loading…</span>
+      <span class="grow"></span>
+      <a class="btn quiet" href="./" target="_blank" rel="noopener">View page</a>
+      <button class="btn" id="discardBtn" disabled>Discard</button>
+      <button class="btn primary" id="publishBtn" disabled>Publish</button>
+    </div>
+  </header>
+
+  <main>
+    <p class="intro">Change the courses, then Publish. The page updates about a minute later. Courses set to "find a photo" get one from the photo agent a few minutes after that.</p>
+
+    <div class="section-head"><h2>Courses</h2></div>
+    <div id="courses"></div>
+    <button class="btn add" id="addCourse">Add a course</button>
+
+    <div class="section-head"><h2>Page</h2></div>
+    <div class="card">
+      <label class="f" id="noteField"><span>Note above the courses</span><textarea id="note" rows="2"></textarea></label>
+      <label class="f" id="calField"><span>Cal.com booking link</span><input type="url" id="cal" placeholder="https://cal.com/your-name/event"><small>The calendar on the page books this event.</small></label>
+    </div>
+
+    <details class="card" id="settings">
+      <summary>Publishing settings</summary>
+      <p class="sub" style="margin-top:10px">Uses the same GitHub token as the site admin: a fine-grained token for <b id="repoLabel"></b> with <b>Contents: Read and write</b>. It stays in this browser.</p>
+      <div class="row">
+        <input type="password" id="token" placeholder="github_pat_…" autocomplete="off">
+        <button class="btn" id="saveToken">Save token</button>
+      </div>
+      <div class="log" id="log"></div>
+    </details>
+  </main>
+</div>
+
+<input type="file" id="filePick" accept="image/*" class="hidden">
+
+<script>
+(function () {
+  const PASSWORD_SHA256 = '8160c5d5b0e16e2c0205df30bcffa0398c06d08679aa0d1462d1c5e26c48a1d0'; // same as /admin.html
+  const REPO = 'umich2021/jimson-sWebsite', BRANCH = 'main';
+  const FILE = 'public/omakase/menu.json', IMG_DIR = 'public/omakase/img/';
+  const TOKEN_KEY = 'jimsonos-admin-token', UNLOCK_KEY = 'jimsonos-admin-unlocked'; // shared with /admin.html
+  const DRAFT_KEY = 'omakase-admin-draft', BASE_KEY = 'omakase-admin-base';
+  const MAX_COURSES = 6;
+  const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  /* ---------- lock ---------- */
+  $('lockForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (await sha256($('pw').value) === PASSWORD_SHA256) {
+      try { sessionStorage.setItem(UNLOCK_KEY, '1'); } catch (err) {}
+      unlock();
+    } else $('pwErr').textContent = 'Wrong password.';
+  });
+  let unlocked = false;
+  try { unlocked = sessionStorage.getItem(UNLOCK_KEY) === '1'; } catch (e) {}
+  if (unlocked) unlock();
+
+  /* ---------- state ---------- */
+  let menu = null;        // being edited
+  let published = null;   // last known live copy
+  const uploads = {};     // course index -> { blob, dataUrl } waiting for Publish
+  const thumbs = {};      // img path -> object URL (for photos not deployed yet)
+  let watching = null;    // timer while waiting for the photo agent
+
+  function normCourse(c) {
+    c = c && typeof c === 'object' ? c : {};
+    const s = (k) => (typeof c[k] === 'string' ? c[k] : '');
+    return { name: s('name'), text: s('text'), img: s('img'), alt: s('alt'), photoHint: s('photoHint'), credit: s('credit') };
+  }
+  function normalize(m) {
+    m = m && typeof m === 'object' ? m : {};
+    return {
+      cal: typeof m.cal === 'string' ? m.cal : '',
+      note: typeof m.note === 'string' ? m.note : '',
+      courses: (Array.isArray(m.courses) ? m.courses : []).map(normCourse)
+    };
+  }
+  const serialize = (m) => JSON.stringify(m, null, 2) + '\n';
+  const clone = (m) => normalize(JSON.parse(serialize(m)));
+
+  function setStatus(msg, kind) { const s = $('status'); s.textContent = msg; s.className = 'pill' + (kind ? ' ' + kind : ''); }
+  function log(msg) { $('log').textContent = msg; }
+
+  const dirty = () => serialize(menu) !== serialize(published) || Object.keys(uploads).length > 0;
+  const waitingForPhotos = (m) => m.courses.some((c) => !c.img && c.name.trim());
+
+  function changed() {
+    store.set(DRAFT_KEY, serialize(menu));
+    store.set(BASE_KEY, serialize(published));
+    refreshChrome();
+  }
+  function refreshChrome() {
+    const d = dirty();
+    $('publishBtn').disabled = !d;
+    $('discardBtn').disabled = !d;
+    if (d) setStatus('Unpublished changes', 'warn');
+    else if (watching) setStatus('Photo agent is finding photos…', 'info');
+    else setStatus('Up to date', 'ok');
+    $('note').classList.toggle('changed', menu.note !== published.note);
+    $('cal').classList.toggle('changed', menu.cal !== published.cal);
+    $('addCourse').classList.toggle('hidden', menu.courses.length >= MAX_COURSES);
+  }
+
+  /* ---------- GitHub ---------- */
+  const token = () => $('token').value.trim() || store.get(TOKEN_KEY) || '';
+  const api = (path) => `https://api.github.com/repos/${REPO}/contents/${path}`;
+  const ghHeaders = (raw) => {
+    const h = { Accept: raw ? 'application/vnd.github.raw' : 'application/vnd.github+json' };
+    if (token()) h.Authorization = 'Bearer ' + token();
+    return h;
+  };
+  function b64(str) { const bytes = new TextEncoder().encode(str); let bin = ''; bytes.forEach((b) => (bin += String.fromCharCode(b))); return btoa(bin); }
+  function blobToB64(blob) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); }); }
+
+  async function readRemote() {
+    const r = await fetch(`${api(FILE)}?ref=${BRANCH}&t=${Date.now()}`, { headers: ghHeaders(false), cache: 'no-store' });
+    if (!r.ok) throw new Error(`GitHub said ${r.status} reading menu.json`);
+    const f = await r.json();
+    const text = new TextDecoder().decode(Uint8Array.from(atob(f.content.replace(/\n/g, '')), (c) => c.charCodeAt(0)));
+    return { sha: f.sha, menu: normalize(JSON.parse(text)) };
+  }
+  async function putFile(path, contentB64, message, sha) {
+    const r = await fetch(api(path), { method: 'PUT', headers: ghHeaders(false), body: JSON.stringify({ message, content: contentB64, branch: BRANCH, sha }) });
+    if (!r.ok) throw new Error(`GitHub said ${r.status}: ${(await r.json().catch(() => ({}))).message || ''}`);
+    return r.json();
+  }
+
+  /* ---------- load ---------- */
+  async function load() {
+    setStatus('Loading…');
+    let live;
+    try { live = (await readRemote()).menu; }
+    catch (e) {
+      // no token yet, or GitHub unavailable: fall back to the deployed copy
+      const r = await fetch('menu.json?t=' + Date.now(), { cache: 'no-store' });
+      live = normalize(await r.json());
+    }
+    published = live;
+    const draft = store.get(DRAFT_KEY), base = store.get(BASE_KEY);
+    menu = clone(live);
+    if (draft) {
+      try {
+        const mine = normalize(JSON.parse(draft));
+        const b = base ? normalize(JSON.parse(base)) : live;
+        menu = merge(b, mine, live);
+      } catch (e) {}
+    }
+    $('note').value = menu.note;
+    $('cal').value = menu.cal;
+    render();
+    refreshChrome();
+    if (!dirty() && waitingForPhotos(published)) watchPhotos();
+  }
+
+  /* My edits since `base` win; photo fields the agent filled in meanwhile are kept. */
+  function merge(base, mine, theirs) {
+    const out = clone(mine);
+    if (mine.note === base.note) out.note = theirs.note;
+    if (mine.cal === base.cal) out.cal = theirs.cal;
+    out.courses.forEach((c, i) => {
+      const b = base.courses[i], t = theirs.courses[i];
+      if (!b || !t) return;
+      if (c.img === b.img && t.img !== b.img) { c.img = t.img; c.alt = t.alt; c.credit = t.credit; }
+    });
+    return out;
+  }
+
+  /* ---------- render ---------- */
+  function photoUrl(c, i) {
+    if (uploads[i]) return uploads[i].dataUrl;
+    if (!c.img) return '';
+    return thumbs[c.img] || c.img; // relative to /omakase/
+  }
+  function render() {
+    const wrap = $('courses');
+    wrap.innerHTML = menu.courses.map((c, i) => {
+      const was = published.courses[i];
+      const nameChanged = was && was.name && c.name.trim() && c.name !== was.name;
+      const url = photoUrl(c, i);
+      let tag = '';
+      if (uploads[i]) tag = 'Your photo, uploads on Publish';
+      else if (!c.img && c.name.trim()) tag = dirty() ? 'Agent finds a photo after Publish' : 'Agent is finding a photo…';
+      const ph = c.name.trim() ? 'No photo yet' : 'Name the course first';
+      return `
+      <section class="card" data-i="${i}">
+        <div class="course-top">
+          <h3><em>${ROMAN[i] || i + 1}</em>${esc(c.name || 'New course')}</h3>
+          <div class="row">
+            <button class="btn quiet small" data-act="up" ${i === 0 ? 'disabled' : ''} aria-label="Move up">↑</button>
+            <button class="btn quiet small" data-act="down" ${i === menu.courses.length - 1 ? 'disabled' : ''} aria-label="Move down">↓</button>
+            <button class="btn quiet small danger" data-act="remove" ${menu.courses.length <= 1 ? 'disabled' : ''}>Remove</button>
+          </div>
+        </div>
+        <div class="course">
+          <div>
+            <div class="thumb">${url ? `<img src="${esc(url)}" alt="">` : `<div class="ph">${ph}</div>`}${tag ? `<div class="tag">${tag}</div>` : ''}</div>
+          </div>
+          <div>
+            <label class="f ${was && c.name !== was.name ? 'changed' : ''}"><span>Dish</span><input type="text" data-k="name" value="${esc(c.name)}" placeholder="e.g. Chawanmushi"></label>
+            <label class="f ${was && c.text !== was.text ? 'changed' : ''}"><span>Description</span><textarea data-k="text" rows="2" placeholder="One or two plain sentences">${esc(c.text)}</textarea></label>
+            <label class="f ${was && c.photoHint !== was.photoHint ? 'changed' : ''}"><span>Photo hint for the agent <span style="color:var(--soft);font-weight:400">(optional)</span></span><input type="text" data-k="photoHint" value="${esc(c.photoHint)}" placeholder="e.g. close-up, dark background, no chopsticks"></label>
+            ${nameChanged && c.img && !uploads[i] ? `<div class="notice">New dish? The old photo is still attached.<button class="btn small" data-act="find">Find a new photo</button></div>` : ''}
+            <div class="photo-actions">
+              <button class="btn small" data-act="find" ${!c.name.trim() ? 'disabled' : ''}>${c.img || uploads[i] ? 'Find a new photo' : 'Find a photo'}</button>
+              <button class="btn small" data-act="upload">Upload my own</button>
+              ${(was && (c.img !== was.img)) || uploads[i] ? `<button class="btn quiet small" data-act="keep">Undo photo change</button>` : ''}
+            </div>
+          </div>
+        </div>
+      </section>`;
+    }).join('');
+  }
+
+  $('courses').addEventListener('input', (e) => {
+    const k = e.target.dataset.k; if (!k) return;
+    const i = +e.target.closest('[data-i]').dataset.i;
+    menu.courses[i][k] = e.target.value;
+    if (k === 'name') {
+      e.target.closest('.card').querySelector('h3').innerHTML = `<em>${ROMAN[i] || i + 1}</em>${esc(e.target.value || 'New course')}`;
+    }
+    e.target.closest('.f').classList.toggle('changed', !published.courses[i] || menu.courses[i][k] !== published.courses[i][k]);
+    changed();
+  });
+  // re-render on blur so notices and button states catch up without stealing focus while typing
+  $('courses').addEventListener('change', () => { render(); refreshChrome(); });
+
+  let uploadFor = null;
+  $('courses').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const i = +b.closest('[data-i]').dataset.i, c = menu.courses[i], act = b.dataset.act;
+    if (act === 'find') { delete uploads[i]; c.img = ''; c.alt = ''; c.credit = ''; }
+    if (act === 'keep') { delete uploads[i]; const w = published.courses[i]; if (w) { c.img = w.img; c.alt = w.alt; c.credit = w.credit; } }
+    if (act === 'upload') { uploadFor = i; $('filePick').value = ''; $('filePick').click(); return; }
+    if (act === 'remove') { menu.courses.splice(i, 1); reindexUploads(i, null); }
+    if (act === 'up' || act === 'down') {
+      const j = act === 'up' ? i - 1 : i + 1;
+      [menu.courses[i], menu.courses[j]] = [menu.courses[j], menu.courses[i]];
+      reindexUploads(i, j);
+    }
+    render(); changed();
+  });
+  function reindexUploads(i, j) {
+    if (j === null) { // removed i: shift the rest down
+      const next = {};
+      Object.keys(uploads).forEach((k) => { k = +k; if (k < i) next[k] = uploads[k]; else if (k > i) next[k - 1] = uploads[k]; });
+      Object.keys(uploads).forEach((k) => delete uploads[k]); Object.assign(uploads, next);
+    } else { const a = uploads[i], b = uploads[j]; delete uploads[i]; delete uploads[j]; if (a) uploads[j] = a; if (b) uploads[i] = b; }
+  }
+
+  $('addCourse').addEventListener('click', () => {
+    menu.courses.push(normCourse({}));
+    render(); changed();
+    const inputs = $('courses').querySelectorAll('input[data-k="name"]');
+    inputs[inputs.length - 1].focus();
+  });
+
+  // Uploaded photos are resized in the browser to keep the repo light
+  $('filePick').addEventListener('change', async () => {
+    const f = $('filePick').files[0]; if (!f || uploadFor === null) return;
+    try {
+      const bmp = await createImageBitmap(f);
+      const scale = Math.min(1, 1800 / Math.max(bmp.width, bmp.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(bmp.width * scale); cv.height = Math.round(bmp.height * scale);
+      cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+      const blob = await new Promise((r) => cv.toBlob(r, 'image/jpeg', 0.84));
+      uploads[uploadFor] = { blob, dataUrl: cv.toDataURL('image/jpeg', 0.6) };
+      const c = menu.courses[uploadFor];
+      if (!c.alt) c.alt = c.name ? `Photo of ${c.name.toLowerCase()}` : 'Photo of the dish';
+      c.credit = 'Jimson';
+      render(); changed();
+    } catch (err) { setStatus('Could not read that image', 'err'); }
+  });
+
+  $('note').addEventListener('input', (e) => { menu.note = e.target.value; changed(); });
+  $('cal').addEventListener('input', (e) => { menu.cal = e.target.value.trim(); changed(); });
+
+  $('discardBtn').addEventListener('click', () => {
+    if (!confirm('Discard your unpublished changes?')) return;
+    Object.keys(uploads).forEach((k) => delete uploads[k]);
+    menu = clone(published);
+    store.del(DRAFT_KEY); store.del(BASE_KEY);
+    $('note').value = menu.note; $('cal').value = menu.cal;
+    render(); refreshChrome();
+  });
+
+  $('saveToken').addEventListener('click', () => { store.set(TOKEN_KEY, $('token').value.trim()); setStatus('Token saved', 'ok'); load(); });
+
+  /* ---------- publish ---------- */
+  const slug = (s) => (s || 'dish').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'dish';
+
+  $('publishBtn').addEventListener('click', async () => {
+    if (!token()) { setStatus('Add your GitHub token first', 'err'); $('settings').open = true; $('token').focus(); return; }
+    store.set(TOKEN_KEY, token());
+    const empty = menu.courses.findIndex((c) => !c.name.trim());
+    if (empty >= 0) { setStatus(`Course ${empty + 1} needs a name`, 'err'); return; }
+    const btn = $('publishBtn'); btn.disabled = true; $('discardBtn').disabled = true;
+    try {
+      // 1. photos you uploaded
+      for (const k of Object.keys(uploads)) {
+        const i = +k, c = menu.courses[i];
+        setStatus(`Uploading photo ${i + 1}…`, 'info');
+        const path = `img/${slug(c.name)}-${Date.now().toString(36)}.jpg`;
+        await putFile(IMG_DIR + path.slice(4), await blobToB64(uploads[k].blob), `Omakase: photo for ${c.name}`);
+        thumbs[path] = uploads[k].dataUrl;
+        c.img = path;
+        delete uploads[k];
+      }
+      // 2. menu.json, merged onto the latest repo copy
+      setStatus('Publishing…', 'info');
+      const remote = await readRemote();
+      menu = merge(published, menu, remote.menu);
+      await putFile(FILE, b64(serialize(menu)), 'Update omakase menu from admin panel', remote.sha);
+      published = clone(menu);
+      store.del(DRAFT_KEY); store.del(BASE_KEY);
+      render();
+      if (waitingForPhotos(published)) watchPhotos();
+      else { refreshChrome(); setStatus('Published. Live in about a minute', 'ok'); }
+    } catch (err) {
+      setStatus(err.message, 'err');
+      render(); refreshChrome();
+    }
+  });
+
+  /* ---------- wait for the photo agent ---------- */
+  function watchPhotos() {
+    if (watching) return;
+    const started = Date.now();
+    log('Waiting for the photo agent (GitHub Action "Omakase photos").');
+    const tick = async () => {
+      try {
+        const r = await readRemote();
+        const before = serialize(published);
+        published = merge(published, published, r.menu);
+        if (!dirty() || serialize(published) !== before) {
+          // adopt the agent's photos into the editor without touching your unsaved edits
+          menu = merge(normalize(JSON.parse(before)), menu, r.menu);
+        }
+        for (const c of r.menu.courses) {
+          if (c.img && !thumbs[c.img] && !(await imageExists(c.img))) {
+            const b = await fetch(api('public/omakase/' + c.img) + `?ref=${BRANCH}`, { headers: ghHeaders(true) });
+            if (b.ok) thumbs[c.img] = URL.createObjectURL(await b.blob());
+          }
+        }
+        render();
+        if (!waitingForPhotos(r.menu)) { stop(); setStatus('Photos added. Live in about a minute', 'ok'); log(''); return; }
+      } catch (e) { /* try again next tick */ }
+      if (Date.now() - started > 12 * 60 * 1000) { stop(); setStatus('Photo agent is taking a while', 'warn'); log('Check the "Omakase photos" run under the repo\'s Actions tab.'); return; }
+      refreshChrome();
+    };
+    const stop = () => { clearInterval(watching); watching = null; refreshChrome(); };
+    watching = setInterval(tick, 20000);
+    refreshChrome();
+  }
+  function imageExists(path) {
+    return new Promise((res) => { const im = new Image(); im.onload = () => res(true); im.onerror = () => res(false); im.src = path + '?t=' + Date.now(); });
+  }
+
+  window.addEventListener('beforeunload', (e) => { if (menu && Object.keys(uploads).length) { e.preventDefault(); e.returnValue = ''; } });
+
+  function unlock() {
+    $('lock').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    $('repoLabel').textContent = REPO;
+    $('token').value = store.get(TOKEN_KEY) || '';
+    if (!store.get(TOKEN_KEY)) $('settings').open = true;
+    load();
+  }
+})();
+</script>
+</body>
+</html>

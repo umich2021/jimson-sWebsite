@@ -1,0 +1,118 @@
+# Finds a photo for every course in public/omakase/menu.json whose "img" is empty, using Claude Code.
+#
+# Flow: the menu admin (/omakase/admin.html) commits menu.json -> this workflow's "check" job sees an
+# empty photo and fires a repository_dispatch (the event claude-code-action documents for automation)
+# -> the "find" job runs Claude Code, which downloads a free Unsplash photo per course into
+# public/omakase/img/ and fills img/alt/credit -> we commit, then start the Pages deploy (a push made
+# with GITHUB_TOKEN doesn't trigger deploy.yml on its own; workflow_dispatch does).
+#
+# Needs one repo secret: CLAUDE_CODE_OAUTH_TOKEN (run `claude setup-token`) or ANTHROPIC_API_KEY.
+
+name: Omakase photos
+
+on:
+  push:
+    branches: [main]
+    paths: [public/omakase/menu.json]
+  repository_dispatch:
+    types: [omakase-photos]
+  workflow_dispatch:
+
+concurrency:
+  group: omakase-photos
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # repository_dispatch needs it
+    steps:
+      - uses: actions/checkout@v4
+      - name: Any course missing a photo?
+        id: need
+        run: |
+          n=$(jq '[.courses[] | select((.name // "") != "" and ((.img // "") == ""))] | length' public/omakase/menu.json)
+          echo "missing=$n" >> "$GITHUB_OUTPUT"
+          echo "Courses without a photo: $n"
+      - name: Start the photo agent
+        if: steps.need.outputs.missing != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api "repos/${{ github.repository }}/dispatches" -f event_type=omakase-photos
+
+  find:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      actions: write     # to start the Pages deploy afterwards
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Any course missing a photo?
+        id: need
+        run: |
+          n=$(jq '[.courses[] | select((.name // "") != "" and ((.img // "") == ""))] | length' public/omakase/menu.json)
+          echo "missing=$n" >> "$GITHUB_OUTPUT"
+
+      - name: Claude Code finds the photos
+        if: steps.need.outputs.missing != '0'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
+          claude_args: |
+            --max-turns 60
+            --allowedTools "Read,Edit,Write,WebSearch,WebFetch,Bash(curl:*),Bash(file:*),Bash(identify:*),Bash(convert:*),Bash(jq:*),Bash(ls:*),Bash(du:*),Bash(rm public/omakase/img/*)"
+          prompt: |
+            You are the photo picker for a dinner-invite page. Work only on public/omakase/menu.json and
+            public/omakase/img/. Do not commit, push, or touch any other file.
+
+            For EACH entry in `courses` whose "name" is non-empty and whose "img" is "" (empty):
+            1. Find one real photograph of that dish (use "name", "text", and "photoHint" if set) on
+               Unsplash under the free Unsplash License. Use WebSearch (e.g. `site:unsplash.com/photos <dish>`)
+               and WebFetch the photo page to confirm it is NOT an Unsplash+ / plus.unsplash.com image and
+               to read the photographer's name and the image URL (og:image, on images.unsplash.com).
+            2. Taste: it must look like a calm, high-end restaurant or home-dinner photo of the dish itself:
+               natural light or moody low light, uncluttered, no text, logos, watermarks, people's faces,
+               or garish colours. Portrait or square crops work best (the card is 3:4). Prefer a photo that
+               clearly shows the dish named; for a generic course ("Dessert") follow the description.
+            3. Download it with curl from images.unsplash.com with `?w=1600&q=80&fm=jpg&fit=max` to
+               public/omakase/img/<dish-slug>-unsplash-<photo-id>.jpg. Check it with `file` (must be JPEG)
+               and `du -k` (aim for 80 to 600 KB). If it fails, try another photo.
+            4. Edit that course in menu.json: set "img" to "img/<filename>.jpg" (relative, no leading slash),
+               "alt" to a short plain description of what the photo actually shows (under 12 words), and
+               "credit" to "<Photographer name> / Unsplash". Leave every other field and every other
+               course exactly as it is. Keep the file valid JSON with 2-space indentation.
+
+            If you truly cannot find a suitable photo for a course, leave its "img" empty.
+            Finish by printing one line per course you changed: dish, file, photographer.
+
+      - name: Commit photos
+        id: commit
+        run: |
+          jq empty public/omakase/menu.json
+          if git status --porcelain -- public/omakase | grep -q .; then
+            git config user.name "omakase-photo-agent"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add public/omakase/menu.json public/omakase/img
+            git commit -m "Omakase: add course photos (Claude Code agent)"
+            git pull --rebase origin main
+            git push origin HEAD:main
+            echo "pushed=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "Nothing changed."
+          fi
+
+      - name: Deploy the site
+        if: steps.commit.outputs.pushed == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main

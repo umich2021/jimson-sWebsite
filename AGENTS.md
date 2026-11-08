@@ -21,8 +21,15 @@ Orientation for coding agents. Keep this current when you change the things it d
 
 - **`public/omakase/index.html`** → `www.jimsonyang.com/omakase/`: the owner's dinner-invite page
   (standalone; React UMD + htm, GSAP, Lenis from CDNs; photos in `public/omakase/img/`, Unsplash).
-  `noindex`. The `DINNER` block at the top of its script holds the 3-course menu (changes every
-  time the owner hosts) and `cal`, the Cal.com event link rendered as an inline booking embed.
+  `noindex`. The menu (changes every time the owner hosts), the note above it, and `cal` (the
+  Cal.com event link, rendered as an inline booking embed) live in **`public/omakase/menu.json`**;
+  the page fetches it on load (inline `FALLBACK` only if that fails). The owner edits it at
+  **`/omakase/admin.html`** (same password + GitHub token as `/admin.html`; commits menu.json and
+  uploaded photos via the GitHub API). A course with an empty `img` gets a photo from
+  **`.github/workflows/omakase-photos.yml`**: on push it fires a `repository_dispatch`, then
+  `anthropics/claude-code-action@v1` picks a free Unsplash photo into `public/omakase/img/`, fills
+  `img`/`alt`/`credit`, the workflow commits and runs `deploy.yml` (GITHUB_TOKEN pushes don't
+  trigger it). Needs repo secret `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`).
 
 ## Content is edited from the admin panel — read this before changing text
 

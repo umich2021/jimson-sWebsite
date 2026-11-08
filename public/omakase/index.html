@@ -51,6 +51,7 @@ a { color: inherit; }
 .wi { display: inline-block; will-change: transform; }
 .frame { position: relative; overflow: hidden; background: #e3dfdc; }
 .frame img { will-change: transform; }
+.frame-wait { width: 100%; height: 100%; background: linear-gradient(135deg, #e3dfdc, #d8d2ce); }
 .zoom img { transition: transform 1.6s var(--ease); }
 .zoom:hover img { transform: scale(1.05); }
 
@@ -179,18 +180,19 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
 <script>
-/* ===== Edit this block each time you host ===== */
-const DINNER = {
-  cal: "https://cal.com/jimson-yang-bgy7zl/dinner",   // your Cal.com event link, e.g. "https://cal.com/your-name/omakase" (or just "your-name/omakase")
+/* The menu and booking link live in menu.json (edit them at /omakase/admin.html).
+   FALLBACK is only used if menu.json can't be loaded. */
+const FALLBACK = {
+  cal: "https://cal.com/jimson-yang-bgy7zl/dinner",
+  note: "I change the menu every time I host. This is the one I'm making next.",
   courses: [
     { name: "Sashimi", text: "Hamachi and scallop, sliced thin, with citrus and sea salt.", img: "img/hero-chef-slicing-tuna-01.jpg", alt: "Hands slicing a block of tuna on a wooden board" },
     { name: "Nigiri", text: "Eight pieces. I make them one at a time and hand each one over when it's ready.", img: "img/hero-chef-hands-nikiri-brush-01.jpg", alt: "Hands brushing glaze onto a piece of nigiri" },
     { name: "Dessert", text: "Persimmon with hojicha cream.", img: "img/autumn-persimmons-01.jpg", alt: "Ripe persimmons on a small white plate" }
   ]
 };
-/* ============================================== */
 
-(function () {
+function start(DINNER) {
   const root = document.getElementById("root");
   const doc = document.documentElement;
   if (!(window.React && window.ReactDOM && window.htm)) { doc.classList.remove("js"); return; }
@@ -287,9 +289,9 @@ const DINNER = {
         q(".course").forEach((c) => {
           const fr = c.querySelector(".frame");
           gsap.from(fr, { clipPath: "inset(16% 12% 16% 12%)", duration: 1.6, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 90%" } });
-          gsap.from(fr.querySelector("img"), { scale: 1.3, duration: 2.2, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 90%" } });
+          gsap.from(fr.firstElementChild, { scale: 1.3, duration: 2.2, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 90%" } });
           gsap.from(c.querySelectorAll(".course-meta, p"), { y: 26, opacity: 0, duration: 1.1, stagger: .1, delay: .15, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 90%" } });
-          gsap.fromTo(fr.querySelector("img"), { yPercent: -5 }, { yPercent: 5, ease: "none", immediateRender: false, scrollTrigger: { trigger: c, start: "top bottom", end: "bottom top", scrub: true } });
+          gsap.fromTo(fr.firstElementChild, { yPercent: -5 }, { yPercent: 5, ease: "none", immediateRender: false, scrollTrigger: { trigger: c, start: "top bottom", end: "bottom top", scrub: true } });
         });
 
         // Steps
@@ -372,12 +374,12 @@ const DINNER = {
                 <span class="label" data-rise>Next dinner</span>
                 <h2 class="h2" id="menu-h"><${Words} text="Three courses" /></h2>
               </div>
-              <p data-rise>I change the menu every time I host. This is the one I'm making next.</p>
+              ${DINNER.note && html`<p data-rise>${DINNER.note}</p>`}
             </div>
             <ol class="courses">
               ${DINNER.courses.map((c, i) => html`
                 <li class="course" key=${c.name}>
-                  <div class="frame zoom"><img src=${c.img} alt=${c.alt} loading="lazy" /></div>
+                  <div class="frame zoom">${c.img ? html`<img src=${c.img} alt=${c.alt || c.name} loading="lazy" />` : html`<div class="frame-wait" aria-hidden="true"></div>`}</div>
                   <div class="course-meta"><span class="course-n">${i + 1}</span><h3>${c.name}</h3></div>
                   <p>${c.text}</p>
                 </li>`)}
@@ -417,7 +419,16 @@ const DINNER = {
   }
 
   ReactDOM.createRoot(root).render(html`<${App} />`);
-})();
+}
+
+fetch("menu.json", { cache: "no-cache" })
+  .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+  .then((m) => start({
+    cal: typeof m.cal === "string" ? m.cal : "",
+    note: typeof m.note === "string" ? m.note : FALLBACK.note,
+    courses: Array.isArray(m.courses) && m.courses.length ? m.courses : FALLBACK.courses
+  }))
+  .catch(() => start(FALLBACK));
 </script>
 </body>
 </html>
