@@ -14,7 +14,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@400;500;600&display=swap">
-<script>/* Font preview: add ?font=eb to the address to see the headings in EB Garamond */
+<script>/* Font previews: ?font=eb shows the headings in EB Garamond, ?font=sans shows everything in Montserrat */
+if (/[?&]font=sans\b/.test(location.search)) { document.documentElement.classList.add("font-sans"); document.write('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;1,300&display=swap">'); }
 if (/[?&]font=eb\b/.test(location.search)) { document.documentElement.classList.add("font-eb"); document.write('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap">'); }</script>
 <style>
 /* Layout: one short page. Photo hero, three course cards, three steps, one plum booking band.
@@ -40,6 +41,16 @@ html.font-eb { --serif: "EB Garamond", Garamond, "Times New Roman", serif; }
 .font-eb .hero h1, .font-eb .h2, .font-eb .lb-cap h3 { font-weight: 400; font-size-adjust: none; letter-spacing: -.01em; }
 .font-eb .hero h1 { font-size: clamp(48px, 8.6vw, 128px); }
 .font-eb .h2 { font-size: clamp(36px, 4.8vw, 66px); }
+/* Montserrat-only preview: light weight and tight tracking so the big headings don't shout */
+html.font-sans { --serif: "Montserrat", "Helvetica Neue", Arial, sans-serif; }
+.font-sans .hero h1, .font-sans .h2, .font-sans .lb-cap h3 { font-weight: 300; letter-spacing: -.035em; }
+.font-sans .hero h1 { font-size: clamp(44px, 7.6vw, 112px); }
+.font-sans .h2 { font-size: clamp(32px, 4.2vw, 58px); }
+.font-sans .hero h1 em { font-style: normal; font-weight: 400; }
+.font-sans .hero-sub { font-size: clamp(16px, 1.5vw, 19px); letter-spacing: .01em; line-height: 1.6; }
+.font-sans .course h3, .font-sans .step h3 { font-weight: 400; font-size: 20px; letter-spacing: 0; }
+.font-sans .course-n, .font-sans .lb-n { font-style: normal; font-size: 16px; }
+.font-sans .step-n { font-weight: 300; font-size: 36px; }
 body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--sans); font-size: 13px; line-height: 2.1; letter-spacing: .14em; -webkit-font-smoothing: antialiased; overflow-x: clip; }
 *, *::before, *::after { box-sizing: border-box; }
 p, h1, h2, h3, ol, figure { margin: 0; }
@@ -57,6 +68,9 @@ a { color: inherit; }
 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .1em; margin-bottom: -.1em; }
 .wi { display: inline-block; will-change: transform; }
 .frame { position: relative; overflow: hidden; background: #e3dfdc; }
+/* Corners: controls and objects that sit on the page (buttons, course photos, the calendar card) get a
+   small radius; full-bleed pieces (hero photos, colour bands) stay square because they meet the screen edge. */
+:root { --r-control: 6px; --r-object: 8px; --r-surface: 12px; }
 .frame img { will-change: transform; }
 .frame-wait { width: 100%; height: 100%; background: linear-gradient(135deg, #e3dfdc, #d8d2ce); }
 .zoom img { transition: transform 1.6s var(--ease); }
@@ -83,7 +97,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .nav a:hover::after { transform: scaleX(1); transform-origin: left; }
 
 /* buttons */
-.btn { position: relative; display: inline-flex; align-items: center; gap: 14px; overflow: hidden; isolation: isolate; font: 600 11px/1 var(--sans); letter-spacing: .29em; text-transform: uppercase; text-decoration: none; padding: 19px 28px; border: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; }
+.btn { position: relative; display: inline-flex; align-items: center; gap: 14px; overflow: hidden; isolation: isolate; font: 600 11px/1 var(--sans); letter-spacing: .29em; text-transform: uppercase; text-decoration: none; padding: 19px 28px; border: 1px solid currentColor; border-radius: var(--r-control); background: transparent; color: inherit; cursor: pointer; }
 .btn::before { content: ""; position: absolute; inset: 0; z-index: -1; background: currentColor; transform: translateY(101%); transition: transform .7s var(--ease); }
 .btn span { transition: color .5s ease; }
 .btn:hover::before { transform: translateY(0); }
@@ -110,7 +124,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .menu-head p { max-width: 38ch; font-size: 12px; color: var(--ink-soft); }
 .courses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2.6vw, 36px); margin-top: clamp(40px, 5vw, 64px); }
 .course:nth-child(2) { margin-top: clamp(0px, 5vw, 72px); }
-.course .frame { aspect-ratio: 3/4; }
+.course .frame { aspect-ratio: 3/4; border-radius: var(--r-object); }
 .course-meta { display: flex; align-items: baseline; gap: 14px; margin-top: 20px; }
 .course-n { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--taupe); font-variant-numeric: lining-nums; }
 .course h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 2.6vw, 36px); line-height: 1.2; letter-spacing: .005em; }
@@ -119,7 +133,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 /* steps */
 .steps-band { background: var(--paper); }
 .steps-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: clamp(40px, 7vw, 110px); align-items: start; }
-.steps-pic { aspect-ratio: 4/5; }
+.steps-pic { aspect-ratio: 4/5; border-radius: var(--r-object); }
 .steps { margin-top: 36px; position: relative; }
 .step { position: relative; display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 0 18px; padding-block: 24px; }
 .step::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--rule); }
@@ -135,7 +149,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .book .label { color: var(--sand); }
 .book .h2 { font-size: clamp(48px, 8vw, 120px); }
 .book-in > .btn { margin-top: 34px; }
-.cal-card { margin-top: clamp(32px, 4vw, 52px); background: var(--paper); color: var(--ink); min-height: 560px; overflow: hidden; }
+.cal-card { margin-top: clamp(32px, 4vw, 52px); background: var(--paper); color: var(--ink); min-height: 560px; overflow: hidden; border-radius: var(--r-surface); }
 .cal-card .cal-inline { width: 100%; min-height: 560px; overflow: auto; }
 .cal-empty { min-height: 320px; display: grid; place-items: center; text-align: center; padding: 40px 16px; font-family: var(--serif); font-size: clamp(22px, 2.4vw, 30px); letter-spacing: .005em; color: var(--taupe); }
 .cal-alt { display: inline-block; margin-top: 18px; color: var(--sand); }
@@ -147,7 +161,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .cursor { position: fixed; z-index: 120; left: 0; top: 0; pointer-events: none; display: none; transition: opacity .25s ease; }
 .cursor.off { opacity: 0; }
 .cursor .sticks { position: absolute; left: -8px; top: -69px; width: 76px; height: 76px; overflow: visible; filter: drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
-.cursor .cur-label { position: absolute; left: 18px; top: 10px; padding: 6px 11px 5px; border: 1px solid #b8935a; background: #1f1a19; color: #e4c690; font: 600 9px/1 var(--sans); letter-spacing: .26em; text-transform: uppercase; white-space: nowrap; opacity: 0; transform: translateY(6px) scale(.9); transform-origin: left top; transition: opacity .3s ease, transform .5s var(--ease); }
+.cursor .cur-label { position: absolute; left: 18px; top: 10px; padding: 6px 11px 5px; border: 1px solid #b8935a; border-radius: 4px; background: #1f1a19; color: #e4c690; font: 600 9px/1 var(--sans); letter-spacing: .26em; text-transform: uppercase; white-space: nowrap; opacity: 0; transform: translateY(6px) scale(.9); transform-origin: left top; transition: opacity .3s ease, transform .5s var(--ease); }
 .cursor.view .cur-label { opacity: 1; transform: none; }
 @media (hover: hover) and (pointer: fine) {
   .has-cursor .cursor { display: block; }
@@ -159,7 +173,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .course-open { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; font: inherit; color: inherit; }
 .lb { position: fixed; inset: 0; z-index: 100; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: center; gap: clamp(24px, 4vw, 64px); padding: clamp(64px, 8vh, 96px) max(16px, 5vw) clamp(32px, 6vh, 64px); }
 .lb-bg { position: absolute; inset: 0; background: var(--ground); }
-.lb-pic { position: relative; height: min(78vh, 900px); overflow: hidden; background: #e3dfdc; }
+.lb-pic { position: relative; height: min(78vh, 900px); overflow: hidden; background: #e3dfdc; border-radius: var(--r-object); }
 .lb-pic img { width: 100%; height: 100%; object-fit: cover; }
 .lb-cap { position: relative; max-width: 42ch; }
 .lb-n { font-family: var(--serif); font-style: italic; font-size: 26px; color: var(--taupe); font-variant-numeric: lining-nums; }
@@ -240,7 +254,7 @@ function start(DINNER) {
   const calPath = DINNER.cal.trim().replace(/^https?:\/\/(app\.)?cal\.com\//, "").replace(/^\/+|\/+$/g, "");
 
   // Buttons scroll down to the calendar
-  const BookButton = ({ label }) => html`<a class="btn btn-light" href="#book" data-magnet><span>${label}</span><i class="arr"></i></a>`;
+  const BookButton = ({ label }) => html`<a class="btn btn-light" href="#book"><span>${label}</span><i class="arr"></i></a>`;
 
   // Cal.com inline booking calendar (official embed loader)
   function CalEmbed() {
@@ -276,7 +290,7 @@ function start(DINNER) {
       if (motion) {
         const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
         if (first.current) tl.from(el.querySelector(".lb-bg"), { opacity: 0, duration: .5, ease: "power2.out" });
-        tl.fromTo(el.querySelector(".lb-pic"), { clipPath: first.current ? "inset(14% 18% 14% 18%)" : "inset(0 0 0 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.2, ease: "expo.inOut" }, first.current ? "-=.25" : 0)
+        tl.fromTo(el.querySelector(".lb-pic"), { clipPath: first.current ? "inset(14% 18% 14% 18% round 8px)" : "inset(0% 0% 0% 100% round 8px)" }, { clipPath: "inset(0% 0% 0% 0% round 8px)", duration: 1.2, ease: "expo.inOut" }, first.current ? "-=.25" : 0)
           .fromTo(el.querySelector(".lb-pic img"), { scale: 1.25 }, { scale: 1, duration: 1.8 }, "<")
           .fromTo(el.querySelectorAll(".lb-cap > *"), { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: .07 }, "<.35")
           .fromTo(el.querySelector(".lb-close"), { opacity: 0 }, { opacity: 1, duration: .6 }, "<");
@@ -404,14 +418,14 @@ function start(DINNER) {
         // Course cards: frame opens, photo settles, text follows, then drifts with scroll
         q(".course").forEach((c) => {
           const fr = c.querySelector(".frame");
-          gsap.from(fr, { clipPath: "inset(16% 12% 16% 12%)", duration: 1.6, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 90%" } });
+          gsap.fromTo(fr, { clipPath: "inset(16% 12% 16% 12% round 8px)" }, { clipPath: "inset(0% 0% 0% 0% round 8px)", duration: 1.6, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 90%" } });
           gsap.from(fr.firstElementChild, { scale: 1.3, duration: 2.2, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 90%" } });
           gsap.from(c.querySelectorAll(".course-meta, p"), { y: 26, opacity: 0, duration: 1.1, stagger: .1, delay: .15, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 90%" } });
           gsap.fromTo(fr.firstElementChild, { yPercent: -5 }, { yPercent: 5, ease: "none", immediateRender: false, scrollTrigger: { trigger: c, start: "top bottom", end: "bottom top", scrub: true } });
         });
 
         // Steps
-        gsap.from(".steps-pic", { clipPath: "inset(0 0 100% 0)", duration: 1.6, ease: "expo.inOut", scrollTrigger: { trigger: ".steps-band", start: "top 75%" } });
+        gsap.fromTo(".steps-pic", { clipPath: "inset(0% 0% 100% 0% round 8px)" }, { clipPath: "inset(0% 0% 0% 0% round 8px)", duration: 1.6, ease: "expo.inOut", scrollTrigger: { trigger: ".steps-band", start: "top 75%" } });
         gsap.fromTo(".steps-pic img", { scale: 1.25, yPercent: -6 }, { scale: 1, yPercent: 6, ease: "none", scrollTrigger: { trigger: ".steps-band", start: "top bottom", end: "bottom top", scrub: true } });
         q(".step").forEach((s) => {
           gsap.from(s, { y: 26, opacity: 0, duration: 1.1, ease: "expo.out", scrollTrigger: { trigger: s, start: "top 90%" } });
@@ -423,16 +437,9 @@ function start(DINNER) {
         gsap.from(".cal-card", { y: 40, opacity: 0, duration: 1.3, ease: "expo.out", scrollTrigger: { trigger: ".book", start: "top 75%" } });
       }, ref);
 
-      // Magnetic buttons and cursor
+      // Cursor
       const cleanups = [];
       if (fine) {
-        q("[data-magnet]").forEach((el) => {
-          const xTo = gsap.quickTo(el, "x", { duration: .6, ease: "power3" }), yTo = gsap.quickTo(el, "y", { duration: .6, ease: "power3" });
-          const mv = (e) => { const r = el.getBoundingClientRect(); xTo((e.clientX - r.left - r.width / 2) * .3); yTo((e.clientY - r.top - r.height / 2) * .3); };
-          const lv = () => { xTo(0); yTo(0); };
-          el.addEventListener("mousemove", mv); el.addEventListener("mouseleave", lv);
-          cleanups.push(() => { el.removeEventListener("mousemove", mv); el.removeEventListener("mouseleave", lv); });
-        });
         // Chopsticks: they follow the pointer, lean with its speed, open over food and pinch on click
         const cur = ref.current.querySelector(".cursor");
         const tilt = cur.querySelector(".tilt"), top = cur.querySelector(".s2");
@@ -569,7 +576,6 @@ function start(DINNER) {
           <section class="book" id="book" aria-labelledby="book-h">
             <div class="frame" aria-hidden="true"><img src="img/counter-knife-spoons-moody-01.jpg" alt="" loading="lazy" /></div>
             <div class="wrap pad book-in">
-              <span class="label" data-rise>Book</span>
               <h2 class="h2" id="book-h"><${Words} text="Pick a night" /></h2>
               <${CalEmbed} />
             </div>
