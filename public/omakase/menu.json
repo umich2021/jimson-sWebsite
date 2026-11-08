@@ -2,8 +2,29 @@
   "cal": "https://cal.com/jimson-yang-bgy7zl/dinner",
   "note": "I change the menu every time I host. This is the one I'm making next.",
   "courses": [
-    { "name": "Sashimi", "text": "Hamachi and scallop, sliced thin, with citrus and sea salt.", "img": "img/hero-chef-slicing-tuna-01.jpg", "alt": "Hands slicing a block of tuna on a wooden board", "photoHint": "", "credit": "Unsplash" },
-    { "name": "Nigiri", "text": "Eight pieces. I make them one at a time and hand each one over when it's ready.", "img": "img/hero-chef-hands-nikiri-brush-01.jpg", "alt": "Hands brushing glaze onto a piece of nigiri", "photoHint": "", "credit": "Unsplash" },
-    { "name": "Dessert", "text": "Persimmon with hojicha cream.", "img": "img/autumn-persimmons-01.jpg", "alt": "Ripe persimmons on a small white plate", "photoHint": "", "credit": "Unsplash" }
+    {
+      "name": "Sashimi",
+      "text": "Hamachi and scallop, sliced thin, with citrus and sea salt.",
+      "img": "img/hero-chef-slicing-tuna-01.jpg",
+      "alt": "Hands slicing a block of tuna on a wooden board",
+      "photoHint": "",
+      "credit": "Unsplash"
+    },
+    {
+      "name": "Nigiri",
+      "text": "Eight pieces. I make them one at a time and hand each one over when it's ready.",
+      "img": "img/hero-chef-hands-nikiri-brush-01.jpg",
+      "alt": "Hands brushing glaze onto a piece of nigiri",
+      "photoHint": "",
+      "credit": "Unsplash"
+    },
+    {
+      "name": "Dessert",
+      "text": "Persimmon with hojicha cream.",
+      "img": "",
+      "alt": "",
+      "photoHint": "",
+      "credit": ""
+    }
   ]
 }
